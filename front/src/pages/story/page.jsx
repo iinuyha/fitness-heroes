@@ -44,7 +44,14 @@ function StoryPage() {
       )}
 
       <div className="flex flex-col items-center justify-center h-full space-y-8 font-sans">
-        <h1 className="text-3xl text-white mb-6 font-semibold font-sans">근력 지역을 책임지고 구출할 것!!</h1>
+        <h1 className="text-3xl text-white mb-6 font-semibold font-sans"
+            style={{
+                textShadow: '0 0 10px rgba(255, 255, 255, 0.5)', // 흰색 블러 효과
+            }}>
+            <span className="text-[#90DEFF]">근력 지역</span>
+            을 책임지고 구출할 것!!
+        </h1>
+
 
         {/* 가운데 3개 아이콘 메뉴 */}
         <div className="flex space-x-28">

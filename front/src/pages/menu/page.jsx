@@ -37,7 +37,12 @@ function MenuPage() {
 
       {/* 가운데 5개 아이콘 메뉴 */}
       <div className="flex flex-col items-center justify-center h-full space-y-8 font-sans">
-        <h1 className="text-3xl text-white mb-6 font-sans">피트니스 히어로, 체력을 지켜라!</h1>
+        <h1 className="text-3xl text-white mb-6 font-semibold font-sans"
+            style={{
+                textShadow: '0 0 10px rgba(255, 255, 255, 0.5)', // 흰색 블러 효과
+            }}>
+            피트니스 히어로, 에너지를 모아라!
+        </h1>
         <div className="flex space-x-20">
           <Link to={routes.story} className="flex flex-col items-center">
             <img src="/image/menu/story_icon.png" alt="Story" className="w-28 h-28" />
