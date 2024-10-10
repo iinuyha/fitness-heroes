@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { routes } from '../../constants/routes';
+import Popup from '../../components/Popup';  // Popup 컴포넌트 불러오기
 
 function MenuPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -27,17 +28,20 @@ function MenuPage() {
 
       {/* 팝업창 */}
       {isPopupOpen && (
-        <div className="absolute top-12 right-4 bg-white p-4 rounded shadow-lg">
-          <p>이 게임에 대한 정보입니다.</p>
-          <button className="mt-2 bg-blue-500 text-white py-1 px-4 rounded" onClick={handlePopupOpen}>
-            닫기
-          </button>
-        </div>
+        <Popup 
+          message="이 게임에 대한 정보입니다." 
+          onClose={handlePopupOpen}  // 닫기 핸들러 전달
+        />
       )}
 
       {/* 가운데 5개 아이콘 메뉴 */}
       <div className="flex flex-col items-center justify-center h-full space-y-8 font-sans">
-        <h1 className="text-3xl text-white mb-6 font-sans">피트니스 히어로, 체력을 지켜라!</h1>
+        <h1 className="text-3xl text-white mb-6 font-semibold font-sans"
+            style={{
+                textShadow: '0 0 10px rgba(255, 255, 255, 0.5)', // 흰색 블러 효과
+            }}>
+            피트니스 히어로, 에너지를 모아라!
+        </h1>
         <div className="flex space-x-20">
           <Link to={routes.story} className="flex flex-col items-center">
             <img src="/image/menu/story_icon.png" alt="Story" className="w-28 h-28" />
