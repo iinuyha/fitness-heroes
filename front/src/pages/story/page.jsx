@@ -16,9 +16,9 @@ function StoryPage() {
     <div className="relative w-full h-screen bg-cover bg-center" style={{ backgroundImage: "url('/image/background.png')" }}>
       
       {/* 뒤로가기 버튼 */}
-      <div className="absolute top-4 left-4 flex items-center">
+      <Link to={routes.menu} className="absolute top-4 left-4 flex items-center">
         <img src="/image/back_icon.png" alt="back" className="w-10 h-10" />
-      </div>
+      </Link>
 
       {/* 우측 상단 i 아이콘 */}
       <div className="absolute top-4 right-4">

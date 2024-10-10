@@ -42,26 +42,26 @@ function MenuPage() {
             }}>
             피트니스 히어로, 에너지를 모아라!
         </h1>
-        <div className="flex space-x-20">
+        <div className="flex space-x-20 text-xl font-medium">
           <Link to={routes.story} className="flex flex-col items-center">
             <img src="/image/menu/story_icon.png" alt="Story" className="w-28 h-28" />
-            <p className="text-white mt-2">스토리</p>
+            <p className="text-white mt-3">스토리</p>
           </Link>
           <Link to={routes.focusExercise} className="flex flex-col items-center">
             <img src="/image/menu/focus_icon.png" alt="Focus" className="w-28 h-28" />
-            <p className="text-white mt-2">집중 운동</p>
+            <p className="text-white mt-3">집중 운동</p>
           </Link>
           <Link to={routes.groupExercise} className="flex flex-col items-center">
             <img src="/image/menu/together_icon.png" alt="Group" className="w-28 h-28" />
-            <p className="text-white mt-2">같이 운동</p>
+            <p className="text-white mt-3">같이 운동</p>
           </Link>
           <Link to={routes.character} className="flex flex-col items-center">
             <img src="/image/menu/mypage_icon.png" alt="Character" className="w-28 h-28" />
-            <p className="text-white mt-2">캐릭터</p>
+            <p className="text-white mt-3">캐릭터</p>
           </Link>
           <Link to={routes.shop} className="flex flex-col items-center">
             <img src="/image/menu/store_icon.png" alt="Shop" className="w-28 h-28" />
-            <p className="text-white mt-2">상점</p>
+            <p className="text-white mt-3">상점</p>
           </Link>
         </div>
       </div>
