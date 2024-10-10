@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { routes } from '../../constants/routes';
+import Popup from '../../components/Popup';  // Popup 컴포넌트 불러오기
 
 function MenuPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -27,12 +28,10 @@ function MenuPage() {
 
       {/* 팝업창 */}
       {isPopupOpen && (
-        <div className="absolute top-12 right-4 bg-white p-4 rounded shadow-lg">
-          <p>이 게임에 대한 정보입니다.</p>
-          <button className="mt-2 bg-blue-500 text-white py-1 px-4 rounded" onClick={handlePopupOpen}>
-            닫기
-          </button>
-        </div>
+        <Popup 
+          message="이 게임에 대한 정보입니다." 
+          onClose={handlePopupOpen}  // 닫기 핸들러 전달
+        />
       )}
 
       {/* 가운데 5개 아이콘 메뉴 */}
