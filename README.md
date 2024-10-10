@@ -1,4 +1,4 @@
-# 웹서비스설계및실습 7조
+# 2024 웹서비스설계및실습 7조
 ## 피트니스 히어로즈, 에너지를 모아라! [피트니스 히어로즈]
 ![피트니스 히어롲](https://github.com/user-attachments/assets/f2bb4fa4-9bb2-40e4-ad28-f5c03d0a7983)
 
