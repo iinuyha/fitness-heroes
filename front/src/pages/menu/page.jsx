@@ -21,7 +21,7 @@ function MenuPage() {
       {/* 우측 상단 i 아이콘 */}
       <div className="absolute top-4 right-4">
         <button onClick={handlePopupOpen}>
-          <img src="/image/menu/info_icon.png" alt="Info" className="w-8 h-8" />
+          <img src="/image/info_icon.png" alt="Info" className="w-8 h-8" />
         </button>
       </div>
 

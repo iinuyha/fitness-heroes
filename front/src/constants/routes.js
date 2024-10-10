@@ -5,4 +5,5 @@ export const routes = {
     forgotPassword: '/forgotPassword',
     onboarding: '/onboarding',
     menu: '/menu',
+    story: '/story',
 };
