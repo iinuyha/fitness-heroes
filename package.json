@@ -1,0 +1,13 @@
+{
+  "name": "fitness-heroes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd back && npm start",
+    "client": "cd front && npm start"
+  },
+  "author": "",
+  "license": "ISC"
+}
