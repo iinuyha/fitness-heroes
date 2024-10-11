@@ -1,13 +1,9 @@
-
 const mongoose = require('mongoose');
-const dbURI = "mongodb+srv://dkgus731:EoGg1VgJJVne65N6@fitnessheroes.f24j2.mongodb.net/?retryWrites=true&w=majority&appName=FitnessHeroes";
+require('dotenv').config();
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(dbURI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(process.env.DB_URI);
         console.log('MongoDB connected successfully');
     } catch (err) {
         console.error('MongoDB connection error:', err.message);
