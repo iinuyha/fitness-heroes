@@ -18,18 +18,18 @@ function LoginPage() {
         </h1>
         <div className="bg-white bg-opacity-10 px-6 sm:px-10 md:px-20 rounded-xl py-16 w-full max-w-md md:max-w-lg lg:max-w-xl">
           <div className="mb-4">
-            <label className="block text-left text-white mb-2" htmlFor="username">아이디</label>
             <input
               id="username"
               type="text"
+              placeholder="아이디"
               className="w-full p-2 border-b-2 border-white focus:border-[#0675C5] bg-transparent text-white focus:outline-none"
             />
           </div>
-          <div className="mb-8">
-            <label className="block text-left text-white mb-2" htmlFor="password">비밀번호</label>
+          <div className="mb-12">
             <input
               id="password"
               type="password"
+              placeholder="비밀번호"
               className="w-full p-2 border-b-2 border-white focus:border-[#0675C5] bg-transparent text-white focus:outline-none"
             />
           </div>
@@ -37,12 +37,19 @@ function LoginPage() {
           <button className="w-full bg-white hover:bg-[#0675C5] text-black hover:text-white font-bold py-2 px-4 rounded-full">
             로그인
           </button>
-          <div className="mt-4">
+          <div className="mt-4 flex text-white text-base justify-center">
             <Link
               to="/signup" // Link는 여전히 활성화
-              className="text-white text-sm font-sans hover:text-[#0675C5] hover:font-semibold block text-center"
+              className="hover:text-[#0675C5] hover:font-semibold block text-center"
             >
               회원가입
+            </Link>
+            <p className='mx-4'>|</p>
+            <Link
+              to="/signup" // Link는 여전히 활성화
+              className="font-sans hover:text-[#0675C5] hover:font-semibold block text-center"
+            >
+              비밀번호 찾기
             </Link>
           </div>
         </div>
