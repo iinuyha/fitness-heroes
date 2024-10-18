@@ -14,15 +14,12 @@ const LoginSchema = new Schema(
     },
     user_name: {
       type: String,
-      required: true,
     },
     birth: {
       type: Date,
-      required: true,
     },
     sex: {
       type: Number,
-      required: true,
     },
     email: {
       type: String,
@@ -30,11 +27,9 @@ const LoginSchema = new Schema(
     },
     user_worry: {
       type: String,
-      required: true,
     },
     character: {
       type: String,
-      required: true,
     },
   },
   { versionKey: false }
