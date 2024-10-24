@@ -37,10 +37,7 @@ function MenuPage() {
             />
             <p className="text-white mt-3">스토리</p>
           </Link>
-          <Link
-            to={routes.focusExercise}
-            className="flex flex-col items-center"
-          >
+          <Link to={routes.focus} className="flex flex-col items-center">
             <img
               src="/image/menu/focus_icon.png"
               alt="Focus"
@@ -48,10 +45,7 @@ function MenuPage() {
             />
             <p className="text-white mt-3">집중 운동</p>
           </Link>
-          <Link
-            to={routes.groupExercise}
-            className="flex flex-col items-center"
-          >
+          <Link to={routes.friend} className="flex flex-col items-center">
             <img
               src="/image/menu/together_icon.png"
               alt="Group"
