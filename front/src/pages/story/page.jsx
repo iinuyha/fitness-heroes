@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // 팝업 컴포넌트 가져오기
+import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 
 function StoryPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -25,14 +26,8 @@ function StoryPage() {
         <img src="/image/back_icon.png" alt="back" className="w-10 h-10" />
       </Link>
 
-      {/* 우측 상단 i 아이콘 */}
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={() => handlePopupOpen("story 페이지에 대한 정보입니다.")}
-        >
-          <img src="/image/info_icon.png" alt="Info" className="w-8 h-8" />
-        </button>
-      </div>
+      {/* 코인 및 정보 팝업 */}
+      <CoinInfoDisplay message="스토리모드 관련된 설명 적으면 됨" />
 
       {/* 팝업창 */}
       {isPopupOpen && (
