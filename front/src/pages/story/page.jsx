@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // 팝업 컴포넌트 가져오기
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
+import ReturnDisplay from "../../components/ReturnDisplay";
 
 function StoryPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -19,12 +20,7 @@ function StoryPage() {
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
       {/* 뒤로가기 버튼 */}
-      <Link
-        to={routes.menu}
-        className="absolute top-4 left-4 flex items-center"
-      >
-        <img src="/image/back_icon.png" alt="back" className="w-10 h-10" />
-      </Link>
+      <ReturnDisplay />
 
       {/* 코인 및 정보 팝업 */}
       <CoinInfoDisplay message="스토리모드 관련된 설명 적으면 됨" />
