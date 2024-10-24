@@ -7,4 +7,8 @@ export const routes = {
   menu: "/menu",
   story: "/story",
   focus: "/focus",
+  friend: "/friend",
+  character: "/character",
+  store: "/character/store",
+  mypage: "/mypage",
 };
