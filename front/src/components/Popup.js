@@ -1,4 +1,6 @@
-import React from 'react';
+import React from "react";
+import ReactMarkdown from "react-markdown"; // react-markdown import
+import rehypeRaw from "rehype-raw"; // rehype-raw import
 
 function Popup({ message, onClose }) {
   return (
@@ -8,8 +10,8 @@ function Popup({ message, onClose }) {
 
       {/* 팝업창 */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg shadow-lg z-20 flex flex-col justify-between h-fit">
-        {/* 메시지 내용 */}
-        <p>{message}</p>
+        {/* Markdown 문법을 적용한 메시지 내용 */}
+        <ReactMarkdown rehypePlugins={[rehypeRaw]}>{message}</ReactMarkdown>
 
         {/* 닫기 버튼 */}
         <div className="flex justify-end mt-8">
