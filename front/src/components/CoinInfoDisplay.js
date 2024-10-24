@@ -38,7 +38,7 @@ function CoinInfoDisplay({ message }) {
       {/* 정보 아이콘 및 팝업 */}
       <div>
         <button onClick={handlePopupOpen}>
-          <img src="/image/info_icon.png" alt="Info" className="w-8 h-8" />
+          <img src="/image/info_icon.png" alt="Info" className="w-10 h-10" />
         </button>
         {isPopupOpen && (
           <Popup
