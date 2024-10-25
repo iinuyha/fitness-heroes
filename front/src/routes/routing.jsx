@@ -8,6 +8,7 @@ import OnBoardingPage from "../pages/onBoarding/page";
 import MenuPage from "../pages/menu/page";
 import StoryPage from "../pages/story/page";
 import FocusPage from "../pages/focus/page";
+import FriendPage from "../pages/friend/page";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
   {
     path: routes.focus,
     element: <FocusPage />,
+  },
+  {
+    path: routes.friend,
+    element: <FriendPage />,
   },
 ]);
 
