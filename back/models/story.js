@@ -1,0 +1,30 @@
+const mongoose = require("mongoose");
+
+const { Schema } = mongoose;
+
+const StorySchema = new Schema(
+  {
+    id: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    concern: {
+      type: String,
+      required: true
+    },
+    episode: {
+      type: Number,
+      required: true
+    },
+    date: {
+      type: Date,
+      required: true
+    }
+  },
+  { versionKey: false }
+);
+
+StorySchema.index({ id: 1, concern: 1, episode: 1 }, { unique: true });
+
+module.exports = mongoose.model("Story", StorySchema);

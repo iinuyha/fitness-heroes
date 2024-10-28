@@ -2,18 +2,18 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
-const DesignSchema = new Schema(
+const SkinSchema = new Schema(
   {
     skin_name: {
       type: String,
-      required: true,
+      required: true
     },
     skin_price: {
       type: Number,
-      required: true,
-    },
+      required: true
+    }
   },
   { versionKey: false }
 );
 
-module.exports = mongoose.model("Design", DesignSchema);
+module.exports = mongoose.model("Skin", SkinSchema);
