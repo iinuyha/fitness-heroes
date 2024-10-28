@@ -62,7 +62,7 @@ function CharacterPage() {
               {/* 상점 아이콘과 텍스트 */}
               <Link
                 to={routes.store}
-                className="flex items-center text-white font-semibold space-x-2"
+                className="flex items-center text-white font-semibold space-x-2 border-2 border-white rounded-xl px-2"
               >
                 상점 &gt;
               </Link>

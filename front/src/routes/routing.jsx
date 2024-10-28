@@ -10,6 +10,7 @@ import StoryPage from "../pages/story/page";
 import FocusPage from "../pages/focus/page";
 import FriendPage from "../pages/friend/page";
 import CharacterPage from "../pages/character/page";
+import StorePage from "../pages/store/page";
 import MypagePage from "../pages/mypage/page";
 
 const router = createBrowserRouter([
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
   {
     path: routes.character,
     element: <CharacterPage />,
+  },
+  {
+    path: routes.store,
+    element: <StorePage />,
   },
   {
     path: routes.mypage,
