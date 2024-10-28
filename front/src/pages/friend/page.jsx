@@ -172,6 +172,9 @@ function FriendPage() {
                 <span className="flex items-center">
                   <span className="font-semibold mr-1">{friend.username}</span>(
                   {friend.userId})
+                  <span className="text-sm text-gray-400">
+                    - {friend.win}승 {friend.draw}무 {friend.lose}패
+                  </span>
                 </span>
                 <button
                   className={`px-4 py-1 rounded-full ${

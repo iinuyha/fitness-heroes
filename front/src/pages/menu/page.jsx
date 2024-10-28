@@ -61,10 +61,10 @@ function MenuPage() {
             />
             <p className="text-white mt-3">캐릭터</p>
           </Link>
-          <Link to={routes.shop} className="flex flex-col items-center">
+          <Link to={routes.mypage} className="flex flex-col items-center">
             <img
               src="/image/menu/mypage_icon.png"
-              alt="Shop"
+              alt="Mypage"
               className="w-28 h-28"
             />
             <p className="text-white mt-3">마이페이지</p>

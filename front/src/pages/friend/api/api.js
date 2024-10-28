@@ -12,16 +12,16 @@ export const fetchFriendList = async () => {
 
   // 일단 임의 데이터 불러오게끔 함
   const mockFriendList = [
-    { userId: "cjftn55", username: "김철수" },
-    { userId: "dudgml3121", username: "이영희" },
-    { userId: "dudtn35", username: "박영수" },
-    { userId: "altn354", username: "최민수" },
-    { userId: "wlals1", username: "한지민" },
-    { userId: "wasds1", username: "손아현" },
-    { userId: "qwers1", username: "김해민" },
-    { userId: "hthals1", username: "문혜진" },
-    { userId: "vxcls1", username: "강윤수" },
-    { userId: "asd1", username: "하하호호" },
+    { userId: "cjftn55", username: "김철수", win: 17, draw: 62, lose: 3 },
+    { userId: "dudgml3121", username: "이영희", win: 1, draw: 2, lose: 36 },
+    { userId: "dudtn35", username: "박영수", win: 31, draw: 2, lose: 36 },
+    { userId: "altn354", username: "최민수", win: 91, draw: 27, lose: 34 },
+    { userId: "wlals1", username: "한지민", win: 18, draw: 22, lose: 23 },
+    { userId: "wasds1", username: "손아현", win: 1, draw: 23, lose: 23 },
+    { userId: "qwers1", username: "김해민", win: 12, draw: 2, lose: 3 },
+    { userId: "hthals1", username: "문혜진", win: 1, draw: 42, lose: 38 },
+    { userId: "vxcls1", username: "강윤수", win: 41, draw: 92, lose: 3 },
+    { userId: "asd1", username: "하하호호", win: 51, draw: 32, lose: 53 },
   ];
 
   return mockFriendList;
