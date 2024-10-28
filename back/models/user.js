@@ -3,22 +3,33 @@ const { Schema } = mongoose;
 
 const UserSchema = new Schema(
   {
-    user_id: {
+    id: {
       type: String,
       unique: true,
       required: true,
     },
-    story: {
-      type: Number,
+    password: {
+      type: String,
       required: true,
     },
-    coin: {
-      type: Number,
+    email: {
+      type: String,
       required: true,
     },
-    user_skin: {
-      type: Number,
-      required: true,
+    name: {
+      type: String,
+    },
+    birthdate: {
+      type: Date,
+    },
+    gender: {
+      type: Boolean,
+    },
+    concern: {
+      type: String,
+    },
+    character: {
+      type: String,
     },
   },
   { versionKey: false }

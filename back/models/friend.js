@@ -4,14 +4,22 @@ const { Schema } = mongoose;
 
 const FriendSchema = new Schema(
   {
-    friend_id: {
+    id: {
       type: String,
       required: true,
     },
-    result: {
-      type: String,
-      required: true,
+    friend: {
+      type: Array,
     },
+    win: {
+      type: Number,
+    },
+    draw: {
+      type: Number,
+    },
+    lose: {
+      type: Number,
+    }
   },
   { versionKey: false }
 );
