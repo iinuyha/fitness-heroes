@@ -6,12 +6,12 @@ const SkinSchema = new Schema(
   {
     skin_name: {
       type: String,
-      required: true
+      required: true,
     },
     skin_price: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   { versionKey: false }
 );

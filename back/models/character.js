@@ -6,21 +6,27 @@ const CharacterSchema = new Schema(
     id: {
       type: String,
       unique: true,
-      required: true
+      required: true,
     },
     character: {
       type: String,
-      required: true
+      required: true,
     },
     coin: {
-      type: Number
+      type: Number,
     },
     skin: {
-      type: Object
+      type: Object,
+      properties: {
+        헬린이: { type: Number },
+        초급자: { type: Number },
+        중급자: { type: Number },
+        고인물: { type: Number }
+      }
     },
     currentSkin: {
-      type: String
-    }
+      type: String,
+    },
   },
   { versionKey: false }
 );
