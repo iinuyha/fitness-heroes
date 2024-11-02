@@ -30,7 +30,7 @@ const UserSchema = new Schema(
     },
     character: {
       type: String,
-    },
+    }
   },
   { versionKey: false }
 );

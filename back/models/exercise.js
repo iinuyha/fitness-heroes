@@ -5,28 +5,28 @@ const ExerciseSchema = new Schema(
   {
     concern: {
       type: String,
-      required: true
+      required: true,
     },
     exe_name: {
       type: String,
-      required: true
+      required: true,
     },
     episode: {
       type: Number,
-      required: true
+      required: true,
     },
     gender: {
       type: Boolean,
-      required: true
+      required: true,
     },
     exe_set: {
       type: Number,
-      required: true
+      required: true,
     },
     exe_count: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   { versionKey: false }
 );

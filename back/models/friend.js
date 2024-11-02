@@ -7,6 +7,7 @@ const FriendSchema = new Schema(
     id: {
       type: String,
       required: true,
+      unique: true
     },
     friend: {
       type: Array,
@@ -19,7 +20,7 @@ const FriendSchema = new Schema(
     },
     lose: {
       type: Number,
-    }
+    },
   },
   { versionKey: false }
 );
