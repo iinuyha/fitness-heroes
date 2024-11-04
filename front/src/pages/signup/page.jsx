@@ -162,7 +162,11 @@ function SignUpPage() {
             setEmail={setEmail}
           />
           <button
-            className="w-full font-bold py-2 px-4 rounded-full bg-white hover:bg-[#0675C5] text-black hover:text-white"
+            className={`w-full font-bold py-2 px-4 rounded-full ${
+              isFormComplete()
+                ? "bg-white hover:bg-[#0675C5] text-black hover:text-white"
+                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+            }`}
             onClick={handleSignUp}
             disabled={!isFormComplete()}
           >
