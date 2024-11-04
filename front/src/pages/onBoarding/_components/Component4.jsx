@@ -13,9 +13,19 @@ function Component4({ moveToNext }) {
   return (
     <div className="text-left">
       <h2 className="text-xl font-bold">
-        가장 큰 <span className="text-[#0675C5]">체력 고민</span>을 한 가지
-        선택하세요!
+        {concern ? (
+          <>
+            <span className="text-[#0675C5]">{concern}</span>을 강화하고
+            싶은가요?
+          </>
+        ) : (
+          <>
+            가장 큰 <span className="text-[#0675C5]">체력 고민</span>을 한 가지
+            선택하세요!
+          </>
+        )}
       </h2>
+
       <p className="text-sm text-green-600 mb-8 font-semibold">
         각 고민마다 33개의 에피소드가 준비되어 있어요!
       </p>
