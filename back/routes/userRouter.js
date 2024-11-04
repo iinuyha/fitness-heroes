@@ -10,7 +10,7 @@ const secretKey = "hi";
 
 
 // Postman 확인용 토큰 생성
-const testToken = jwt.sign({ id: "newUser123" }, secretKey);
+const testToken = jwt.sign({ id: "user123" }, secretKey);
 console.log("생성된 토큰:", testToken);
 
 // JWT 토큰에서 id를 추출하는 함수
@@ -99,5 +99,38 @@ router.post('/onboarding', async (req, res) => {
     res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
   }
 });
+
+
+// 코인 조회 라우터
+router.get('/coin', async (req, res) => {
+    try {
+      // Authorization 헤더 체크
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: 'Authorization token이 필요합니다.' });
+      }
+  
+      // "Bearer " 이후의 실제 토큰 부분만 가져옴
+      const token = authHeader.split(" ")[1];
+      
+      // 토큰에서 사용자 ID 추출
+      const id = decodeToken(token);
+      if (!id) {
+        return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
+      }
+  
+      // Character 컬렉션에서 해당 id의 coin 조회
+      const character = await Character.findOne({ id });
+      if (!character) {
+        return res.status(404).json({ error: '캐릭터 정보를 찾을 수 없습니다.' });
+      }
+  
+      // 성공적으로 coin 값을 반환
+      res.json({ coin: character.coin });
+    } catch (error) {
+      console.error("코인 조회 오류:", error);
+      res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
+    }
+  });
 
 module.exports = router;
