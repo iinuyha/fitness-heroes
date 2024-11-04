@@ -5,9 +5,6 @@ const Skin = require('../models/skin');
 const jwt = require('jsonwebtoken');
 const secretKey = "hi";
 
-// Postman 확인용 토큰 생성
-const testToken = jwt.sign({ id: "user123" }, secretKey);
-console.log("생성된 토큰:", testToken);
 
 // JWT 토큰에서 id를 추출하는 함수
 function decodeToken(token) {
