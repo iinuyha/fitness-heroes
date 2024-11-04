@@ -14,6 +14,16 @@ const EmailVerification = ({ onVerify, setEmail }) => {
   // 이메일 입력 시 부모 컴포넌트의 email 상태를 업데이트
   useEffect(() => {
     setEmail(emailInput);
+
+    // 이메일이 변경될 때마다 초기화
+    setServerCode("");
+    setVerificationCode("");
+    setEmailMsg("");
+    setAuthMsg("");
+    setLoading(false);
+    setIsVerified(false);
+    setCountdown(0);
+    setIsCountdownStarted(false);
   }, [emailInput, setEmail]);
 
   const handleSubmit = async (e) => {
@@ -92,10 +102,21 @@ const EmailVerification = ({ onVerify, setEmail }) => {
           />
           <button
             type="submit"
-            disabled={loading}
-            className="w-2/6 ml-2 font-bold py-2 px-4 rounded-full bg-white hover:bg-[#0675C5] text-black hover:text-white"
+            disabled={loading || isVerified || countdown > 0} // 로딩 중이거나 인증 완료 시 비활성화
+            className={`w-2/6 ml-2 font-bold py-2 px-4 rounded-full
+              ${
+                countdown > 0 || isVerified
+                  ? "bg-[#0675C5] text-white" // 카운트다운 중일 때 파란색 배경
+                  : "bg-white text-black hover:bg-[#0675C5] hover:text-white"
+              }`} // 기본 상태
           >
-            {loading ? "전송 중..." : "인증 요청"}
+            {loading
+              ? "전송 중..."
+              : countdown > 0
+                ? `남은 시간: ${Math.floor(countdown / 60)}:${(countdown % 60).toString().padStart(2, "0")}`
+                : isVerified
+                  ? "인증 완료"
+                  : "인증 요청"}
           </button>
         </div>
         <p className="text-red-500">{emailMsg}</p>
