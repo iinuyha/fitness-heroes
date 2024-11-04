@@ -1,22 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "./api";
+import { routes } from "../../constants/routes";
 
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  // 페이지 로드 시 토큰이 있으면 자동으로 메뉴로 리다이렉트
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate(routes.menu); // 토큰이 있으면 메뉴로 이동
+    }
+  }, [navigate]);
+
   const handleLogin = async () => {
     try {
       const response = await login(id, password);
       if (response.ok) {
-        const token = response.token; // 서버에서 반환된 JWT 토큰
-        localStorage.setItem("jwtToken", token); // 토큰을 localStorage에 저장
+        localStorage.setItem("token", response.token); // 토큰을 localStorage에 저장
         if (response.isFirstTime) {
-          navigate("/onboarding"); // isFirstTime이 true면 onboarding으로 이동
+          navigate(routes.onboarding); // isFirstTime이 true면 onboarding으로 이동
         } else {
-          navigate("/menu"); // isFirstTime이 false면 menu로 이동
+          navigate(routes.menu); // isFirstTime이 false면 menu로 이동
         }
       } else {
         alert("로그인 실패: 다시 시도해주세요.");

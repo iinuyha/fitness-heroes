@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/User");
+const User = require("../models/user");
 
 // 중복 ID 체크 API
 router.post("/check-id", async (req, res) => {
