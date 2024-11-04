@@ -25,4 +25,4 @@ const FriendSchema = new Schema(
   { versionKey: false }
 );
 
-module.exports = mongoose.model("Friend", FriendSchema);
+module.exports = mongoose.model("Friend", FriendSchema, "Friend");

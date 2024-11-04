@@ -33,4 +33,4 @@ const ExerciseSchema = new Schema(
 
 ExerciseSchema.index({ concern: 1, exe_name: 1, episode: 1, gender: 1}, { unique: true });
 
-module.exports = mongoose.model("Exercise", ExerciseSchema);
+module.exports = mongoose.model("Exercise", ExerciseSchema, "Exercise");
