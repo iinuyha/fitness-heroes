@@ -2,19 +2,26 @@ const express = require('express');
 const router = express.Router();
 const Character = require('../models/character');
 const Skin = require('../models/skin');
+const jwt = require('jsonwebtoken');
 const secretKey = "hi";
 
-// JWT 토큰에서 userId를 추출하는 함수
+// Postman 확인용 토큰 생성
+const token = jwt.sign({ id: "user123" }, secretKey);
+console.log("생성된 토큰:", token);
+
+// JWT 토큰에서 id를 추출하는 함수
 function decodeToken(token) {
-    try {
+  try {
+      console.log("디코딩할 토큰:", token); // 토큰 출력
+      console.log("사용할 secretKey:", secretKey); // secretKey 출력
       const decoded = jwt.verify(token, secretKey);
-      return decoded.userId;
-    } catch (error) {
+      console.log("사용자 Id", decoded.id);
+      return decoded.id;
+  } catch (error) {
       console.error("토큰 디코딩 오류:", error);
       return null;
-    }
+  }
 }
-
 // 캐릭터 정보 조회
 router.get('/', async function(req, res, next) {
     try {
@@ -28,13 +35,13 @@ router.get('/', async function(req, res, next) {
     const token = authHeader.split(" ")[1];
       
     // 토큰에서 사용자 ID 추출
-    const userId = decodeToken(token);
-    if (!userId) {
+    const id = decodeToken(token);
+    if (!id) {
         return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
     }
       
     // MongoDB에서 id에 맞는 캐릭터 정보 조회
-    const characterInfo = await Character.findOne({ id: userId });
+    const characterInfo = await Character.findOne({ id: id });
       
     if (!characterInfo) {
         return res.status(404).json({ error: '캐릭터 정보를 찾을 수 없습니다.' });
@@ -65,14 +72,15 @@ router.patch('/buy-skin', async (req, res) => {
     // "Bearer " 이후의 실제 토큰 부분만 가져오기
     const token = authHeader.split(" ")[1];
 
-    // 토큰에서 userId 추출
-    const userId = decodeToken(token);
-    if (!userId) {
+    // 토큰에서 id 추출
+    const id = decodeToken(token);
+    if (!id) {
       return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
     }
 
     // Request body에서 skin_name 가져오기
     const { skin_name } = req.body;
+    console.log('skin이름:', skin_name);
     if (!skin_name) {
       return res.status(400).json({ error: '스킨 이름이 필요합니다.' });
     }
@@ -85,7 +93,7 @@ router.patch('/buy-skin', async (req, res) => {
     const skinPrice = skin.skin_price;
 
     // Character 테이블에서 사용자 캐릭터 정보 조회
-    const character = await Character.findOne({ id: userId });
+    const character = await Character.findOne({ id: id });
     if (!character) {
       return res.status(404).json({ error: '캐릭터 정보를 찾을 수 없습니다.' });
     }
@@ -98,8 +106,8 @@ router.patch('/buy-skin', async (req, res) => {
     // 구매 가능: 코인 차감 및 스킨 소유 상태 업데이트
     character.coin -= skinPrice;
     if (!character.skin) character.skin = {}; // 스킨 객체 초기화
-    character.skin[skin_name] = 1; // 소유 상태를 1로 변경
-
+    character.skin[skin_name] = 1; // 스킨 상태 변경
+    character.markModified('skin'); // 변경 사항 알림
     // 변경된 정보 저장
     await character.save();
 
