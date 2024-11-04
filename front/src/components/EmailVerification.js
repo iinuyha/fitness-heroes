@@ -100,7 +100,26 @@ const EmailVerification = ({ onVerify, setEmail }) => {
         </div>
         <p className="text-red-500">{emailMsg}</p>
       </form>
-      {/* 나머지 코드 */}
+      {isCountdownStarted && !(countdown === -1) && !isVerified && (
+        <div className="flex mb-4">
+          <input
+            type="text"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+            placeholder="인증번호"
+            required
+            className="w-4/6 p-2 border-b-2 border-white focus:border-[#0675C5] bg-transparent text-white focus:outline-none"
+          />
+          <button
+            onClick={handleVerification}
+            disabled={isVerified}
+            className={`w-2/6 ml-2 bg-white hover:bg-[#0675C5] hover:text-white text-black font-bold py-2 px-4 rounded-full`}
+          >
+            인증번호 확인
+          </button>
+        </div>
+      )}
+      <p className="text-red-500">{authMsg}</p>
     </div>
   );
 };
