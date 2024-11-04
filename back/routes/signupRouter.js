@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const router = express.Router();
 const User = require("../models/user");
 
@@ -28,8 +29,12 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "이미 존재하는 아이디입니다." });
     }
 
+    // 비밀번호 암호화
+    const saltRounds = 10; // 암호화 강도
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     // 새로운 사용자 추가
-    const newUser = new User({ id, password, email });
+    const newUser = new User({ id, password: hashedPassword, email });
     await newUser.save(); // MongoDB에 저장
 
     return res.status(201).json({ message: "회원가입 성공" });

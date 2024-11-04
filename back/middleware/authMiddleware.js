@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const secretKey = 'yourSecretKey'; // 서버에서 사용하는 비밀 키
+const secretKey = 'hi'; // 서버에서 사용하는 비밀 키
 
 // JWT 검증 미들웨어 (4번)
 const verifyToken = (req, res, next) => {

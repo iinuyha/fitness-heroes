@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 const User = require("../models/user");
-const secretKey = process.env.SECRET_KEY; // 환경 변수로 설정
+const secretKey = "hi";
 
 // 로그인 경로
 router.post("/", async (req, res) => {
@@ -38,6 +38,7 @@ router.post("/", async (req, res) => {
 
     // 로그인 성공 응답
     return res.status(200).json({
+      success: true,
       token,
       id: user.id,
       isFirstTime: isFirstTime, // 필드가 모두 null인 경우 true, 아니면 false
