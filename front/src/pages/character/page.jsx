@@ -1,21 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
+import { getCharacterInfo, changeCharacterSkin } from "./api"; // API 함수 가져오기
 
 function CharacterPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-  const [selectedSkin, setSelectedSkin] = useState("회원복"); // 기본 선택 스킨
+  const [character, setCharacter] = useState("크로"); // 기본 캐릭터 이름
+  const [currentSkin, setCurrentSkin] = useState("회원복"); // 기본 선택 스킨
+  const [skins, setSkins] = useState([]); // 사용자가 소유한 스킨 목록
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
     setIsPopupOpen(true);
   };
 
-  const skins = ["회원복", "초급자", "중급자", "고인물"]; // 스킨 목록
+  // 캐릭터 정보 불러오기
+  useEffect(() => {
+    const fetchCharacterInfo = async () => {
+      try {
+        const token = localStorage.getItem("token"); // 토큰 가져오기
+        const data = await getCharacterInfo(token);
+        setCharacter(data.character);
+        setCurrentSkin(data.currentSkin);
+        setSkins(Object.keys(data.skins)); // 보유 스킨 목록 설정
+      } catch (error) {
+        handlePopupOpen("캐릭터 정보를 불러오는데 실패했습니다.");
+      }
+    };
+
+    fetchCharacterInfo();
+  }, []);
+
+  // 스킨 변경 함수
+  const handleSkinChange = async (skin) => {
+    try {
+      const token = localStorage.getItem("token"); // 토큰 가져오기
+      await changeCharacterSkin(token, skin);
+      setCurrentSkin(skin); // 성공 시 현재 스킨 변경
+      handlePopupOpen(`${skin} 스킨으로 변경되었습니다.`);
+    } catch (error) {
+      handlePopupOpen("스킨 변경에 실패했습니다.");
+    }
+  };
 
   return (
     <div
@@ -48,7 +78,7 @@ function CharacterPage() {
           {/* 왼쪽 캐릭터 */}
           <div className="bg-white bg-opacity-10 rounded-lg p-8">
             <img
-              src={`/image/skin/character/크로_${selectedSkin}.png`}
+              src={`/image/skin/character/${character}_${currentSkin}.png`}
               alt="캐릭터 이미지"
               className="h-80 mx-auto"
             />
@@ -72,9 +102,9 @@ function CharacterPage() {
               {skins.map((skin) => (
                 <div
                   key={skin}
-                  onClick={() => setSelectedSkin(skin)}
+                  onClick={() => handleSkinChange(skin)}
                   className={`p-4 rounded-lg cursor-pointer ${
-                    selectedSkin === skin
+                    currentSkin === skin
                       ? "bg-blue-400"
                       : "bg-white bg-opacity-20"
                   }`}
