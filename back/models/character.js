@@ -21,7 +21,7 @@ const CharacterSchema = new Schema(
         헬린이: { type: Number },
         초급자: { type: Number },
         중급자: { type: Number },
-        고인물: { type: Number }
+        고인물: { type: Number },
       }
     },
     currentSkin: {
