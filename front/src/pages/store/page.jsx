@@ -1,14 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
+import { buySkin, getCharacterInfo } from "./api";
 
 function StorePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-  const [ownedSkins, setOwnedSkins] = useState(["회원복"]); // 보유한 스킨 초기값
+  const [ownedSkins, setOwnedSkins] = useState({}); // 보유한 스킨 초기값
+  const [coin, setCoin] = useState(0);
+  const token = localStorage.getItem("token"); // 예시로 토큰을 localStorage에서 가져옴
+
+  useEffect(() => {
+    // 초기 캐릭터 정보 불러오기
+    const fetchCharacterInfo = async () => {
+      try {
+        const data = await getCharacterInfo(token);
+        setOwnedSkins(data.skins);
+        setCoin(data.coin);
+      } catch (error) {
+        console.error("캐릭터 정보 불러오기 실패:", error);
+      }
+    };
+
+    fetchCharacterInfo();
+  }, [token]);
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
@@ -43,10 +61,18 @@ function StorePage() {
     },
   ];
 
-  const handlePurchase = (skinId) => {
-    if (!ownedSkins.includes(skinId)) {
-      setOwnedSkins([...ownedSkins, skinId]);
-      handlePopupOpen(`${skinId} 스킨을 구매했습니다!`);
+  const handlePurchase = async (skinId, skinPrice) => {
+    if (coin >= skinPrice) {
+      try {
+        const data = await buySkin(token, skinId);
+        setOwnedSkins(data.skins);
+        setCoin(data.remainingCoin);
+        handlePopupOpen(`${skinId} 스킨을 구매했습니다!`);
+      } catch (error) {
+        handlePopupOpen("스킨 구매에 실패했습니다.");
+      }
+    } else {
+      handlePopupOpen("코인이 부족합니다.");
     }
   };
 
@@ -55,13 +81,9 @@ function StorePage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
-      {/* 뒤로가기 버튼 */}
       <ReturnDisplay />
-
-      {/* 코인 및 정보 팝업 */}
       <CoinInfoDisplay message="상점 페이지 관련된 설명 적으면 됨" />
 
-      {/* 팝업창 */}
       {isPopupOpen && (
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />
       )}
@@ -70,13 +92,12 @@ function StorePage() {
         <h1
           className="text-3xl text-white mb-6 font-semibold"
           style={{
-            textShadow: "0 0 10px rgba(255, 255, 255, 0.5)", // 흰색 블러 효과
+            textShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
           }}
         >
           상점
         </h1>
 
-        {/* 스킨 카드 목록 */}
         <div className="flex space-x-8">
           {skins.map((skin) => (
             <div
@@ -99,11 +120,11 @@ function StorePage() {
                   {skin.price}
                 </span>
               </div>
-              {ownedSkins.includes(skin.id) ? (
+              {ownedSkins[skin.id] ? (
                 <p className="text-green-300 font-semibold">보유 중</p>
               ) : (
                 <button
-                  onClick={() => handlePurchase(skin.id)}
+                  onClick={() => handlePurchase(skin.id, skin.price)}
                   className="bg-blue-400 text-white px-4 py-2 rounded-full"
                 >
                   구매
