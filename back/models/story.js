@@ -26,4 +26,4 @@ const StorySchema = new Schema(
 
 StorySchema.index({ id: 1, concern: 1, episode: 1 }, { unique: true });
 
-module.exports = mongoose.model("Story", StorySchema);
+module.exports = mongoose.model("Story", StorySchema, "Story");

@@ -16,4 +16,4 @@ const SkinSchema = new Schema(
   { versionKey: false }
 );
 
-module.exports = mongoose.model("Skin", SkinSchema);
+module.exports = mongoose.model("Skin", SkinSchema, "Skin");
