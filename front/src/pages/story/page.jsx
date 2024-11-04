@@ -1,18 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // 팝업 컴포넌트 가져오기
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
+import { getStoryEpisode } from "./api"; // API 함수 가져오기
 
 function StoryPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [concern, setConcern] = useState("근력"); // 예시로 "근력" 설정
+  const [episode, setEpisode] = useState(0);
+
+  const initialConcernList = [
+    "근력",
+    "근지구력",
+    "심폐지구력",
+    "기초체력",
+    "순발력",
+  ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getStoryEpisode();
+        setConcern(data.concern);
+        setEpisode(data.episode);
+      } catch (error) {
+        console.error("Failed to fetch story data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
     setIsPopupOpen(true);
   };
+
+  // 선택된 concern을 제외한 나머지 걱정 리스트
+  const filteredConcerns = initialConcernList.filter((c) => c !== concern);
 
   return (
     <div
@@ -40,72 +68,75 @@ function StoryPage() {
             textShadow: "0 0 10px rgba(255, 255, 255, 0.5)", // 흰색 블러 효과
           }}
         >
-          <span className="text-[#90DEFF]">근력 지역</span>을 책임지고 구출할
-          것!!
+          <span className="text-[#90DEFF]">{concern} 지역</span>을 책임지고
+          구출할 것!!
         </h1>
 
-        {/* 가운데 3개 아이콘 메뉴 */}
-        <div className="flex space-x-28">
-          <button
-            onClick={() => handlePopupOpen("아직 열리지 않은 지역입니다.")}
-            className="flex flex-col items-center"
-          >
-            <p className="text-white text-xl font-semibold mb-2">순발력 지역</p>
-            <img
-              src="/image/story/area4.png"
-              alt="순발력 지역"
-              className="w-32"
-            />
-          </button>
-          <button
-            onClick={() => handlePopupOpen("아직 열리지 않은 지역입니다.")}
-            className="flex flex-col items-center"
-          >
-            <p className="text-white text-xl font-semibold mb-2">
-              근지구력 지역
-            </p>
-            <img
-              src="/image/story/area3.png"
-              alt="근지구력 지역"
-              className="w-32"
-            />
-          </button>
+        {/* 가운데 5개 아이콘 메뉴 */}
+        <div className="flex space-x-28 justify-center">
+          {/* 왼쪽에 두 개의 concern들 */}
+          {filteredConcerns.slice(0, 2).map((c) => (
+            <button
+              key={c}
+              onClick={() => handlePopupOpen("아직 열리지 않은 지역입니다.")}
+              className="flex flex-col items-center"
+            >
+              <p className="text-white text-xl font-semibold mb-2">{c} 지역</p>
+              <div className="relative">
+                <img
+                  src={`/image/concern/${c}.png`}
+                  alt={`${c} 지역`}
+                  className="w-32"
+                  style={{ opacity: 0.4 }}
+                />
+                <img
+                  src="/image/lock_icon.png"
+                  alt="아직 열리지 않은 지역"
+                  className="w-14 absolute top-4/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                />
+              </div>
+            </button>
+          ))}
+
+          {/* 선택된 concern */}
           <Link to={routes.story} className="flex flex-col items-center">
             <img
-              src="/image/story/area1.png"
-              alt="근력 운동"
+              src={`/image/concern/${concern}.png`}
+              alt={`${concern} 운동`}
               className="w-52"
             />
             <div className="mt-4 w-full flex justify-center">
               <div className="bg-white py-2 px-8 rounded-full">
-                <p className="text-[#00B2FF] text-xl font-bold">1 / 33</p>
+                <p className="text-[#00B2FF] text-xl font-bold">
+                  {episode} / 33
+                </p>
               </div>
             </div>
           </Link>
-          <button
-            onClick={() => handlePopupOpen("아직 열리지 않은 지역입니다.")}
-            className="flex flex-col items-center"
-          >
-            <p className="text-white text-xl font-semibold mb-2">체력 지역</p>
-            <img
-              src="/image/story/area2.png"
-              alt="체력 지역"
-              className="w-32"
-            />
-          </button>
-          <button
-            onClick={() => handlePopupOpen("아직 열리지 않은 지역입니다.")}
-            className="flex flex-col items-center"
-          >
-            <p className="text-white text-xl font-semibold mb-2">
-              기초체력 지역
-            </p>
-            <img
-              src="/image/story/area5.png"
-              alt="기초체력 지역"
-              className="w-32"
-            />
-          </button>
+
+          {/* 오른쪽에 두 개의 concern들 */}
+          {filteredConcerns.slice(2, 4).map((c) => (
+            <button
+              key={c}
+              onClick={() => handlePopupOpen("아직 열리지 않은 지역입니다.")}
+              className="flex flex-col items-center"
+            >
+              <p className="text-white text-xl font-semibold mb-2">{c} 지역</p>
+              <div className="relative">
+                <img
+                  src={`/image/concern/${c}.png`}
+                  alt={`${c} 지역`}
+                  className="w-32"
+                  style={{ opacity: 0.4 }}
+                />
+                <img
+                  src="/image/lock_icon.png"
+                  alt="아직 열리지 않은 지역"
+                  className="w-14 absolute top-4/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                />
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
