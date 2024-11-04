@@ -19,16 +19,16 @@ function LoginPage() {
   const handleLogin = async () => {
     try {
       const response = await login(id, password);
-      if (response.ok) {
-        localStorage.setItem("token", response.token); // 토큰을 localStorage에 저장
+      if (response.success) { // response.success가 true일 때 로그인 성공 처리
+        localStorage.setItem("token", response.token);
         if (response.isFirstTime) {
-          navigate(routes.onboarding); // isFirstTime이 true면 onboarding으로 이동
+          navigate(routes.onboarding);
         } else {
-          navigate(routes.menu); // isFirstTime이 false면 menu로 이동
+          navigate(routes.menu);
         }
       } else {
-        alert("로그인 실패: 다시 시도해주세요.");
-      }
+        alert(response.message || "로그인 실패: 다시 시도해주세요.");
+      }      
     } catch (error) {
       console.error("로그인 에러:", error);
       alert("로그인 실패: 다시 시도해주세요.");

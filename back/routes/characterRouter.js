@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Character = require('../models/character');
 const Skin = require('../models/skin');
+const secretKey = "hi";
 
 // JWT 토큰에서 userId를 추출하는 함수
 function decodeToken(token) {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = jwt.verify(token, secretKey);
       return decoded.userId;
     } catch (error) {
       console.error("토큰 디코딩 오류:", error);
