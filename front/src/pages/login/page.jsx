@@ -11,6 +11,8 @@ function LoginPage() {
     try {
       const response = await login(id, password);
       if (response.ok) {
+        const token = response.token; // 서버에서 반환된 JWT 토큰
+        localStorage.setItem("jwtToken", token); // 토큰을 localStorage에 저장
         if (response.isFirstTime) {
           navigate("/onboarding"); // isFirstTime이 true면 onboarding으로 이동
         } else {
