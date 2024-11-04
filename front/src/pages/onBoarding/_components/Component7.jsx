@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
+import { saveOnboardingInfo } from "../api"; // api 함수 불러오기
 
-function Component7({ character, moveToMenu }) {
+function Component7({
+  character,
+  moveToMenu,
+  name,
+  birthdate,
+  gender,
+  concern,
+}) {
   const characterImages = {
     yello: "/image/character/yello.png",
     blo: "/image/character/blo.png",
@@ -33,6 +41,16 @@ function Component7({ character, moveToMenu }) {
     fireConfetti();
   }, []);
 
+  const handleStart = async () => {
+    try {
+      await saveOnboardingInfo({ name, birthdate, gender, concern, character });
+      moveToMenu();
+    } catch (error) {
+      console.error("Failed to save onboarding info:", error);
+      alert("온보딩 정보 저장에 실패했습니다.");
+    }
+  };
+
   return (
     <div className="text-center">
       <h1 className="text-2xl font-bold mb-12">
@@ -50,7 +68,7 @@ function Component7({ character, moveToMenu }) {
 
       {/* '시작하기' 버튼 */}
       <button
-        onClick={moveToMenu}
+        onClick={handleStart}
         className="text-lg font-semibold px-6 py-1 bg-white border-2 border-[#0675C5] text-[#0675C5] rounded-full hover:bg-[#0675C5] hover:text-white"
       >
         피트니스 히어로즈 시작하기 &gt;
