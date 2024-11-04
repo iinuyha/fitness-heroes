@@ -7,12 +7,11 @@ function SignUpPage() {
   const [userId, setUserId] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
-  const [email, setEmail] = useState("");
   const [idCheckResult, setIdCheckResult] = useState(null);
   const [isIdChecked, setIsIdChecked] = useState(false);
 
   const handleVerification = () => {
-    setIsVerified(true);
+    setIsVerified(true); // 이메일 인증 완료 시 상태 변경
   };
 
   const handleCheckId = async () => {
@@ -29,7 +28,7 @@ function SignUpPage() {
 
   const handleSignup = async () => {
     try {
-      const response = await signup(userId, password1, email);
+      const response = await signup(userId, password1);
       alert(response.message); // 회원가입 성공 메시지
     } catch (error) {
       console.error("회원가입 실패:", error);
@@ -39,13 +38,12 @@ function SignUpPage() {
 
   const isFormComplete = () => {
     return (
-      isVerified &&
+      isVerified && // 이메일 인증 완료 여부 확인
       isIdChecked &&
       userId &&
       password1 &&
       password2 &&
-      password1 === password2 &&
-      email
+      password1 === password2
     );
   };
 
@@ -111,16 +109,6 @@ function SignUpPage() {
               placeholder="비밀번호 확인"
               value={password2}
               onChange={(e) => setPassword2(e.target.value)}
-              className="w-full p-2 border-b-2 border-white focus:border-[#0675C5] bg-transparent text-white focus:outline-none"
-            />
-          </div>
-          <div className="mb-4">
-            <input
-              id="email"
-              type="email"
-              placeholder="이메일"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-2 border-b-2 border-white focus:border-[#0675C5] bg-transparent text-white focus:outline-none"
             />
           </div>
