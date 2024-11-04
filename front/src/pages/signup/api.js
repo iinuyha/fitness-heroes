@@ -1,16 +1,12 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: process.env.REACT_APP_SERVER_URL,
-});
-
 export const checkIdAvailability = async (id) => {
   try {
-    const response = await api.get("/api/user/check-id", {
-      params: { id },
-      headers: { "Content-Type": "application/json" },
-    });
-    return response.data;
+    const response = await axios.post(
+      `${process.env.REACT_APP_SERVER_URL}/api/signup/check-id`,
+      { id }
+    );
+    return response.data.isAvailable;
   } catch (error) {
     throw error.response ? error.response.data : new Error("ID 확인 실패");
   }
@@ -18,17 +14,14 @@ export const checkIdAvailability = async (id) => {
 
 export const signup = async (id, password, email) => {
   try {
-    const response = await api.post(
-      "/api/signup",
-      { id, password, email },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+    const response = await axios.post(
+      `${process.env.REACT_APP_SERVER_URL}/api/signup`,
+      { id, password, email }
     );
     return response.data;
   } catch (error) {
-    throw error.response ? error.response.data : new Error("회원가입 실패");
+    throw error.response && error.response.data.message
+      ? error.response.data.message
+      : new Error("회원가입 실패");
   }
 };
