@@ -28,11 +28,11 @@ router.post("/", async (req, res) => {
 
     // 모든 필드가 null인지 확인
     const isFirstTime =
-      user.name === null &&
-      user.birthdate === null &&
-      user.gender === null &&
-      user.concern === null &&
-      user.character === null;
+      user.name == null &&
+      user.birthdate == null &&
+      user.gender == null &&
+      user.concern == null &&
+      user.character == null;
 
     const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: "1h" });
 
