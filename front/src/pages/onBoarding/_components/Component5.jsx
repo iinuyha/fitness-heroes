@@ -23,15 +23,15 @@ function Component5({ moveToNext, setCharacter }) {
       {/* 3개의 캐릭터 버튼 가로로 정렬 */}
       <div className="flex justify-center space-x-10 font-semibold">
         {/* 옐로 캐릭터 */}
-        <button onClick={() => setSelectedCharacter("yello")} className="w-28">
+        <button onClick={() => setSelectedCharacter("옐로")} className="w-28">
           <img
-            src="/image/character/yello.png"
+            src="/image/character/옐로.png"
             alt="옐로"
             className="w-28 h-44 mx-auto mb-4"
           />
           <p
             className={`text-center px-4 py-2 border-2 rounded-full ${
-              character === "yello"
+              character === "옐로"
                 ? "bg-[#FF9500] border-[#FF9500] text-white"
                 : "border-[#FF9500] text-[#FF9500]"
             }`}
@@ -41,15 +41,15 @@ function Component5({ moveToNext, setCharacter }) {
         </button>
 
         {/* 블로 캐릭터 */}
-        <button onClick={() => setSelectedCharacter("blo")} className="w-28">
+        <button onClick={() => setSelectedCharacter("블로")} className="w-28">
           <img
-            src="/image/character/blo.png"
+            src="/image/character/블로.png"
             alt="블로"
             className="h-44 mx-auto mb-4"
           />
           <p
             className={`text-center px-4 py-2 border-2 rounded-full ${
-              character === "blo"
+              character === "블로"
                 ? "bg-[#0675C5] border-[#0675C5] text-white"
                 : "border-[#0675C5] text-[#0675C5]"
             }`}
@@ -59,15 +59,15 @@ function Component5({ moveToNext, setCharacter }) {
         </button>
 
         {/* 크로 캐릭터 */}
-        <button onClick={() => setSelectedCharacter("cro")} className="w-28">
+        <button onClick={() => setSelectedCharacter("크로")} className="w-28">
           <img
-            src="/image/character/cro.png"
+            src="/image/character/크로.png"
             alt="크로"
             className="h-44 mx-auto mb-4"
           />
           <p
             className={`text-center px-4 py-2 border-2 rounded-full ${
-              character === "cro"
+              character === "크로"
                 ? "bg-[#009216] border-[#009216] text-white"
                 : "border-[#009216] text-[#009216]"
             }`}

@@ -23,7 +23,6 @@ function LoginPage() {
     try {
       const response = await login(id, password);
       if (response.success) {
-        localStorage.setItem("token", response.token);
         if (response.isFirstTime) {
           navigate(routes.onboarding);
         } else {

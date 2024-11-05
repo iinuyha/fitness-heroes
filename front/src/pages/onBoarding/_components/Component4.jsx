@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 
-function Component4({ moveToNext }) {
-  const [concern, setConcern] = useState(""); // 고민 선택 상태 관리
+function Component4({ moveToNext, setConcern }) {
+  const [concern, setSelectedConcern] = useState(""); // 고민 선택 상태 관리
 
   // 고민이 선택되면 다음 버튼을 활성화시키기 위해 moveToNext 호출
   useEffect(() => {
     if (concern) {
+      setConcern(concern);
       moveToNext(); // 고민이 선택되면 다음 단계로 이동 가능
     }
-  }, [concern, moveToNext]);
+  }, [concern, moveToNext, setConcern]);
 
   return (
     <div className="text-left">
@@ -33,7 +34,7 @@ function Component4({ moveToNext }) {
       {/* 5개의 고민 버튼 */}
       <div className="space-y-4 text-center text-[#0675C5] font-semibold">
         <button
-          onClick={() => setConcern("근력")}
+          onClick={() => setSelectedConcern("근력")}
           className={`w-full px-4 py-2 border-2 rounded-full ${
             concern === "근력"
               ? "bg-[#0675C5] border-[#0675C5] text-white"
@@ -43,7 +44,7 @@ function Component4({ moveToNext }) {
           물건을 들거나 힘을 쓰는 게 힘들어요 😣
         </button>
         <button
-          onClick={() => setConcern("근지구력")}
+          onClick={() => setSelectedConcern("근지구력")}
           className={`w-full px-4 py-2 border-2 rounded-full ${
             concern === "근지구력"
               ? "bg-[#0675C5] border-[#0675C5] text-white"
@@ -53,7 +54,7 @@ function Component4({ moveToNext }) {
           운동을 조금만 해도 쉽게 지쳐요 😩
         </button>
         <button
-          onClick={() => setConcern("심폐지구력")}
+          onClick={() => setSelectedConcern("심폐지구력")}
           className={`w-full px-4 py-2 border-2 rounded-full ${
             concern === "심폐지구력"
               ? "bg-[#0675C5] border-[#0675C5] text-white"
@@ -63,7 +64,7 @@ function Component4({ moveToNext }) {
           계단을 몇 층만 올라가도 숨이 차요 😥
         </button>
         <button
-          onClick={() => setConcern("기초체력")}
+          onClick={() => setSelectedConcern("기초체력")}
           className={`w-full px-4 py-2 border-2 rounded-full ${
             concern === "기초체력"
               ? "bg-[#0675C5] border-[#0675C5] text-white"
@@ -73,7 +74,7 @@ function Component4({ moveToNext }) {
           일상생활에서 항상 지쳐 있어요 😴
         </button>
         <button
-          onClick={() => setConcern("순발력")}
+          onClick={() => setSelectedConcern("순발력")}
           className={`w-full px-4 py-2 border-2 rounded-full ${
             concern === "순발력"
               ? "bg-[#0675C5] border-[#0675C5] text-white"

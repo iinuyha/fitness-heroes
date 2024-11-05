@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 
-function Component3({ moveToNext }) {
-  const [gender, setGender] = useState(""); // 성별 관리
+function Component3({ moveToNext, setGender }) {
+  const [gender, setSelectedGender] = useState(null); // 성별 관리
 
   // 성별이 선택되면 다음 버튼을 활성화시키기 위해 moveToNext 호출
   useEffect(() => {
-    if (gender) {
+    if (gender !== null) {
+      setGender(gender);
       moveToNext(); // 성별이 선택되면 다음 단계로 이동 가능
     }
-  }, [gender, moveToNext]);
+  }, [gender, moveToNext, setGender]);
 
   return (
     <div>
@@ -20,7 +21,7 @@ function Component3({ moveToNext }) {
             name="gender"
             value="male"
             checked={gender === "male"}
-            onChange={(e) => setGender(e.target.value)}
+            onChange={() => setSelectedGender(true)}
             className="mr-2"
           />
           남성
@@ -30,8 +31,8 @@ function Component3({ moveToNext }) {
             type="radio"
             name="gender"
             value="female"
-            checked={gender === "female"}
-            onChange={(e) => setGender(e.target.value)}
+            checked={gender === false}
+            onChange={() => setSelectedGender(false)}
             className="mr-2"
           />
           여성
