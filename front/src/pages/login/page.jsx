@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "./api";
 import { routes } from "../../constants/routes";
+import Popup from "../../components/Popup"; // Popup 컴포넌트 추가
 
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+  const [popupMessage, setPopupMessage] = useState(""); // 팝업 메시지 상태 추가
+  const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 열림 상태 추가
   const navigate = useNavigate();
 
   // 페이지 로드 시 토큰이 있으면 자동으로 메뉴로 리다이렉트
@@ -19,7 +22,7 @@ function LoginPage() {
   const handleLogin = async () => {
     try {
       const response = await login(id, password);
-      if (response.success) { // response.success가 true일 때 로그인 성공 처리
+      if (response.success) {
         localStorage.setItem("token", response.token);
         if (response.isFirstTime) {
           navigate(routes.onboarding);
@@ -27,11 +30,14 @@ function LoginPage() {
           navigate(routes.menu);
         }
       } else {
-        alert(response.message || "로그인 실패: 다시 시도해주세요.");
-      }      
+        // 로그인 실패 시 오류 메시지를 Popup으로 표시
+        setPopupMessage(response.message || "로그인 실패: 다시 시도해주세요.");
+        setIsPopupOpen(true); // 팝업 열기
+      }
     } catch (error) {
       console.error("로그인 에러:", error);
-      alert("로그인 실패: 다시 시도해주세요.");
+      setPopupMessage("로그인 실패: 다시 시도해주세요."); // 일반 오류 메시지 설정
+      setIsPopupOpen(true); // 팝업 열기
     }
   };
 
@@ -96,6 +102,11 @@ function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Popup 컴포넌트 추가 */}
+      {isPopupOpen && (
+        <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />
+      )}
     </div>
   );
 }
