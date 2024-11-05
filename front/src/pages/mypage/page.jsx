@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
@@ -9,10 +9,16 @@ function MypagePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate(); // useNavigate 훅을 사용하여 페이지 이동
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
     setIsPopupOpen(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // 토큰 삭제
+    navigate("/"); // 홈 페이지로 이동
   };
 
   const userInfo = {
@@ -105,7 +111,7 @@ function MypagePage() {
 
       <div className="flex flex-col items-center justify-center h-full space-y-8 font-sans">
         <h1
-          className="text-3xl text-white mb-6 font-semibold"
+          className="text-3xl text-white mb-2 font-semibold"
           style={{ textShadow: "0 0 10px rgba(255, 255, 255, 0.5)" }}
         >
           마이페이지
@@ -194,6 +200,14 @@ function MypagePage() {
             ))}
           </div>
         </div>
+
+        {/* 로그아웃 버튼 */}
+        <button
+          onClick={handleLogout}
+          className="mt-1 px-4 py-2 bg-red-500 text-white rounded-lg font-semibold"
+        >
+          로그아웃
+        </button>
       </div>
     </div>
   );
