@@ -1,15 +1,44 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
+import { getUserInfo, getStoryInfo } from "./api";
 
 function MypagePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [userInfo, setUserInfo] = useState({});
+  const [storyInfo, setStoryInfo] = useState({});
+
   const navigate = useNavigate(); // useNavigate 훅을 사용하여 페이지 이동
+
+  // 정보 불러오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token"); // 토큰 가져오기
+        const data = await getUserInfo(token);
+        setUserInfo(data);
+      } catch (error) {
+        handlePopupOpen("사용자 정보를 불러오는데 실패했습니다.");
+      }
+    };
+    const fetchStoryInfo = async () => {
+      try {
+        const token = localStorage.getItem("token"); // 토큰 가져오기
+        const data = await getStoryInfo(token);
+        setStoryInfo(data);
+      } catch (error) {
+        handlePopupOpen("스토리 정보를 불러오는데 실패했습니다.");
+      }
+    };
+
+    fetchUserInfo();
+    fetchStoryInfo();
+  });
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
@@ -18,61 +47,12 @@ function MypagePage() {
 
   const handleLogout = () => {
     localStorage.removeItem("token"); // 토큰 삭제
-    navigate("/"); // 홈 페이지로 이동
+    navigate(routes.main); // 홈 페이지로 이동
   };
-
-  const userInfo = {
-    name: "강윤수",
-    role: "기초체력 히어로",
-    gender: "남",
-    id: "kwu123456",
-    progress: "4 / 33",
-    startDate: "2024.10.16",
-    coin: 9,
-  };
-
-  const episodes = [
-    {
-      id: 6,
-      title: "에피소드 6",
-      details: "스쿼트(x4) · 런지(x4) · 푸쉬업(x3) · 버피 테스트 · 플랭크",
-      date: "2024.10.25 | 14:35 (금)",
-    },
-    {
-      id: 5,
-      title: "에피소드 5",
-      details: "스쿼트(x4) · 런지(x4) · 푸쉬업(x3) · 플랭크",
-      date: "2024.10.24 | 10:35 (목)",
-    },
-    {
-      id: 4,
-      title: "에피소드 4",
-      details: "스쿼트(x3) · 푸쉬업(x3) · 인클라인 푸쉬업(x3)",
-      date: "2024.10.22 | 20:05 (화)",
-    },
-    {
-      id: 3,
-      title: "에피소드 3",
-      details: "스쿼트(x4) · 런지(x4) · 푸쉬업(x3) · 플랭크",
-      date: "2024.10.20 | 10:35 (일)",
-    },
-    {
-      id: 2,
-      title: "에피소드 2",
-      details: "푸쉬업(x3) · 버피 테스트 · 플랭크",
-      date: "2024.10.18 | 15:30 (토)",
-    },
-    {
-      id: 1,
-      title: "에피소드 1",
-      details: "런지(x4) · 스쿼트(x4)",
-      date: "2024.10.15 | 10:00 (수)",
-    },
-  ];
 
   // 페이지당 4개씩 표시
   const itemsPerPage = 4;
-  const totalPages = Math.ceil(episodes.length / itemsPerPage);
+  const totalPages = Math.ceil(storyInfo.length / itemsPerPage);
 
   // 슬라이드 이동 핸들러
   const nextSlide = () => {
@@ -88,7 +68,7 @@ function MypagePage() {
   };
 
   // 현재 페이지에 표시할 에피소드
-  const currentEpisodes = episodes.slice(
+  const currentStoryInfo = storyInfo.slice(
     currentIndex * itemsPerPage,
     currentIndex * itemsPerPage + itemsPerPage
   );
@@ -124,7 +104,7 @@ function MypagePage() {
               <div className="flex items-baseline mb-5">
                 <span className="text-3xl font-semibold">{userInfo.name}</span>
                 <span className="text-lg ml-4 text-gray-300">
-                  {userInfo.role}
+                  {userInfo.concern} 히어로즈
                 </span>
               </div>
               <p className="mb-2">성별 | {userInfo.gender}</p>
@@ -140,7 +120,7 @@ function MypagePage() {
               />
             </div>
             <p className="text-lg font-semibold">
-              진행도 | {userInfo.progress}
+              진행도 | {storyInfo.length - 1}/33
             </p>
           </div>
         </div>
@@ -150,7 +130,7 @@ function MypagePage() {
           <div className="mb-4 flex justify-between">
             <h2 className="text-xl font-semibold text-white">지난 에피소드</h2>
             <div className="text-right text-sm text-white">
-              시작일 | {userInfo.startDate}
+              시작일 | {storyInfo.date}
             </div>
           </div>
 
@@ -165,17 +145,17 @@ function MypagePage() {
               </button>
             )}
             <div className="flex space-x-4 w-full max-w-2xl mx-10 justify-center">
-              {currentEpisodes.map((episode) => (
+              {currentStoryInfo.map((episode) => (
                 <div
-                  key={episode.id}
+                  key={storyInfo.id}
                   className="bg-white rounded-lg p-4 w-1/4 text-center text-gray-800"
                 >
                   <h3 className="font-semibold text-lg">{episode.title}</h3>
                   <p className="font-semibold text-sm mt-2">
-                    {episode.details}
+                    {storyInfo.details}
                   </p>
                   <p className="font-semibold text-xs mt-2 text-gray-500">
-                    {episode.date}
+                    {storyInfo.date}
                   </p>
                 </div>
               ))}
