@@ -26,7 +26,9 @@ function CharacterPage() {
         const data = await getCharacterInfo(token);
         setCharacter(data.character);
         setCurrentSkin(data.currentSkin);
-        setSkins(Object.keys(data.skins)); // 보유 스킨 목록 설정
+        setSkins(
+          Object.keys(data.skins).filter((skin) => data.skins[skin] === 1)
+        ); // 값이 1인 스킨만 가져오기
       } catch (error) {
         handlePopupOpen("캐릭터 정보를 불러오는데 실패했습니다.");
       }
@@ -74,7 +76,7 @@ function CharacterPage() {
         </h1>
 
         {/* 캐릭터 이미지 */}
-        <div className="flex space-x-20 items-center">
+        <div className="flex space-x-20 items-center w-full justify-center">
           {/* 왼쪽 캐릭터 */}
           <div className="bg-white bg-opacity-10 rounded-lg p-8">
             <img
@@ -88,8 +90,6 @@ function CharacterPage() {
           <div className="bg-white bg-opacity-10 rounded-lg p-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-white">보유 스킨</h2>
-
-              {/* 상점 아이콘과 텍스트 */}
               <Link
                 to={routes.store}
                 className="flex items-center text-white font-semibold space-x-2 border-2 border-white rounded-xl px-2"

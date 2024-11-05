@@ -36,10 +36,10 @@ function StorePage() {
   // 스킨 목록과 가격
   const skins = [
     {
-      id: "회원복",
-      name: "회원복 스킨",
+      id: "헬린이",
+      name: "헬린이 스킨",
       price: 0,
-      image: "/image/skin/skin/회원복.png",
+      image: "/image/skin/skin/헬린이.png",
     },
     {
       id: "초급자",
