@@ -18,14 +18,8 @@ export const login = async (id, password) => {
   } catch (error) {
     // 에러 처리
     if (error.response) {
-      // 서버 응답이 있는 경우
-      const { status, data } = error.response;
-
-      if (status === 404 && data.message === "User not found") {
-        return { success: false, message: "존재하지 않는 아이디입니다" };
-      } else if (status === 401 && data.message === "Incorrect password") {
-        return { success: false, message: "일치하지 않는 비밀번호입니다" };
-      }
+      const { data } = error.response;
+      return { success: false, message: data.message }; // 서버의 메시지를 바로 표시
     }
     // 그 외 에러 처리
     return {

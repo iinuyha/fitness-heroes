@@ -6,7 +6,7 @@ const api = axios.create({
 
 export const getCoinCount = async () => {
   try {
-    const token = localStorage.getItem("jwtToken");
+    const token = localStorage.getItem("token");
     const response = await api.get("/api/user/coin", {
       headers: {
         Authorization: `Bearer ${token}`,

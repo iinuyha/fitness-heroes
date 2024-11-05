@@ -14,7 +14,7 @@ function OnBoardingPage() {
   const [isComplete, setIsComplete] = useState(false);
   const [name, setName] = useState("");
   const [birthdate, setBirthdate] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState(null);
   const [concern, setConcern] = useState("");
   const [character, setCharacter] = useState("");
   const navigate = useNavigate();

@@ -25,7 +25,7 @@ export const changeCharacterSkin = async (token, skinName) => {
   try {
     const response = await axios.patch(
       `${process.env.REACT_APP_SERVER_URL}/api/character/change-skin`,
-      { skin_name: skinName },
+      { currentSkin: skinName },
       {
         headers: {
           Authorization: `Bearer ${token}`,

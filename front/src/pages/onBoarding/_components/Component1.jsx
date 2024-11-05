@@ -7,8 +7,8 @@ function Component1({ moveToNext, setName }) {
   // 이름이 입력되면 다음 버튼을 활성화시키기 위해 moveToNext 호출
   useEffect(() => {
     if (inputName.trim()) {
-      moveToNext();
       setName(inputName); // 부모 컴포넌트의 name 상태 업데이트
+      moveToNext();
     }
   }, [inputName, moveToNext, setName]);
 

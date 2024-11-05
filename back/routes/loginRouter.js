@@ -13,9 +13,9 @@ router.post("/", async (req, res) => {
     const user = await User.findOne({ id });
     if (!user) {
       // 사용자 존재하지 않을 경우
-      return res.status(404).json({
+      return res.status(401).json({
         ok: false,
-        message: "존재하지 않는 사용자입니다.",
+        message: "존재하지 않는 ID 입니다.",
         error: "UserNotFound",
       });
     }
@@ -23,7 +23,9 @@ router.post("/", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       // 비밀번호 불일치
-      return res.status(401).json({ message: "Incorrect password" });
+      return res.status(401).json({
+        message: "비밀번호가 일치하지 않습니다.",
+      });
     }
 
     // 모든 필드가 null인지 확인

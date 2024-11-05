@@ -5,7 +5,7 @@ const api = axios.create({
 });
 
 export const getStoryEpisode = async () => {
-  const token = localStorage.getItem("jwtToken"); // JWT 토큰을 localStorage에서 가져오기
+  const token = localStorage.getItem("token"); // JWT 토큰을 localStorage에서 가져오기
   try {
     const response = await api.get("/api/story", {
       headers: {

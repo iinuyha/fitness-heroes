@@ -11,9 +11,9 @@ function Component7({
   concern,
 }) {
   const characterImages = {
-    yello: "/image/character/yello.png",
-    blo: "/image/character/blo.png",
-    cro: "/image/character/cro.png",
+    옐로: "/image/character/옐로.png",
+    블로: "/image/character/블로.png",
+    크로: "/image/character/크로.png",
   };
 
   const [flipped, setFlipped] = useState(false); // 이미지 좌우반전 상태 관리
