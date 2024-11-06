@@ -16,7 +16,7 @@ function decodeToken(token) {
 }
 
 // 친구 목록 조회 라우트
-router.get('/list', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
