@@ -23,9 +23,10 @@ function StoryPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getStoryEpisode();
-        setConcern(data.concern);
-        setEpisode(data.episode);
+        const token = localStorage.getItem("token"); // JWT 토큰을 localStorage에서 가져오기
+        const data = await getStoryEpisode(token);
+        setConcern(data[0].concern);
+        setEpisode(data[0].episode);
       } catch (error) {
         console.error("Failed to fetch story data:", error);
       }
@@ -99,7 +100,13 @@ function StoryPage() {
           ))}
 
           {/* 선택된 concern */}
-          <Link to={routes.story} className="flex flex-col items-center">
+          <Link
+            to={{
+              pathname: routes.episode,
+              state: { concern: concern }, // concern 데이터 전달
+            }}
+            className="flex flex-col items-center"
+          >
             <img
               src={`/image/concern/${concern}.png`}
               alt={`${concern} 운동`}

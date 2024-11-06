@@ -8,7 +8,8 @@ function CoinInfoDisplay({ message }) {
 
   const fetchCoinCount = async () => {
     try {
-      const coinCount = await getCoinCount();
+      const token = localStorage.getItem("token");
+      const coinCount = await getCoinCount(token);
       setCoinCount(coinCount);
     } catch (error) {
       console.error("Failed to fetch coin count:", error);

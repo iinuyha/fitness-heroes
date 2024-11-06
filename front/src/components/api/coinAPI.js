@@ -1,18 +1,16 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: process.env.REACT_APP_SERVER_URL,
-});
-
-export const getCoinCount = async () => {
+export const getCoinCount = async (token) => {
   try {
-    const token = localStorage.getItem("token");
-    const response = await api.get("/api/user/coin", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.get(
+      `${process.env.REACT_APP_SERVER_URL}/api/user/coin`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return response.data.coin;
   } catch (error) {
     console.error("Failed to fetch coin count:", error);
