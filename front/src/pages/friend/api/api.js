@@ -1,30 +1,44 @@
-import axios from "axios"; // axios 사용
+import axios from "axios";
 
-// 친구 목록 가져오는 함수
-export const fetchFriendList = async () => {
-  // try {
-  //   const response = await axios.get("/api/friends"); // 서버에서 친구 목록 받아옴
-  //   return response.data; // 친구 목록 반환
-  // } catch (error) {
-  //   console.error("친구 목록을 불러오는 중 오류 발생:", error);
-  //   throw error;
-  // }
+// 친구 목록 조회
+export const fetchFriendList = async (token) => {
+  try {
+    const response = await axios.get(
+      `${process.env.REACT_APP_SERVER_URL}/api/friend`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("친구 목록 조회 실패:", error);
+    throw error.response
+      ? error.response.data
+      : new Error("친구 목록 조회 조회 실패");
+  }
+};
 
-  // 일단 임의 데이터 불러오게끔 함
-  const mockFriendList = [
-    { userId: "cjftn55", username: "김철수", win: 17, draw: 62, lose: 3 },
-    { userId: "dudgml3121", username: "이영희", win: 1, draw: 2, lose: 36 },
-    { userId: "dudtn35", username: "박영수", win: 31, draw: 2, lose: 36 },
-    { userId: "altn354", username: "최민수", win: 91, draw: 27, lose: 34 },
-    { userId: "wlals1", username: "한지민", win: 18, draw: 22, lose: 23 },
-    { userId: "wasds1", username: "손아현", win: 1, draw: 23, lose: 23 },
-    { userId: "qwers1", username: "김해민", win: 12, draw: 2, lose: 3 },
-    { userId: "hthals1", username: "문혜진", win: 1, draw: 42, lose: 38 },
-    { userId: "vxcls1", username: "강윤수", win: 41, draw: 92, lose: 3 },
-    { userId: "asd1", username: "하하호호", win: 51, draw: 32, lose: 53 },
-  ];
-
-  return mockFriendList;
+// 친구 조회(검색)
+export const searchFriend = async (token, friendId) => {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_SERVER_URL}/api/friend/search`,
+      { id: friendId }, // body에 친구 ID 전달
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data; // 성공 시 친구 데이터 반환
+  } catch (error) {
+    console.error("친구 추가 중 오류 발생:", error);
+    throw error.response
+      ? error.response.data
+      : new Error("친구 추가 중 오류 발생");
+  }
 };
 
 // 친구 초대하는 함수
