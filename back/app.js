@@ -1,6 +1,8 @@
-var express = require("express");
-const connectDB = require("./config/db");
-const cors = require("cors"); // CORS 패키지 추가
+const express = require('express');
+const mongoose = require('mongoose');
+const userRoutes = require('./routes/user'); // user 라우트 경로
+
+require('dotenv').config();
 
 var path = require("path");
 var cookieParser = require("cookie-parser");
@@ -13,11 +15,15 @@ var signupRouter = require("./routes/signupRouter");
 var sendEmailRouter = require("./routes/sendEmailRouter");
 var characterRouter = require("./routes/characterRouter");
 var userRouter = require("./routes/userRouter");
+var storyRouter = require('./routes/storyRouter');
+var exerciseRouter = require('./routes/exerciseRouter');
+var friendRouter = require("./routes/friendRouter");
 
-
-var app = express();
+// 사용자 관련 API 라우트 등록
+app.use('/api/user', userRoutes);
 
 app.use(cors());
+app.use(express.json());  
 
 connectDB();
 
@@ -33,5 +39,9 @@ app.use("/api/signup", signupRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/character", characterRouter);
 app.use("/api/user", userRouter);
+app.use('/api/story', storyRouter);
+app.use('/api/exercise', exerciseRouter);
+app.use("/api/friend", friendRouter);
+
 
 module.exports = app;
