@@ -1,6 +1,6 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const userRoutes = require('./routes/user'); // user 라우트 경로
+var express = require("express");
+const connectDB = require("./config/db");
+const cors = require("cors"); // CORS 패키지 추가
 
 require('dotenv').config();
 
@@ -19,8 +19,7 @@ var storyRouter = require('./routes/storyRouter');
 var exerciseRouter = require('./routes/exerciseRouter');
 var friendRouter = require("./routes/friendRouter");
 
-// 사용자 관련 API 라우트 등록
-app.use('/api/user', userRoutes);
+var app = express();
 
 app.use(cors());
 app.use(express.json());  
