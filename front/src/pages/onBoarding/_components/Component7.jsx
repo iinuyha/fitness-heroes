@@ -10,12 +10,6 @@ function Component7({
   gender,
   concern,
 }) {
-  const characterImages = {
-    옐로: "/image/character/옐로.png",
-    블로: "/image/character/블로.png",
-    크로: "/image/character/크로.png",
-  };
-
   const [flipped, setFlipped] = useState(false); // 이미지 좌우반전 상태 관리
 
   // 색종이 효과를 실행하는 함수
@@ -59,7 +53,7 @@ function Component7({
 
       {/* 선택한 캐릭터 이미지 표시 */}
       <img
-        src={characterImages[character]}
+        src={`/image/character/${character}.png`}
         alt={character}
         className={`mx-auto w-32 mb-8 transition-transform duration-700 ${
           flipped ? "transform -scale-x-100" : ""
