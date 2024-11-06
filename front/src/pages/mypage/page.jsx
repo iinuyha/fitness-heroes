@@ -11,7 +11,7 @@ function MypagePage() {
   const [popupMessage, setPopupMessage] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInfo, setUserInfo] = useState({});
-  const [storyInfo, setStoryInfo] = useState({});
+  const [storyInfo, setStoryInfo] = useState([]); // 초기 상태를 빈 배열로 설정
 
   const navigate = useNavigate(); // useNavigate 훅을 사용하여 페이지 이동
 
@@ -30,7 +30,7 @@ function MypagePage() {
       try {
         const token = localStorage.getItem("token"); // 토큰 가져오기
         const data = await getStoryInfo(token);
-        setStoryInfo(data);
+        setStoryInfo(data.slice(1)); // 첫 번째 에피소드는 0으로 기본 설정이 되어있으니까 첫 번째 원소를 제외한 나머지만!!
       } catch (error) {
         handlePopupOpen("스토리 정보를 불러오는데 실패했습니다.");
       }
@@ -38,7 +38,7 @@ function MypagePage() {
 
     fetchUserInfo();
     fetchStoryInfo();
-  });
+  }, []); // 의존성 배열 추가하여 한 번만 실행되도록 설정
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
@@ -107,20 +107,20 @@ function MypagePage() {
                   {userInfo.concern} 히어로즈
                 </span>
               </div>
-              <p className="mb-2">성별 | {userInfo.gender}</p>
+              <p className="mb-2">성별 | {userInfo.gender.toString()}</p>
               <p>ID | {userInfo.id}</p>
             </div>
           </div>
           <div className="text-center ml-80">
             <div className="flex items-center justify-center mb-4">
               <img
-                src="/image/story/area1.png"
-                alt="근력 지역"
+                src={`/image/concern/${userInfo.concern}.png`}
+                alt={`${userInfo.concern} 지역`}
                 className="h-28"
               />
             </div>
             <p className="text-lg font-semibold">
-              진행도 | {storyInfo.length - 1}/33
+              진행도 | {storyInfo.length}/33
             </p>
           </div>
         </div>
@@ -130,7 +130,7 @@ function MypagePage() {
           <div className="mb-4 flex justify-between">
             <h2 className="text-xl font-semibold text-white">지난 에피소드</h2>
             <div className="text-right text-sm text-white">
-              시작일 | {storyInfo.date}
+              시작일 | {storyInfo[0] ? storyInfo[0].date : "데이터 없음"}
             </div>
           </div>
 
@@ -147,15 +147,17 @@ function MypagePage() {
             <div className="flex space-x-4 w-full max-w-2xl mx-10 justify-center">
               {currentStoryInfo.map((episode) => (
                 <div
-                  key={storyInfo.id}
+                  key={`${episode.concern}-${episode.episode}`} // concern과 episode를 결합하여 key로 설정
                   className="bg-white rounded-lg p-4 w-1/4 text-center text-gray-800"
                 >
-                  <h3 className="font-semibold text-lg">{episode.title}</h3>
+                  <h3 className="font-semibold text-lg">
+                    {episode.concern} 지역
+                  </h3>
                   <p className="font-semibold text-sm mt-2">
-                    {storyInfo.details}
+                    에피소드 {episode.episode}
                   </p>
                   <p className="font-semibold text-xs mt-2 text-gray-500">
-                    {storyInfo.date}
+                    {episode.date}
                   </p>
                 </div>
               ))}
@@ -175,7 +177,9 @@ function MypagePage() {
             {Array.from({ length: totalPages }, (_, index) => (
               <span
                 key={index}
-                className={`h-2 w-2 rounded-full ${index === currentIndex ? "bg-white" : "bg-gray-500"}`}
+                className={`h-2 w-2 rounded-full ${
+                  index === currentIndex ? "bg-white" : "bg-gray-500"
+                }`}
               />
             ))}
           </div>
