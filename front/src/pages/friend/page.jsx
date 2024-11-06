@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import YesNoPopup from "../../components/YesNoPopup"; // YesNoPopup import
+import Popup from "../../components/Popup";
 import {
   fetchFriendList,
+  searchFriend,
   inviteFriend,
   checkInvitationStatus,
 } from "./api/api"; // API 함수 가져오기
@@ -19,6 +21,7 @@ function FriendPage() {
   const [hasScrollbar, setHasScrollbar] = useState(false); // 스크롤바 감지 상태
   const listRef = useRef(null); // 친구 목록의 참조를 저장할 ref
   const [newFriendId, setNewFriendId] = useState(""); // 새로운 친구의 ID 입력 상태
+  const token = localStorage.getItem("token"); // 토큰 가져오기
 
   // 스크롤바 여부 감지
   useEffect(() => {
@@ -34,8 +37,8 @@ function FriendPage() {
   useEffect(() => {
     const loadFriends = async () => {
       try {
-        const friends = await fetchFriendList(); // API 호출하여 친구 목록 불러오기
-        setFriendList(friends);
+        const friends = await fetchFriendList(token); // API 호출하여 친구 목록 불러오기
+        setFriendList(friends.friends);
       } catch (error) {
         console.error("친구 목록을 불러오는 중 오류 발생:", error);
       }
@@ -45,11 +48,18 @@ function FriendPage() {
   }, []);
 
   // 새로운 친구 추가 함수 (아이디 입력 후 버튼 클릭 시 호출)
-  const handleAddFriend = () => {
+  const handleAddFriend = async () => {
     if (newFriendId.trim()) {
-      console.log("새 친구 추가:", newFriendId);
-      // 여기에 친구 추가 API를 호출하거나 다른 로직을 추가할 수 있습니다
-      setNewFriendId(""); // 입력 필드 초기화
+      try {
+        const response = await searchFriend(token, newFriendId); // searchFriend 함수 호출
+        setPopupMessage(`${newFriendId}님과 친구가 되셨습니다!`); // 성공 메시지 설정
+        setIsPopupOpen(true); // 팝업 열기
+        setNewFriendId(""); // 입력 필드 초기화
+      } catch (error) {
+        const errorMessage = error.message || "친구 추가 중 오류 발생";
+        setPopupMessage(errorMessage); // 오류 메시지 설정
+        setIsPopupOpen(true); // 팝업 열기
+      }
     } else {
       alert("친구의 ID를 입력해주세요.");
     }
@@ -105,6 +115,12 @@ function FriendPage() {
     setIsPopupOpen(true);
   };
 
+  // 팝업 닫기 함수
+  const handlePopupClose = () => {
+    setIsPopupOpen(false);
+    setPopupMessage("");
+  };
+
   // 초대 취소 확인 팝업 처리
   const handleCancelConfirmation = (confirm) => {
     if (confirm) {
@@ -131,6 +147,11 @@ function FriendPage() {
           onCancel={() => handleCancelConfirmation(false)} // 취소
           onConfirm={() => handleCancelConfirmation(true)} // 확인
         />
+      )}
+
+      {/* 친구 추가 팝업 */}
+      {isPopupOpen && (
+        <Popup message={popupMessage} onClose={handlePopupClose} />
       )}
 
       <div className="flex flex-col items-center justify-center h-full space-y-5 font-sans">
@@ -161,32 +182,32 @@ function FriendPage() {
             친구 목록
           </h2>
           <ul
-            className={`space-y-0 max-h-72 overflow-y-auto ${hasScrollbar ? "pr-3" : ""}`} // 스크롤바가 있을 때만 pr-3 적용
+            className={`space-y-0 max-h-72 overflow-y-auto ${
+              hasScrollbar ? "pr-3" : ""
+            }`} // 스크롤바가 있을 때만 pr-3 적용
             ref={listRef} // 친구 목록에 ref 추가
           >
             {friendList.map((friend, index) => (
               <li
-                key={friend.userId}
+                key={friend.id}
                 className="flex justify-between items-center text-white py-2 border-b border-gray-500 last:border-none" // li에 border-bottom 적용, 마지막 항목에만 border 제거
               >
                 <span className="flex items-center">
-                  <span className="font-semibold mr-1">{friend.username}</span>(
-                  {friend.userId})
+                  <span className="font-semibold mr-1">{friend.name}</span>(
+                  {friend.id})
                   <span className="text-sm text-gray-400">
                     - {friend.win}승 {friend.draw}무 {friend.lose}패
                   </span>
                 </span>
                 <button
                   className={`px-4 py-1 rounded-full ${
-                    selectedFriend?.userId === friend.userId
+                    selectedFriend?.id === friend.id
                       ? "bg-gray-400"
                       : "bg-[#00B2FF]"
                   } text-white flex items-center justify-center`}
                   onClick={() => handleInvite(friend)}
                 >
-                  {selectedFriend?.userId === friend.userId
-                    ? "취소"
-                    : "초대하기"}
+                  {selectedFriend?.id === friend.id ? "취소" : "초대하기"}
                 </button>
               </li>
             ))}
