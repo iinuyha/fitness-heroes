@@ -107,7 +107,7 @@ function MypagePage() {
                   {userInfo.concern} 히어로즈
                 </span>
               </div>
-              <p className="mb-2">성별 | {userInfo.gender.toString()}</p>
+              <p className="mb-2">성별 | {userInfo.gender ? "남성" : "여성"}</p>
               <p>ID | {userInfo.id}</p>
             </div>
           </div>
