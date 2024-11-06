@@ -6,6 +6,7 @@ export const routes = {
   onboarding: "/onBoarding",
   menu: "/menu",
   story: "/story",
+  episode: "/story/episode",
   focus: "/focus",
   friend: "/friend",
   character: "/character",

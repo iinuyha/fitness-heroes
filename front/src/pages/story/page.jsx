@@ -100,7 +100,7 @@ function StoryPage() {
           ))}
 
           {/* 선택된 concern */}
-          <Link to={routes.story} className="flex flex-col items-center">
+          <Link to={routes.episode} className="flex flex-col items-center">
             <img
               src={`/image/concern/${concern}.png`}
               alt={`${concern} 운동`}
