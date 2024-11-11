@@ -9,8 +9,6 @@ function EpisodePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [concern, setConcern] = useState("근력");
-  const [latestEpisode, setLatestEpisode] = useState(0);
-  const [gender, setGender] = useState("");
   const [episodes, setEpisodes] = useState([]);
   const [progressDisplay, setProgressDisplay] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -25,8 +23,6 @@ function EpisodePage() {
         const userGender = await getUserGender(token);
 
         setConcern(data.concern);
-        setLatestEpisode(data.episode);
-        setGender(userGender);
 
         setProgressDisplay(`${data.episode} / 33`);
 
