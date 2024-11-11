@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Exercise = require("../models/exercise");
 
+
 // GET /api/exercise 엔드포인트
 router.get("/", async (req, res) => {
   try {

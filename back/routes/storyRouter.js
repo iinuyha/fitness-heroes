@@ -53,4 +53,79 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/story/episode 엔드포인트
+router.get('/episode', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // 사용자 정보에서 concern과 gender 조회
+    const user = await User.findOne({ id: userId }); // User 모델에서 조회
+    if (!user) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    }
+    const { concern, gender } = user;
+
+    // Exercise 테이블에서 concern과 gender에 맞는 데이터를 episode 오름차순으로 조회
+    const episodes = await Exercise.find({ concern, gender }).sort({ episode: 1 });
+
+    if (!episodes || episodes.length === 0) {
+      return res.status(404).json({ error: '해당 concern과 gender에 맞는 에피소드를 찾을 수 없습니다.' });
+    }
+
+    // 에피소드 데이터를 JSON 응답으로 전송
+    res.json(episodes.map(episode => ({
+      concern: episode.concern,
+      exe_name: episode.exe_name,
+      episode: episode.episode,
+      exe_set: episode.exe_set,
+      exe_count: episode.exe_count,
+    })));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: '서버 내부 오류입니다.' });
+  }
+});
+
+// 운동 정보 저장 엔드포인트
+router.post('/save-exercise', authenticateToken, async (req, res) => {
+  try {
+    const { episode, exe_name, exe_set, exe_count } = req.body;
+
+    // 사용자 정보 확인
+    const userId = req.user.id;
+    const user = await User.findOne({ id: userId });
+
+    if (!user) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    }
+
+    // 운동 정보 저장
+    const newExercise = new Exercise({
+      concern: user.concern,
+      exe_name: exe_name,
+      episode: episode,
+      gender: user.gender,
+      exe_set: exe_set,
+      exe_count: exe_count,
+    });
+
+    await newExercise.save();
+
+    // 성공 응답
+    res.json({
+      message: "운동 정보가 성공적으로 저장되었습니다.",
+      data: {
+        episode: episode,
+        exe_name: exe_name,
+        exe_set: exe_set,
+        exe_count: exe_count
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+
 module.exports = router;

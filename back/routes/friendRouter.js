@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Friend = require('../models/friend');
-const User = require('../models/user'); // User 모델 임포트
+const User = require('../models/user'); 
 const jwt = require('jsonwebtoken');
 const secretKey = "hi";
 
@@ -35,13 +35,7 @@ router.get('/', async (req, res) => {
       return res.status(404).json({ error: '친구 정보를 찾을 수 없습니다.' });
     }
 
-    // // 친구의 각 ID로 이름, 승/무/패 데이터를 가져오기
-    // const friendsData = await Promise.all(friendInfo.friend.map(async friendId => {
-    //   // 친구의 win, draw, lose 정보 가져오기
-    //   const friendData = await Friend.findOne({ id: friendId });
-    //   // 친구의 name 정보 가져오기
-    //   const userData = await User.findOne({ id: friendId }); 
-
+    // 친구의 각 ID로 이름, 승/무/패 데이터를 가져오기
     const friendsData = await Promise.all(friendInfo.friend.map(async friendId => {
       const friendData = await Friend.findOne({ id: friendId }) || { win: 0, draw: 0, lose: 0 };
       const userData = await User.findOne({ id: friendId }) || { name: "이름 없음" };
@@ -55,7 +49,6 @@ router.get('/', async (req, res) => {
       };
     }));
 
-    // 결과 반환
     res.json({ friends: friendsData });
   } catch (error) {
     console.error(error);
@@ -63,7 +56,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 친구 검색
+// 친구 검색 및 추가
 router.post('/search', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -72,8 +65,8 @@ router.post('/search', async (req, res) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const id = decodeToken(token);
-    if (!id) {
+    const userId = decodeToken(token);
+    if (!userId) {
       return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
     }
 
@@ -82,16 +75,37 @@ router.post('/search', async (req, res) => {
       return res.status(400).json({ error: '검색할 친구의 ID가 필요합니다.' });
     }
 
+    // 자신을 친구로 추가하려는 경우 오류 반환
+    if (searchId === userId) {
+      return res.status(400).json({ error: '자신을 친구로 추가할 수 없습니다.' });
+    }
+
+    // 검색할 친구가 존재하는지 확인
     const friendData = await Friend.findOne({ id: searchId });
     if (!friendData) {
       return res.status(404).json({ error: '친구를 찾을 수 없습니다.' });
     }
 
+    // 현재 사용자의 친구 목록에 추가
+    let userFriendData = await Friend.findOne({ id: userId });
+    if (!userFriendData) {
+      userFriendData = new Friend({ id: userId, friend: [] });
+    }
+
+    // 이미 친구 목록에 있는지 확인 후 추가
+    if (!userFriendData.friend.includes(searchId)) {
+      userFriendData.friend.push(searchId);
+      await userFriendData.save();
+    } else {
+      return res.status(400).json({ error: '이미 친구 목록에 있는 사용자입니다.' });
+    }
+
     res.json({
-      id: friendData.id,
-      // win: friendData.win,
-      // draw: friendData.draw,
-      // lose: friendData.lose,
+      message: '친구가 성공적으로 추가되었습니다.',
+      friend: {
+        id: friendData.id,
+        // 친구 데이터 추가 가능
+      }
     });
   } catch (error) {
     console.error(error);
