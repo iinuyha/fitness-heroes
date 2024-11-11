@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
@@ -107,8 +108,11 @@ function MypagePage() {
                   {userInfo.concern} 히어로즈
                 </span>
               </div>
-              <p className="mb-2">성별 | {userInfo.gender ? "남성" : "여성"}</p>
-              <p>ID | {userInfo.id}</p>
+              <p className="mb-2">
+                ID | {jwtDecode(localStorage.getItem("token")).id}
+              </p>
+              <p className="mb-2">생년월일 | {userInfo.birthdate}</p>
+              <p>성별 | {userInfo.gender ? "남성" : "여성"}</p>
             </div>
           </div>
           <div className="text-center ml-80">
