@@ -1,16 +1,13 @@
-// 운동 정보 조회
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const Exercise = require('../models/exercise');
-const User = require('../models/user'); 
+const User = require('../models/user');
 
-const secretKey = "hi";
+const secretKey = "hi"; 
 
 // 인증 미들웨어
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: 'Authorization 토큰이 필요합니다.' });
   }
@@ -26,24 +23,25 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// GET /api/exercise 엔드포인트
+// GET /api/mypage 엔드포인트
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const { concern, gender } = req.body;
+    const userId = req.user.id; // 토큰에서 추출한 사용자 ID
 
-    // 데이터베이스에서 운동 정보 조회
-    const exerciseInfo = await Exercise.findOne({ concern, gender });
+    // 데이터베이스에서 사용자 정보 조회
+    const user = await User.findOne({ id: userId });
 
-    if (!exerciseInfo) {
-      return res.status(404).json({ error: '운동 정보를 찾을 수 없습니다.' });
+    // 사용자가 존재하지 않는 경우
+    if (!user) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
     }
 
-    // 운동 정보 데이터를 JSON 응답으로 전송
+    // 사용자 정보를 JSON 응답으로 전송
     res.json({
-      exe_name: exerciseInfo.exe_name,
-      episode: exerciseInfo.episode,
-      exe_set: exerciseInfo.exe_set,
-      exe_count: exerciseInfo.exe_count,
+      name: user.name || '',
+      birthdate: user.birthdate ? user.birthdate.toISOString().split('T')[0] : '',
+      gender: user.gender,
+      concern: user.concern || ''
     });
   } catch (error) {
     console.error(error);
