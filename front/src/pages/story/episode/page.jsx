@@ -18,7 +18,7 @@ function EpisodePage() {
       try {
         const token = localStorage.getItem("token"); // JWT 토큰 가져오기
         const [storyEpisodes, exerciseEpisodes, gender] = await Promise.all([
-          getStoryEpisode(token),
+          getStoryEpisode(),
           getEpCardData(token),
           getUserGender(token),
         ]);
