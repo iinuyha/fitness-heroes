@@ -18,11 +18,15 @@ export const getStoryEpisode = async (token) => {
   }
 };
 
-export const getEpCardData = async () => {
+export const getEpCardData = async (concern, gender) => {
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_SERVER_URL}/api/exercise`,
       {
+        params: {
+          concern,
+          gender,
+        },
         headers: {
           "Content-Type": "application/json",
         },
@@ -34,7 +38,6 @@ export const getEpCardData = async () => {
     throw error;
   }
 };
-
 export const getUserGender = async (token) => {
   try {
     const response = await axios.get(

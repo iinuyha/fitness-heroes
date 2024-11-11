@@ -8,6 +8,7 @@ import { getStoryEpisode, getEpCardData, getUserGender } from "./api";
 
 function EpisodePage() {
   const [concern, setConcern] = useState("");
+  const [gender, setGender] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [episodes, setEpisodes] = useState([]);
@@ -17,14 +18,15 @@ function EpisodePage() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token"); // JWT 토큰 가져오기
-        const [storyEpisodes, exerciseEpisodes, gender] = await Promise.all([
-          getStoryEpisode(),
-          getEpCardData(token),
+        const [storyEpisodes, userGender] = await Promise.all([
+          getStoryEpisode(token),
           getUserGender(token),
         ]);
 
-        // 관심사 설정
-        setConcern(storyEpisodes[0]?.concern || "");
+        // 관심사와 성별 설정
+        const userConcern = storyEpisodes[0]?.concern || "";
+        setConcern(userConcern);
+        setGender(userGender);
 
         // 사용자가 가장 최근에 완료한 에피소드 찾기
         const lastCompletedEpisode = Math.max(
@@ -33,6 +35,9 @@ function EpisodePage() {
 
         // 진행 상황 표시 설정
         setProgressDisplay(`${lastCompletedEpisode} / 33`);
+
+        // 관심사와 성별에 맞는 운동 데이터 가져오기
+        const exerciseEpisodes = await getEpCardData(userConcern, userGender);
 
         // 에피소드 카드 데이터 설정
         const episodeCards = exerciseEpisodes.map((exercise) => {
