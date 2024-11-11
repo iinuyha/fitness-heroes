@@ -126,14 +126,14 @@ function EpisodePage() {
             {paginatedEpisodes.map((epCard, index) => (
               <div
                 key={epCard.episode || index}
-                className={`rounded-lg px-4 py-8 text-center text-gray-800 shadow-md ${
+                className={`rounded-lg px-4 py-8 text-center text-black shadow-md ${
                   epCard.buttonEnabled
-                    ? "bg-white bg-opacity-80"
-                    : "bg-gray-300 bg-opacity-50"
+                    ? "bg-white"
+                    : "bg-gray-300 bg-opacity-50 text-white"
                 } w-64`}
               >
-                <h3 className="font-semibold text-xl">
-                  에피소드 {epCard.episode}
+                <h3 className="font-semibold text-2xl">
+                  에피소드{epCard.episode}
                 </h3>
                 <ul className="text-left mt-4 text-base">
                   <li>
