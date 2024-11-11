@@ -4,7 +4,7 @@ import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // 팝업 컴포넌트 가져오기
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
-import { getStoryEpisode } from "./api"; // API 함수 가져오기
+import { getLatestStoryEpisode } from "./api"; // API 함수 가져오기
 
 function StoryPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -24,9 +24,9 @@ function StoryPage() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token"); // JWT 토큰을 localStorage에서 가져오기
-        const data = await getStoryEpisode(token);
-        setConcern(data[0].concern);
-        setEpisode(data[0].episode);
+        const data = await getLatestStoryEpisode(token);
+        setConcern(data.concern);
+        setEpisode(data.episode);
       } catch (error) {
         console.error("Failed to fetch story data:", error);
       }

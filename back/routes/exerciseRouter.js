@@ -1,13 +1,12 @@
-// 운동 정보 조회
 const express = require("express");
 const router = express.Router();
-const Exercise = require("../models/exercise");
-
+const Exercise = require("../models/exercise"); // Exercise 모델 불러오기
 
 // GET /api/exercise 엔드포인트
 router.get("/", async (req, res) => {
   try {
-    const { concern, gender } = req.body;
+    const { concern, gender } = req.query;
+
 
     // 데이터베이스에서 조건에 맞는 모든 운동 정보 조회
     const exerciseInfo = await Exercise.find({ concern, gender });

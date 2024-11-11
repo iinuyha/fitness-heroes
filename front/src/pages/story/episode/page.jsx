@@ -1,48 +1,40 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { routes } from "../../../constants/routes";
 import Popup from "../../../components/Popup";
 import CoinInfoDisplay from "../../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../../components/ReturnDisplay";
-import { getStoryEpisode, getEpCardData, getUserGender } from "./api";
+import { getEpCardData, getUserGender } from "./api";
+import { getLatestStoryEpisode } from "../api";
 
 function EpisodePage() {
-  const [concern, setConcern] = useState("");
-  const [gender, setGender] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [concern, setConcern] = useState("근력");
+  const [latestEpisode, setLatestEpisode] = useState(0);
+  const [gender, setGender] = useState("");
   const [episodes, setEpisodes] = useState([]);
   const [progressDisplay, setProgressDisplay] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const itemsPerPage = 3; // 페이지당 에피소드 개수
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token"); // JWT 토큰 가져오기
-        const [storyEpisodes, userGender] = await Promise.all([
-          getStoryEpisode(token),
-          getUserGender(token),
-        ]);
+        const token = localStorage.getItem("token"); // JWT 토큰을 가져오기
+        const data = await getLatestStoryEpisode(token);
+        const userGender = await getUserGender(token);
 
-        // 관심사와 성별 설정
-        const userConcern = storyEpisodes[0]?.concern || "";
-        setConcern(userConcern);
+        setConcern(data.concern);
+        setLatestEpisode(data.episode);
         setGender(userGender);
 
-        // 사용자가 가장 최근에 완료한 에피소드 찾기
-        const lastCompletedEpisode = Math.max(
-          ...storyEpisodes.map((episode) => episode.episode)
-        );
+        setProgressDisplay(`${data.episode} / 33`);
 
-        // 진행 상황 표시 설정
-        setProgressDisplay(`${lastCompletedEpisode} / 33`);
+        const exerciseEpisodes = await getEpCardData(data.concern, userGender);
 
-        // 관심사와 성별에 맞는 운동 데이터 가져오기
-        const exerciseEpisodes = await getEpCardData(userConcern, userGender);
-
-        // 에피소드 카드 데이터 설정
         const episodeCards = exerciseEpisodes.map((exercise) => {
-          const isCompleted = exercise.episode <= lastCompletedEpisode;
-          const isNext = exercise.episode === lastCompletedEpisode + 1;
+          const isCompleted = exercise.episode <= data.episode;
+          const isNext = exercise.episode === data.episode + 1;
           return {
             ...exercise,
             buttonEnabled: isNext,
@@ -51,8 +43,7 @@ function EpisodePage() {
         });
         setEpisodes(episodeCards);
       } catch (error) {
-        console.error("Error setting up episode display:", error);
-        handlePopupOpen("스토리 데이터를 불러오는 중 오류가 발생했습니다.");
+        console.error("Failed to fetch story data:", error);
       }
     };
 
@@ -62,6 +53,26 @@ function EpisodePage() {
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
     setIsPopupOpen(true);
+  };
+
+  // 현재 페이지에 표시할 에피소드 계산
+  const paginatedEpisodes = episodes
+    .filter((epCard) => epCard.isVisible)
+    .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (
+      (currentPage + 1) * itemsPerPage <
+      episodes.filter((epCard) => epCard.isVisible).length
+    ) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
   return (
@@ -86,12 +97,13 @@ function EpisodePage() {
           <span className="text-[#90DEFF]">{concern}</span> 지역
         </h1>
 
-        <div className="flex space-x-28 justify-center">
+        <div className="flex items-center space-x-6 justify-center w-4/5">
+          {/* 고정된 이미지 */}
           <div className="flex flex-col items-center">
             <img
               src={`/image/concern/${concern}.png`}
               alt={`${concern} 운동`}
-              className="w-52"
+              className="w-60"
             />
             <div className="mt-4 w-full flex justify-center">
               <div className="bg-white py-2 px-8 rounded-full">
@@ -101,27 +113,42 @@ function EpisodePage() {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex flex-wrap justify-center mt-8 space-x-4">
-          {episodes
-            .filter((epCard) => epCard.isVisible)
-            .map((epCard, index) => (
+          {/* 왼쪽 페이지네이션 버튼 */}
+          {currentPage > 0 ? (
+            <button
+              onClick={handlePrevPage}
+              className="text-4xl text-white font-bold"
+            >
+              &lt;
+            </button>
+          ) : (
+            <div className="w-10" /> // 빈 공간을 만들어 위치 고정
+          )}
+          {/* 에피소드 카드 리스트 */}
+          <div className="flex space-x-6 items-center">
+            {paginatedEpisodes.map((epCard, index) => (
               <div
                 key={epCard.episode || index}
-                className="bg-white bg-opacity-80 rounded-lg p-4 w-1/4 text-center text-gray-800 shadow-md"
+                className={`rounded-lg px-4 py-8 text-center text-gray-800 shadow-md ${
+                  epCard.buttonEnabled
+                    ? "bg-white bg-opacity-80"
+                    : "bg-gray-300 bg-opacity-50"
+                } w-64`}
               >
-                <h3 className="font-semibold text-lg">
+                <h3 className="font-semibold text-xl">
                   에피소드 {epCard.episode}
                 </h3>
-                <ul className="text-left mt-4">
+                <ul className="text-left mt-4 text-base">
                   <li>
-                    {epCard.exe_name} | {epCard.exe_count}회 X {epCard.exe_set}
-                    세트
+                    <p className="font-semibold">{epCard.exe_name}</p> :{" "}
+                    {epCard.exe_count}회 X {epCard.exe_set}세트
                   </li>
                 </ul>
                 <button
-                  className="bg-blue-500 text-white mt-4 py-2 px-6 rounded-lg font-semibold"
+                  className={`mt-4 py-2 px-6 rounded-lg font-semibold text-white ${
+                    epCard.buttonEnabled ? "bg-blue-500" : "bg-gray-400"
+                  }`}
                   disabled={!epCard.buttonEnabled}
                   onClick={() =>
                     handlePopupOpen("오늘의 에피소드를 진행하세요.")
@@ -131,6 +158,20 @@ function EpisodePage() {
                 </button>
               </div>
             ))}
+          </div>
+
+          {/* 오른쪽 페이지네이션 버튼 */}
+          {(currentPage + 1) * itemsPerPage <
+          episodes.filter((epCard) => epCard.isVisible).length ? (
+            <button
+              onClick={handleNextPage}
+              className="text-4xl text-white font-bold"
+            >
+              &gt;
+            </button>
+          ) : (
+            <div className="w-10" /> // 빈 공간을 만들어 위치 고정
+          )}
         </div>
       </div>
     </div>
