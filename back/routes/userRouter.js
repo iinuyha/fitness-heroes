@@ -32,7 +32,7 @@ router.get("/", authenticateToken, async (req, res) => {
     const userId = req.user.id; // 토큰에서 추출한 사용자 ID
 
     // 데이터베이스에서 사용자 정보 조회
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ id: userId });
 
     // 사용자가 존재하지 않는 경우
     if (!user) {
