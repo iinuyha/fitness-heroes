@@ -8,6 +8,7 @@ import OnBoardingPage from "../pages/onBoarding/page";
 import MenuPage from "../pages/menu/page";
 import StoryPage from "../pages/story/page";
 import EpisodePage from "../pages/story/episode/page";
+import ExerciseStartPage from "../pages/story/exerciseStart/page";
 import FocusPage from "../pages/focus/page";
 import FriendPage from "../pages/friend/page";
 import CharacterPage from "../pages/character/page";
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
   {
     path: routes.episode,
     element: <EpisodePage />,
+  },
+  {
+    path: routes.exercise,
+    element: <ExerciseStartPage />,
   },
   {
     path: routes.focus,

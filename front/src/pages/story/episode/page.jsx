@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { routes } from "../../../constants/routes";
 import Popup from "../../../components/Popup";
 import CoinInfoDisplay from "../../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../../components/ReturnDisplay";
@@ -12,6 +14,7 @@ function EpisodePage() {
   const [episodes, setEpisodes] = useState([]);
   const [progressDisplay, setProgressDisplay] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const navigate = useNavigate();
 
   const itemsPerPage = 3; // 페이지당 에피소드 개수
 
@@ -46,9 +49,8 @@ function EpisodePage() {
     fetchData();
   }, []);
 
-  const handlePopupOpen = (message) => {
-    setPopupMessage(message);
-    setIsPopupOpen(true);
+  const handleGameStart = () => {
+    navigate(routes.exercise); // 운동 페이지로 이동
   };
 
   // 현재 페이지에 표시할 에피소드 계산
@@ -146,9 +148,7 @@ function EpisodePage() {
                     epCard.buttonEnabled ? "bg-blue-500" : "bg-gray-400"
                   }`}
                   disabled={!epCard.buttonEnabled}
-                  onClick={() =>
-                    handlePopupOpen("오늘의 에피소드를 진행하세요.")
-                  }
+                  onClick={handleGameStart}
                 >
                   게임 시작
                 </button>
