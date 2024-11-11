@@ -7,6 +7,7 @@ export const routes = {
   menu: "/menu",
   story: "/story",
   episode: "/story/episode",
+  exercise: "/story/exercise",
   focus: "/focus",
   friend: "/friend",
   character: "/character",
