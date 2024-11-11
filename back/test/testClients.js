@@ -35,7 +35,7 @@ clientA.on('connect', () => {
 
   // 3초 후에 대결 신청을 userB에게 보냄
   setTimeout(() => {
-    console.log('Client A is sending a challenge request to userB');
+    console.log('Client A가 userB에게 대결 신청을 보냈습니다.');
     clientA.emit('challenge', { friendId: 'userB' });
   }, 3000);
 });
@@ -48,6 +48,16 @@ clientB.on('connect', () => {
 // Client B가 대결 신청을 수신할 때 처리
 clientB.on('challengeRequest', (data) => {
   console.log(`Client B received a challenge request from user: ${data.from}`);
+  
+  // 남은 시간 업데이트
+  if (data.timeLeft) {
+    console.log(`남은 시간: ${data.timeLeft}초`);
+  }
+});
+
+// 주기적으로 서버로부터 남은 시간을 수신하는 이벤트
+clientB.on('timeUpdate', (data) => {
+  console.log(`남은 시간 업데이트: ${data.timeLeft}초`);
 });
 
 // 연결 해제 시 처리 (테스트 용도)
