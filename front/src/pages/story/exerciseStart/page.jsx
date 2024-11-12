@@ -13,7 +13,7 @@ function ExerciseStartPage() {
     <div className="exercise-start-page">
       {isPopupOpen && (
         <Popup
-          message="운동을 시작하시겠습니까?"
+          message="<img alt='점핑잭 튜토리얼' src='/image/jumping_jack.png'/>"
           onClose={handlePopupClose} // 닫기 시 handlePopupClose 호출
         />
       )}
