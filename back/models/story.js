@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
-const StorySchema = new Schema(
+const StorySchema = new mongoose.Schema(
   {
     id: {
       type: String,
@@ -12,7 +12,19 @@ const StorySchema = new Schema(
       type: String,
       required: true,
     },
+    exe_name: {
+      type: String,
+      required: true,
+    },
     episode: {
+      type: Number,
+      required: true,
+    },
+    exe_set: {
+      type: Number,
+      required: true,
+    },
+    exe_count: {
       type: Number,
       required: true,
     },
