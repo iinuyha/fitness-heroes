@@ -1,8 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Friend = require('../models/friend');
-const User = require('../models/user'); 
-const jwt = require('jsonwebtoken');
+const Friend = require("../models/friend");
+const User = require("../models/user");
+const Challenge = require("../models/challenge");
+const jwt = require("jsonwebtoken");
 const secretKey = "hi";
 
 // JWT 토큰에서 id를 추출하는 함수
@@ -16,100 +17,244 @@ function decodeToken(token) {
 }
 
 // 친구 목록 조회 라우트
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: 'Authorization token이 필요합니다.' });
+      return res
+        .status(401)
+        .json({ error: "Authorization token이 필요합니다." });
     }
 
     const token = authHeader.split(" ")[1];
     const userId = decodeToken(token);
     if (!userId) {
-      return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
+      return res.status(401).json({ error: "유효하지 않은 토큰입니다." });
     }
 
-    // 현재 사용자 ID로 친구 목록 가져오기
     const friendInfo = await Friend.findOne({ id: userId });
     if (!friendInfo || !friendInfo.friend) {
-      return res.status(404).json({ error: '친구 정보를 찾을 수 없습니다.' });
+      return res.status(404).json({ error: "친구 정보를 찾을 수 없습니다." });
     }
 
-    // 친구의 각 ID로 이름, 승/무/패 데이터를 가져오기
-    const friendsData = await Promise.all(friendInfo.friend.map(async friendId => {
-      const friendData = await Friend.findOne({ id: friendId }) || { win: 0, draw: 0, lose: 0 };
-      const userData = await User.findOne({ id: friendId }) || { name: "이름 없음" };
-
-      return {
-        id: friendId,
-        name: userData.name,
-        win: friendData.win,
-        draw: friendData.draw,
-        lose: friendData.lose
-      };
-    }));
+    const friendsData = await Promise.all(
+      friendInfo.friend.map(async (friendId) => {
+        const friendData = (await Friend.findOne({ id: friendId })) || {
+          win: 0,
+          draw: 0,
+          lose: 0,
+        };
+        const userData = (await User.findOne({ id: friendId })) || {
+          name: "이름 없음",
+        };
+        return {
+          id: friendId,
+          name: userData.name,
+          win: friendData.win,
+          draw: friendData.draw,
+          lose: friendData.lose,
+        };
+      })
+    );
 
     res.json({ friends: friendsData });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
+    res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
   }
 });
 
 // 친구 검색 및 추가
-router.post('/search', async (req, res) => {
+router.post("/search", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: 'Authorization token이 필요합니다.' });
+      return res
+        .status(401)
+        .json({ error: "Authorization token이 필요합니다." });
     }
 
     const token = authHeader.split(" ")[1];
     const userId = decodeToken(token);
     if (!userId) {
-      return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
+      return res.status(401).json({ error: "유효하지 않은 토큰입니다." });
     }
 
     const { id: searchId } = req.body;
     if (!searchId) {
-      return res.status(400).json({ error: '검색할 친구의 ID가 필요합니다.' });
+      return res.status(400).json({ error: "검색할 친구의 ID가 필요합니다." });
     }
 
-    // 자신을 친구로 추가하려는 경우 오류 반환
     if (searchId === userId) {
-      return res.status(400).json({ error: '자신을 친구로 추가할 수 없습니다.' });
+      return res
+        .status(400)
+        .json({ error: "자신을 친구로 추가할 수 없습니다." });
     }
 
-    // 검색할 친구가 존재하는지 확인
     const friendData = await Friend.findOne({ id: searchId });
     if (!friendData) {
-      return res.status(404).json({ error: '친구를 찾을 수 없습니다.' });
+      return res.status(404).json({ error: "친구를 찾을 수 없습니다." });
     }
 
-    // 현재 사용자의 친구 목록에 추가
     let userFriendData = await Friend.findOne({ id: userId });
     if (!userFriendData) {
       userFriendData = new Friend({ id: userId, friend: [] });
     }
 
-    // 이미 친구 목록에 있는지 확인 후 추가
     if (!userFriendData.friend.includes(searchId)) {
       userFriendData.friend.push(searchId);
       await userFriendData.save();
     } else {
-      return res.status(400).json({ error: '이미 친구 목록에 있는 사용자입니다.' });
+      return res
+        .status(400)
+        .json({ error: "이미 친구 목록에 있는 사용자입니다." });
     }
 
     res.json({
-      message: '친구가 성공적으로 추가되었습니다.',
-      friend: {
-        id: friendData.id,
-        // 친구 데이터 추가 가능
-      }
+      message: "친구가 성공적으로 추가되었습니다.",
+      friend: { id: friendData.id },
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
+    res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
+  }
+});
+
+// 친구 초대 라우트
+router.post("/invite", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ error: "Authorization token이 필요합니다." });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const userId = decodeToken(token);
+    if (!userId) {
+      return res.status(401).json({ error: "유효하지 않은 토큰입니다." });
+    }
+
+    const { friendId } = req.body;
+    if (!friendId) {
+      return res.status(400).json({ error: "초대할 친구의 ID가 필요합니다." });
+    }
+
+    const existingChallenge = await Challenge.findOne({
+      challengerId: userId,
+      challengedId: friendId,
+      status: "pending",
+    });
+    if (existingChallenge) {
+      return res.status(400).json({
+        error: "이미 초대를 보냈습니다. 상대방의 응답을 기다리고 있습니다.",
+      });
+    }
+
+    const challenge = new Challenge({
+      challengerId: userId,
+      challengedId: friendId,
+      status: "pending",
+      createdAt: new Date(),
+    });
+
+    await challenge.save();
+    res.json({
+      message: "친구에게 초대가 성공적으로 전송되었습니다.",
+      challengeId: challenge._id,
+      success: true,
+    });
+  } catch (error) {
+    console.error("초대 중 오류 발생:", error);
+    res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
+  }
+});
+
+// 초대 수락 라우트
+router.post("/accept-invitation", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ error: "Authorization token이 필요합니다." });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const userId = decodeToken(token);
+    if (!userId) {
+      return res.status(401).json({ error: "유효하지 않은 토큰입니다." });
+    }
+
+    const { friendId } = req.body;
+    if (!friendId) {
+      return res
+        .status(400)
+        .json({ error: "수락할 초대의 친구 ID가 필요합니다." });
+    }
+
+    const challenge = await Challenge.findOne({
+      challengerId: friendId,
+      challengedId: userId,
+      status: "pending",
+    });
+
+    if (!challenge) {
+      return res.status(404).json({ error: "초대가 존재하지 않습니다." });
+    }
+
+    challenge.status = "accepted";
+    challenge.acceptedAt = new Date();
+    await challenge.save();
+
+    res.json({ message: "초대를 수락하였습니다.", challengeId: challenge._id });
+  } catch (error) {
+    console.error("초대 수락 중 오류 발생:", error);
+    res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
+  }
+});
+
+// 초대 거절 라우트
+router.post("/decline-invitation", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ error: "Authorization token이 필요합니다." });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const userId = decodeToken(token);
+    if (!userId) {
+      return res.status(401).json({ error: "유효하지 않은 토큰입니다." });
+    }
+
+    const { friendId } = req.body;
+    if (!friendId) {
+      return res
+        .status(400)
+        .json({ error: "거절할 초대의 친구 ID가 필요합니다." });
+    }
+
+    const challenge = await Challenge.findOne({
+      challengerId: friendId,
+      challengedId: userId,
+      status: "pending",
+    });
+
+    if (!challenge) {
+      return res.status(404).json({ error: "초대가 존재하지 않습니다." });
+    }
+
+    challenge.status = "declined";
+    await challenge.save();
+
+    res.json({ message: "초대를 거절하였습니다.", challengeId: challenge._id });
+  } catch (error) {
+    console.error("초대 거절 중 오류 발생:", error);
+    res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
   }
 });
 

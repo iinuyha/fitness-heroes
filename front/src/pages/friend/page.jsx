@@ -1,132 +1,231 @@
 import React, { useState, useEffect, useRef } from "react";
-import CoinInfoDisplay from "../../components/CoinInfoDisplay";
-import ReturnDisplay from "../../components/ReturnDisplay";
-import YesNoPopup from "../../components/YesNoPopup"; // YesNoPopup import
-import Popup from "../../components/Popup";
+import io from "socket.io-client";
 import {
   fetchFriendList,
   searchFriend,
   inviteFriend,
-  checkInvitationStatus,
-} from "./api/api"; // API 함수 가져오기
+  acceptInvitation,
+  declineInvitation,
+} from "./api/api";
+import CoinInfoDisplay from "../../components/CoinInfoDisplay";
+import ReturnDisplay from "../../components/ReturnDisplay";
+import YesNoPopup from "../../components/YesNoPopup";
+import Popup from "../../components/Popup";
 
 function FriendPage() {
+  const [friendList, setFriendList] = useState([]);
+  const [isInvitationSent, setIsInvitationSent] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-  const [friendList, setFriendList] = useState([]); // 친구 목록
-  const [selectedFriend, setSelectedFriend] = useState(null); // 선택한 친구
-  const [isInvitationSent, setIsInvitationSent] = useState(false); // 초대 상태
-  const [isStartEnabled, setIsStartEnabled] = useState(false); // 게임 시작 버튼 활성화 상태
-  const [isCancelConfirm, setIsCancelConfirm] = useState(false); // 초대 취소 팝업 상태
-  const [hasScrollbar, setHasScrollbar] = useState(false); // 스크롤바 감지 상태
-  const listRef = useRef(null); // 친구 목록의 참조를 저장할 ref
-  const [newFriendId, setNewFriendId] = useState(""); // 새로운 친구의 ID 입력 상태
-  const token = localStorage.getItem("token"); // 토큰 가져오기
+  const [newFriendId, setNewFriendId] = useState("");
+  const [isChallengePopupOpen, setIsChallengePopupOpen] = useState(false);
+  const [challengeFrom, setChallengeFrom] = useState(null);
+  const [currentRoom, setCurrentRoom] = useState(null);
 
-  // 스크롤바 여부 감지
-  useEffect(() => {
-    const listElement = listRef.current;
-    if (listElement.scrollHeight > listElement.clientHeight) {
-      setHasScrollbar(true); // 스크롤바가 있을 때
-    } else {
-      setHasScrollbar(false); // 스크롤바가 없을 때
-    }
-  }, [friendList]); // friendList가 변경될 때마다 스크롤바 감지
+  const token = localStorage.getItem("token");
+  const socketRef = useRef();
 
-  // 친구 목록을 DB에서 받아오기
   useEffect(() => {
-    const loadFriends = async () => {
-      try {
-        const friends = await fetchFriendList(token); // API 호출하여 친구 목록 불러오기
-        setFriendList(friends.friends);
-      } catch (error) {
-        console.error("친구 목록을 불러오는 중 오류 발생:", error);
-      }
+    loadFriends();
+    initializeSocket();
+
+    return () => {
+      cleanupSocket();
     };
+  }, [token]);
 
-    loadFriends(); // 친구 목록 불러오는 함수 실행
-  }, []);
+  // 소켓 초기화
+  const initializeSocket = () => {
+    socketRef.current = io(process.env.REACT_APP_SERVER_URL, {
+      auth: { token },
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 2000,
+    });
 
-  // 새로운 친구 추가 함수 (아이디 입력 후 버튼 클릭 시 호출)
-  const handleAddFriend = async () => {
-    if (newFriendId.trim()) {
-      try {
-        const response = await searchFriend(token, newFriendId); // searchFriend 함수 호출
-        setPopupMessage(`${newFriendId}님과 친구가 되셨습니다!`); // 성공 메시지 설정
-        setIsPopupOpen(true); // 팝업 열기
-        setNewFriendId(""); // 입력 필드 초기화
-      } catch (error) {
-        const errorMessage = error.message || "친구 추가 중 오류 발생";
-        setPopupMessage(errorMessage); // 오류 메시지 설정
-        setIsPopupOpen(true); // 팝업 열기
-      }
-    } else {
-      alert("친구의 ID를 입력해주세요.");
-    }
+    setupSocketListeners();
   };
 
-  // 초대 상태 확인 함수
-  const checkStatus = async (friendId) => {
+  // 소켓 이벤트 리스너 설정
+  const setupSocketListeners = () => {
+    const socket = socketRef.current;
+
+    socket.on("connect", () => {
+      console.log("서버와 연결 성공:", socket.id);
+    });
+
+    socket.on("userStatusUpdate", ({ userId, isOnline }) => {
+      updateFriendStatus(userId, isOnline);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("서버 연결 오류:", error.message);
+      setPopupMessage("서버 연결에 실패했습니다. 다시 시도해주세요.");
+      setIsPopupOpen(true);
+    });
+
+    socket.on("error", ({ message }) => {
+      setPopupMessage(message);
+      setIsPopupOpen(true);
+      setIsInvitationSent(false);
+    });
+
+    socket.on("challengeReceived", handleChallengeReceived); // 대결 신청 받는 경우 (초대받는 사람)
+    socket.on("challengeDeclined", handleChallengeDeclined); // 초대하는 사람 브라우저에 거절되었다고 뜨는거
+    socket.on("challengeCancelled", handleChallengeCancelled); // 초대하는 사람 브라우저에 2분 지나서 취소됐다고 뜨는거
+    socket.on("gameStart", handleGameStart); // 둘 다
+  };
+
+  // 친구 목록 로드
+  const loadFriends = async () => {
     try {
-      const intervalId = setInterval(async () => {
-        const response = await checkInvitationStatus(friendId); // API 호출하여 초대 상태 확인
-        if (response.accepted) {
-          setIsStartEnabled(true); // 친구가 수락하면 시작 버튼 활성화
-          clearInterval(intervalId); // 수락 확인되면 반복 종료
-        }
-      }, 3000); // 3초마다 상태 확인
+      const friends = await fetchFriendList(token);
+      setFriendList(friends.friends);
     } catch (error) {
-      console.error("초대 상태 확인 중 오류 발생:", error);
+      console.error("친구 목록 로드 실패:", error);
+      setPopupMessage("친구 목록을 불러오는데 실패했습니다.");
+      setIsPopupOpen(true);
     }
   };
 
-  // 초대 취소 함수
-  const cancelInvite = () => {
-    setSelectedFriend(null);
-    setIsInvitationSent(false);
-    setIsStartEnabled(false);
+  // 소켓 정리
+  const cleanupSocket = () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
   };
 
-  // 초대 버튼 클릭 시 처리
+  // 친구 상태 업데이트
+  const updateFriendStatus = (userId, isOnline) => {
+    setFriendList((prevFriends) =>
+      prevFriends.map((friend) =>
+        friend.id === userId ? { ...friend, isOnline } : friend
+      )
+    );
+  };
+
+  // 대결 신청하기 (초대하는 사람)
   const handleInvite = async (friend) => {
-    if (selectedFriend?.userId === friend.userId) {
-      // 초대 취소 확인 팝업 띄우기
-      setIsCancelConfirm(true);
-      setPopupMessage("초대를 취소하시겠습니까?");
-    } else {
-      try {
-        const response = await inviteFriend(friend.userId); // API 호출하여 친구 초대
-        if (response.success) {
-          setSelectedFriend(friend); // 선택한 친구 설정
-          setIsInvitationSent(true); // 초대가 성공했음을 표시
-          checkStatus(friend.userId); // 초대 상태 확인
-        } else {
-          handlePopupOpen(response.message); // 실패 메시지 표시
-        }
-      } catch (error) {
-        console.error("초대하는 중 오류 발생:", error);
+    if (!friend.isOnline) {
+      setPopupMessage("친구가 온라인 상태일 때만 초대할 수 있습니다.");
+      setIsPopupOpen(true);
+      return;
+    }
+
+    setIsInvitationSent(true);
+    if (isInvitationSent) {
+      setPopupMessage(
+        "이미 초대를 보냈습니다.<br>2분 뒤에 다시 초대를 할 수 있습니다."
+      );
+      setIsPopupOpen(true);
+      return;
+    }
+
+    try {
+      const response = await inviteFriend(token, friend.id);
+      if (response.success) {
+        setIsInvitationSent(true);
+        socketRef.current.emit("sendChallenge", { friendId: friend.id });
+      } else {
+        setPopupMessage(response.message);
+        setIsPopupOpen(true);
       }
+    } catch (error) {
+      console.error("초대 실패:", error);
+      // 서버에서 반환된 에러 메시지가 있을 경우 이를 팝업 메시지로 설정
+      if (error.response && error.response.data && error.response.data.error) {
+        setPopupMessage(error.response.data.error);
+      } else {
+        // 서버에서 반환된 메시지가 없을 경우 기본 메시지 사용
+        setPopupMessage("초대 처리 중 오류가 발생했습니다.");
+      }
+      setIsPopupOpen(true);
     }
   };
 
-  // 팝업 열기 함수
-  const handlePopupOpen = (message) => {
+  // 대결 수신 처리 (초대받는 사람)
+  const handleChallengeReceived = ({ from, roomId }) => {
+    setChallengeFrom({ from, roomId });
+    setIsChallengePopupOpen(true);
+
+    socketRef.current.emit("joinRoom", { roomId }); // 초대받은 사용자가 roomId에 참가
+  };
+
+  // 초대받은 사람이 대결을 수락함
+  const handleChallengeAccept = async () => {
+    try {
+      await acceptInvitation(token, challengeFrom.from);
+      socketRef.current.emit("acceptChallenge", {
+        roomId: challengeFrom.roomId,
+      });
+      setCurrentRoom(challengeFrom.roomId);
+      setIsChallengePopupOpen(false);
+    } catch (error) {
+      console.error("대결 수락 실패:", error);
+      setPopupMessage("대결 수락 처리 중 오류가 발생했습니다.");
+      setIsPopupOpen(true);
+    }
+  };
+
+  // 초대받은 사람이 대결을 거절함
+  const handleChallengeDecline = async () => {
+    try {
+      await declineInvitation(token, challengeFrom.from); // 초대 거절 API 호출
+      socketRef.current.emit("declineChallenge", {
+        roomId: challengeFrom.roomId,
+      });
+
+      setIsChallengePopupOpen(false);
+      setPopupMessage("초대를 거절하였습니다.");
+      setIsPopupOpen(true);
+    } catch (error) {
+      console.error("대결 거절 실패:", error);
+      setPopupMessage("대결 거절 처리 중 오류가 발생했습니다.");
+      setIsPopupOpen(true);
+    }
+  };
+
+  // 대결 취소 처리
+  const handleChallengeCancelled = ({ message }) => {
     setPopupMessage(message);
+    setIsPopupOpen(true);
+    setIsInvitationSent(false);
+    setCurrentRoom(null);
+  };
+
+  // 대결 거절 처리됨 (초대하는 사람 브라우저에 뜨는거)
+  const handleChallengeDeclined = ({ message }) => {
+    setPopupMessage(message || "상대방이 대결을 거절했습니다.");
+    setIsPopupOpen(true);
+    setIsInvitationSent(false);
+  };
+
+  // 게임 시작 처리 - 팝업 메시지를 통해 모든 사용자에게 표시
+  const handleGameStart = ({ roomId }) => {
+    setCurrentRoom(roomId);
+    setPopupMessage("게임을 시작합니다!");
     setIsPopupOpen(true);
   };
 
-  // 팝업 닫기 함수
-  const handlePopupClose = () => {
-    setIsPopupOpen(false);
-    setPopupMessage("");
-  };
-
-  // 초대 취소 확인 팝업 처리
-  const handleCancelConfirmation = (confirm) => {
-    if (confirm) {
-      cancelInvite();
+  // 친구 추가 처리
+  const handleAddFriend = async () => {
+    if (!newFriendId.trim()) {
+      setPopupMessage("친구의 ID를 입력해주세요.");
+      setIsPopupOpen(true);
+      return;
     }
-    setIsCancelConfirm(false); // 팝업 닫기
+
+    try {
+      const response = await searchFriend(token, newFriendId);
+      setPopupMessage(`${newFriendId}님과 친구가 되셨습니다!`);
+      setIsPopupOpen(true);
+      setNewFriendId("");
+      loadFriends(); // 친구 목록 새로고침
+    } catch (error) {
+      setPopupMessage(error.message || "친구 추가 중 오류가 발생했습니다.");
+      setIsPopupOpen(true);
+    }
   };
 
   return (
@@ -134,24 +233,19 @@ function FriendPage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
-      {/* 뒤로가기 버튼 */}
       <ReturnDisplay />
+      <CoinInfoDisplay message="<u>운동 경쟁 설명</u>" />
 
-      {/* 코인 및 정보 팝업 */}
-      <CoinInfoDisplay message="<u>운동 경쟁 관련된 설명</u> 적으면 됨.. html이나 마크다운 문법 사용 가능" />
-
-      {/* 초대 취소 확인 팝업 */}
-      {isCancelConfirm && (
-        <YesNoPopup
-          message={popupMessage}
-          onCancel={() => handleCancelConfirmation(false)} // 취소
-          onConfirm={() => handleCancelConfirmation(true)} // 확인
-        />
+      {isPopupOpen && (
+        <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />
       )}
 
-      {/* 친구 추가 팝업 */}
-      {isPopupOpen && (
-        <Popup message={popupMessage} onClose={handlePopupClose} />
+      {isChallengePopupOpen && (
+        <YesNoPopup
+          message={`${challengeFrom.from}님이 대결을 신청했습니다. 수락하시겠습니까?`}
+          onConfirm={handleChallengeAccept} // 확인 버튼 클릭 시 초대 수락
+          onCancel={handleChallengeDecline} // 취소 버튼 클릭 시 초대 거절
+        />
       )}
 
       <div className="flex flex-col items-center justify-center h-full space-y-5 font-sans">
@@ -161,6 +255,7 @@ function FriendPage() {
         >
           친구를 초대하여 운동 경쟁을 해보세요!
         </h1>
+
         <div className="flex items-center">
           <img
             src="/image/friend/competition.png"
@@ -181,16 +276,11 @@ function FriendPage() {
           <h2 className="text-xl text-white font-semibold mb-2 w-full text-center bg-[#193E59] py-2 rounded-xl">
             친구 목록
           </h2>
-          <ul
-            className={`space-y-0 max-h-72 overflow-y-auto ${
-              hasScrollbar ? "pr-3" : ""
-            }`} // 스크롤바가 있을 때만 pr-3 적용
-            ref={listRef} // 친구 목록에 ref 추가
-          >
-            {friendList.map((friend, index) => (
+          <ul className="space-y-0 max-h-72 overflow-y-auto pr-3">
+            {friendList.map((friend) => (
               <li
                 key={friend.id}
-                className="flex justify-between items-center text-white py-2 border-b border-gray-500 last:border-none" // li에 border-bottom 적용, 마지막 항목에만 border 제거
+                className="flex justify-between items-center text-white py-2 border-b border-gray-500 last:border-none"
               >
                 <span className="flex items-center">
                   <span className="font-semibold mr-1">{friend.name}</span>(
@@ -200,18 +290,18 @@ function FriendPage() {
                   </span>
                 </span>
                 <button
-                  className={`px-4 py-1 rounded-full ${
-                    selectedFriend?.id === friend.id
-                      ? "bg-gray-400"
-                      : "bg-[#00B2FF]"
-                  } text-white flex items-center justify-center`}
+                  disabled={!friend.isOnline}
                   onClick={() => handleInvite(friend)}
+                  className={`px-4 py-1 rounded-full ${
+                    friend.isOnline ? "bg-[#00B2FF]" : "bg-gray-400"
+                  } text-white`}
                 >
-                  {selectedFriend?.id === friend.id ? "취소" : "초대하기"}
+                  {friend.isOnline ? "대결신청" : "오프라인"}
                 </button>
               </li>
             ))}
           </ul>
+
           {/* 친구 추가 입력 및 버튼 */}
           <div className="flex items-center mt-4 bg-gray-200 rounded-xl">
             <input
@@ -228,21 +318,6 @@ function FriendPage() {
               친구 추가 +
             </button>
           </div>
-        </div>
-
-        {/* 게임 시작 버튼 (공간 유지) */}
-        <div
-          className={`mt-8 px-6 py-2 text-lg rounded-full font-semibold text-white
-            ${isStartEnabled ? "bg-green-500" : "bg-gray-500"}`}
-          style={{ visibility: isInvitationSent ? "visible" : "hidden" }}
-        >
-          <button
-            className="w-full"
-            onClick={() => alert("게임 시작!")}
-            disabled={!isStartEnabled}
-          >
-            {isStartEnabled ? "게임 시작" : "수락 대기 중"}
-          </button>
         </div>
       </div>
     </div>
