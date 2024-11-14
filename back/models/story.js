@@ -14,7 +14,6 @@ const StorySchema = new mongoose.Schema(
     },
     exe_name: {
       type: String,
-      required: true,
     },
     episode: {
       type: Number,
@@ -22,11 +21,9 @@ const StorySchema = new mongoose.Schema(
     },
     exe_set: {
       type: Number,
-      required: true,
     },
     exe_count: {
       type: Number,
-      required: true,
     },
     date: {
       type: Date,
