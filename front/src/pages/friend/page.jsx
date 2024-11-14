@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import io from "socket.io-client";
+import React, { useState, useEffect, useContext } from "react";
 import {
   fetchFriendList,
   searchFriend,
@@ -11,6 +10,7 @@ import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import YesNoPopup from "../../components/YesNoPopup";
 import Popup from "../../components/Popup";
+import SocketContext from "../../contexts/SocketContext";
 
 function FriendPage() {
   const [friendList, setFriendList] = useState([]);
@@ -23,58 +23,42 @@ function FriendPage() {
   const [currentRoom, setCurrentRoom] = useState(null);
 
   const token = localStorage.getItem("token");
-  const socketRef = useRef();
+  const { socket, onlineFriends } = useContext(SocketContext);
 
   useEffect(() => {
     loadFriends();
-    initializeSocket();
+    if (socket) {
+      setupSocketListeners();
+    }
 
     return () => {
-      cleanupSocket();
+      cleanupSocketListeners();
     };
-  }, [token]);
-
-  // 소켓 초기화
-  const initializeSocket = () => {
-    socketRef.current = io(process.env.REACT_APP_SERVER_URL, {
-      auth: { token },
-      transports: ["websocket"],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 2000,
-    });
-
-    setupSocketListeners();
-  };
+  }, [socket, token]);
 
   // 소켓 이벤트 리스너 설정
   const setupSocketListeners = () => {
-    const socket = socketRef.current;
-
-    socket.on("connect", () => {
-      console.log("서버와 연결 성공:", socket.id);
-    });
-
-    socket.on("userStatusUpdate", ({ userId, isOnline }) => {
-      updateFriendStatus(userId, isOnline);
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("서버 연결 오류:", error.message);
-      setPopupMessage("서버 연결에 실패했습니다. 다시 시도해주세요.");
-      setIsPopupOpen(true);
-    });
-
     socket.on("error", ({ message }) => {
       setPopupMessage(message);
       setIsPopupOpen(true);
       setIsInvitationSent(false);
     });
 
-    socket.on("challengeReceived", handleChallengeReceived); // 대결 신청 받는 경우 (초대받는 사람)
-    socket.on("challengeDeclined", handleChallengeDeclined); // 초대하는 사람 브라우저에 거절되었다고 뜨는거
-    socket.on("challengeCancelled", handleChallengeCancelled); // 초대하는 사람 브라우저에 2분 지나서 취소됐다고 뜨는거
-    socket.on("gameStart", handleGameStart); // 둘 다
+    socket.on("challengeReceived", handleChallengeReceived);
+    socket.on("challengeDeclined", handleChallengeDeclined);
+    socket.on("challengeCancelled", handleChallengeCancelled);
+    socket.on("gameStart", handleGameStart);
+  };
+
+  // 소켓 리스너 정리
+  const cleanupSocketListeners = () => {
+    if (socket) {
+      socket.off("error");
+      socket.off("challengeReceived");
+      socket.off("challengeDeclined");
+      socket.off("challengeCancelled");
+      socket.off("gameStart");
+    }
   };
 
   // 친구 목록 로드
@@ -89,31 +73,14 @@ function FriendPage() {
     }
   };
 
-  // 소켓 정리
-  const cleanupSocket = () => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-    }
-  };
-
-  // 친구 상태 업데이트
-  const updateFriendStatus = (userId, isOnline) => {
-    setFriendList((prevFriends) =>
-      prevFriends.map((friend) =>
-        friend.id === userId ? { ...friend, isOnline } : friend
-      )
-    );
-  };
-
   // 대결 신청하기 (초대하는 사람)
   const handleInvite = async (friend) => {
-    if (!friend.isOnline) {
+    if (!onlineFriends[friend.id]) {
       setPopupMessage("친구가 온라인 상태일 때만 초대할 수 있습니다.");
       setIsPopupOpen(true);
       return;
     }
 
-    setIsInvitationSent(true);
     if (isInvitationSent) {
       setPopupMessage(
         "이미 초대를 보냈습니다.<br>2분 뒤에 다시 초대를 할 수 있습니다."
@@ -126,18 +93,16 @@ function FriendPage() {
       const response = await inviteFriend(token, friend.id);
       if (response.success) {
         setIsInvitationSent(true);
-        socketRef.current.emit("sendChallenge", { friendId: friend.id });
+        socket.emit("sendChallenge", { friendId: friend.id });
       } else {
         setPopupMessage(response.message);
         setIsPopupOpen(true);
       }
     } catch (error) {
       console.error("초대 실패:", error);
-      // 서버에서 반환된 에러 메시지가 있을 경우 이를 팝업 메시지로 설정
-      if (error.response && error.response.data && error.response.data.error) {
+      if (error.response?.data?.error) {
         setPopupMessage(error.response.data.error);
       } else {
-        // 서버에서 반환된 메시지가 없을 경우 기본 메시지 사용
         setPopupMessage("초대 처리 중 오류가 발생했습니다.");
       }
       setIsPopupOpen(true);
@@ -148,15 +113,14 @@ function FriendPage() {
   const handleChallengeReceived = ({ from, roomId }) => {
     setChallengeFrom({ from, roomId });
     setIsChallengePopupOpen(true);
-
-    socketRef.current.emit("joinRoom", { roomId }); // 초대받은 사용자가 roomId에 참가
+    socket.emit("joinRoom", { roomId });
   };
 
   // 초대받은 사람이 대결을 수락함
   const handleChallengeAccept = async () => {
     try {
       await acceptInvitation(token, challengeFrom.from);
-      socketRef.current.emit("acceptChallenge", {
+      socket.emit("acceptChallenge", {
         roomId: challengeFrom.roomId,
       });
       setCurrentRoom(challengeFrom.roomId);
@@ -171,8 +135,8 @@ function FriendPage() {
   // 초대받은 사람이 대결을 거절함
   const handleChallengeDecline = async () => {
     try {
-      await declineInvitation(token, challengeFrom.from); // 초대 거절 API 호출
-      socketRef.current.emit("declineChallenge", {
+      await declineInvitation(token, challengeFrom.from);
+      socket.emit("declineChallenge", {
         roomId: challengeFrom.roomId,
       });
 
@@ -201,7 +165,7 @@ function FriendPage() {
     setIsInvitationSent(false);
   };
 
-  // 게임 시작 처리 - 팝업 메시지를 통해 모든 사용자에게 표시
+  // 게임 시작 처리
   const handleGameStart = ({ roomId }) => {
     setCurrentRoom(roomId);
     setPopupMessage("게임을 시작합니다!");
@@ -221,7 +185,7 @@ function FriendPage() {
       setPopupMessage(`${newFriendId}님과 친구가 되셨습니다!`);
       setIsPopupOpen(true);
       setNewFriendId("");
-      loadFriends(); // 친구 목록 새로고침
+      loadFriends();
     } catch (error) {
       setPopupMessage(error.message || "친구 추가 중 오류가 발생했습니다.");
       setIsPopupOpen(true);
@@ -243,8 +207,8 @@ function FriendPage() {
       {isChallengePopupOpen && (
         <YesNoPopup
           message={`${challengeFrom.from}님이 대결을 신청했습니다. 수락하시겠습니까?`}
-          onConfirm={handleChallengeAccept} // 확인 버튼 클릭 시 초대 수락
-          onCancel={handleChallengeDecline} // 취소 버튼 클릭 시 초대 거절
+          onConfirm={handleChallengeAccept}
+          onCancel={handleChallengeDecline}
         />
       )}
 
@@ -290,13 +254,13 @@ function FriendPage() {
                   </span>
                 </span>
                 <button
-                  disabled={!friend.isOnline}
+                  disabled={!onlineFriends[friend.id]}
                   onClick={() => handleInvite(friend)}
                   className={`px-4 py-1 rounded-full ${
-                    friend.isOnline ? "bg-[#00B2FF]" : "bg-gray-400"
+                    onlineFriends[friend.id] ? "bg-[#00B2FF]" : "bg-gray-400"
                   } text-white`}
                 >
-                  {friend.isOnline ? "대결신청" : "오프라인"}
+                  {onlineFriends[friend.id] ? "대결신청" : "오프라인"}
                 </button>
               </li>
             ))}
