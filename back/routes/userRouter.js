@@ -76,7 +76,7 @@ router.post("/onboarding", authenticateToken, async (req, res) => {
     };
 
     await User.findOneAndUpdate(
-      { _id: userId },
+      { id: userId },
       { $set: updateData },
       { new: true }
     );
