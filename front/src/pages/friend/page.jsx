@@ -93,7 +93,25 @@ function FriendPage() {
       const response = await inviteFriend(token, friend.id);
       if (response.success) {
         setIsInvitationSent(true);
+
+        // 친구 초대 상태 업데이트
+        setFriendList((prevList) =>
+          prevList.map((f) =>
+            f.id === friend.id ? { ...f, isInvited: true } : f
+          )
+        );
+
         socket.emit("sendChallenge", { friendId: friend.id });
+
+        // 30초 후 초대 상태 초기화
+        setTimeout(() => {
+          setFriendList((prevList) =>
+            prevList.map((f) =>
+              f.id === friend.id ? { ...f, isInvited: false } : f
+            )
+          );
+          setIsInvitationSent(false);
+        }, 30000);
       } else {
         setPopupMessage(response.message);
         setIsPopupOpen(true);
@@ -170,6 +188,12 @@ function FriendPage() {
     setPopupMessage(message || "상대방이 대결을 거절했습니다.");
     setIsPopupOpen(true);
     setIsInvitationSent(false);
+
+    setFriendList((prevFriendList) =>
+      prevFriendList.map((friend) =>
+        friend.isInvited ? { ...friend, isInvited: false } : friend
+      )
+    );
   };
 
   // 게임 시작 처리
@@ -177,6 +201,12 @@ function FriendPage() {
     setCurrentRoom(roomId);
     setPopupMessage("게임을 시작합니다!");
     setIsPopupOpen(true);
+
+    setFriendList((prevFriendList) =>
+      prevFriendList.map((friend) =>
+        friend.isInvited ? { ...friend, isInvited: false } : friend
+      )
+    );
   };
 
   // 친구 추가 처리
@@ -261,13 +291,21 @@ function FriendPage() {
                   </span>
                 </span>
                 <button
-                  disabled={!onlineFriends[friend.id]}
+                  disabled={!onlineFriends[friend.id] || friend.isInvited}
                   onClick={() => handleInvite(friend)}
-                  className={`px-4 py-1 rounded-full ${
-                    onlineFriends[friend.id] ? "bg-[#00B2FF]" : "bg-gray-400"
+                  className={`px-4 py-1 rounded-full font-semibold ${
+                    friend.isInvited
+                      ? "bg-[#175874]" // 초대 중일 때 버튼 색상
+                      : onlineFriends[friend.id]
+                      ? "bg-[#00B2FF]"
+                      : "bg-gray-400"
                   } text-white`}
                 >
-                  {onlineFriends[friend.id] ? "대결신청" : "오프라인"}
+                  {friend.isInvited
+                    ? "초대 중..." // 초대 상태 표시
+                    : onlineFriends[friend.id]
+                    ? "대결신청"
+                    : "오프라인"}
                 </button>
               </li>
             ))}
