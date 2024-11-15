@@ -7,6 +7,7 @@ const {
 } = require("../sockets/inviteFriend");
 
 const SECRET_KEY = "hi";
+const onlineUsers = {}; // 모든 사용자의 온라인 상태를 저장하는 객체
 
 function decodeToken(token) {
   if (!token) {
@@ -57,12 +58,13 @@ module.exports = (server) => {
 
   io.on("connection", (socket) => {
     const token = socket.handshake.auth.token;
-    const userId = decodeToken(token); // 예: decodeToken 함수를 이용해 userId 추출
+    const userId = decodeToken(token);
     console.log(`클라이언트 연결됨: ${userId}`);
     users[userId] = socket.id;
+    onlineUsers[userId] = true; // 온라인 상태 저장
 
-    // 소켓에 연결되면 온라인 상태를 true로 (userStatusUpdate 이벤트 발생시키기)
-    io.emit("userStatusUpdate", { userId, isOnline: true });
+    // 새로운 사용자가 연결되면 모든 사용자에게 온라인 상태를 업데이트
+    io.emit("userStatusUpdate", onlineUsers);
 
     // 친구 초대 관련 이벤트 핸들링
     handleChallenge(io, socket);
@@ -77,8 +79,11 @@ module.exports = (server) => {
 
     socket.on("disconnect", () => {
       console.log("클라이언트 연결 해제됨:", socket.id);
-      io.emit("userStatusUpdate", { userId, isOnline: false });
       delete users[userId];
+      delete onlineUsers[userId]; // 온라인 상태에서 제거
+
+      // 사용자 상태를 업데이트하여 모든 클라이언트에게 알림
+      io.emit("userStatusUpdate", onlineUsers);
 
       for (const challengeId in activeChallenges) {
         if (challengeId.startsWith(`${userId}-`)) {

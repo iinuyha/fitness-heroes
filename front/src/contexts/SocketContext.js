@@ -22,11 +22,9 @@ export const SocketProvider = ({ children }) => {
         console.log("Connected to server with ID:", socketRef.current.id);
       });
 
-      socketRef.current.on("userStatusUpdate", ({ userId, isOnline }) => {
-        setOnlineFriends((prevStatus) => ({
-          ...prevStatus,
-          [userId]: isOnline,
-        }));
+      // 전체 사용자 온라인 상태 업데이트
+      socketRef.current.on("userStatusUpdate", (updatedStatus) => {
+        setOnlineFriends(updatedStatus);
       });
 
       return () => {
