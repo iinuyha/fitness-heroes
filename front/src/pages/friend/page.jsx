@@ -83,7 +83,7 @@ function FriendPage() {
 
     if (isInvitationSent) {
       setPopupMessage(
-        "이미 초대를 보냈습니다.<br>2분 뒤에 다시 초대를 할 수 있습니다."
+        "이미 초대를 보냈습니다.<br>30초 뒤에 다시 초대를 할 수 있습니다."
       );
       setIsPopupOpen(true);
       return;
@@ -152,10 +152,17 @@ function FriendPage() {
 
   // 대결 취소 처리
   const handleChallengeCancelled = ({ message }) => {
-    setPopupMessage(message);
-    setIsPopupOpen(true);
-    setIsInvitationSent(false);
-    setCurrentRoom(null);
+    // 현재 팝업 닫기
+    setIsPopupOpen(false);
+    setIsChallengePopupOpen(false);
+
+    // 새로운 팝업 메시지 설정
+    setTimeout(() => {
+      setPopupMessage(message);
+      setIsPopupOpen(true);
+      setIsInvitationSent(false);
+      setCurrentRoom(null);
+    }, 300); // 팝업 전환을 위한 약간의 지연 시간
   };
 
   // 대결 거절 처리됨 (초대하는 사람 브라우저에 뜨는거)
@@ -204,7 +211,7 @@ function FriendPage() {
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />
       )}
 
-      {isChallengePopupOpen && (
+      {isChallengePopupOpen && !isPopupOpen && (
         <YesNoPopup
           message={`${challengeFrom.from}님이 대결을 신청했습니다. 수락하시겠습니까?`}
           onConfirm={handleChallengeAccept}

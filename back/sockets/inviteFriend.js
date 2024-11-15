@@ -65,10 +65,10 @@ function handleChallenge(io, socket) {
             );
 
             // 대결 취소 알림 전송
-            io.to(users[userId]).emit("challengeCancelled", {
+            io.to(io.users[userId]).emit("challengeCancelled", {
               message: `${friendId}님이 응답하지 않아 대결이 자동으로 취소되었습니다.`,
             });
-            io.to(users[friendId]).emit("challengeCancelled", {
+            io.to(io.users[friendId]).emit("challengeCancelled", {
               message: `${userId}님의 대결 신청이 자동으로 취소되었습니다.`,
             });
 
