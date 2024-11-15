@@ -21,7 +21,8 @@ app.set("port", port);
  */
 
 var server = http.createServer(app);
-socketHandler(server);
+const io = socketHandler(server);
+app.set("io", io); // io 객체를 Express에 추가
 
 /**
  * Listen on provided port, on all network interfaces.

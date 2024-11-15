@@ -141,32 +141,23 @@ router.post("/invite", async (req, res) => {
       return res.status(400).json({ error: "초대할 친구의 ID가 필요합니다." });
     }
 
-    const existingChallenge = await Challenge.findOne({
-      challengerId: userId,
-      challengedId: friendId,
-      status: "pending",
-    });
-    if (existingChallenge) {
-      return res.status(400).json({
-        error: "이미 초대를 보냈습니다. 상대방의 응답을 기다리고 있습니다.",
-      });
+    // 친구가 온라인인지 확인
+    const io = req.app.get("io");
+    const users = io ? io.users : {};
+
+    console.log("현재 온라인 사용자 상태:", users); // 디버깅용 로그
+    console.log(`확인할 친구 ID: ${friendId}`);
+
+    if (!users[friendId]) {
+      return res.status(400).json({ error: "친구가 온라인 상태가 아닙니다." });
     }
 
-    const challenge = new Challenge({
-      challengerId: userId,
-      challengedId: friendId,
-      status: "pending",
-      createdAt: new Date(),
-    });
-
-    await challenge.save();
     res.json({
-      message: "친구에게 초대가 성공적으로 전송되었습니다.",
-      challengeId: challenge._id,
+      message: "친구에게 초대 요청이 전송되었습니다.",
       success: true,
     });
   } catch (error) {
-    console.error("초대 중 오류 발생:", error);
+    console.error("초대 처리 중 오류 발생:", error);
     res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
   }
 });
