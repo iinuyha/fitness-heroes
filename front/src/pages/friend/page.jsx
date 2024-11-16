@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom"; // useNavigate 임포트
 import {
   fetchFriendList,
   searchFriend,
@@ -23,6 +24,8 @@ function FriendPage() {
 
   const token = localStorage.getItem("token");
   const { socket, onlineFriends } = useContext(SocketContext);
+
+  const navigate = useNavigate(); // useNavigate 훅 사용
 
   useEffect(() => {
     loadFriends();
@@ -195,14 +198,12 @@ function FriendPage() {
 
   // 게임 시작 처리
   const handleGameStart = ({ roomId }) => {
-    setPopupMessage("게임을 시작합니다!");
-    setIsPopupOpen(true);
-
     setFriendList((prevFriendList) =>
       prevFriendList.map((friend) =>
         friend.isInvited ? { ...friend, isInvited: false } : friend
       )
     );
+    navigate(`/friend/challenge/${roomId}`);
   };
 
   // 친구 추가 처리

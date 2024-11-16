@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import Popup from "../../../components/Popup"; // Popup 컴포넌트 경로 확인
-import { useParams } from "react-router-dom";
 
-function ExerciseStartPage() {
-  const { roomId } = useParams();
+function ChallengeStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true); // 팝업이 처음에 열려있도록 설정
 
   // 팝업 닫기 시 웹캠 화면을 표시
@@ -15,7 +13,7 @@ function ExerciseStartPage() {
     <div className="exercise-start-page">
       {isPopupOpen && (
         <Popup
-          message="<img alt='점핑잭 튜토리얼' src='/image/jumping_jack.png'/>"
+          message="게임을 시작합니다!"
           onClose={handlePopupClose} // 닫기 시 handlePopupClose 호출
         />
       )}
@@ -34,4 +32,4 @@ function ExerciseStartPage() {
   );
 }
 
-export default ExerciseStartPage;
+export default ChallengeStartPage;

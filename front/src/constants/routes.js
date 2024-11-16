@@ -10,6 +10,7 @@ export const routes = {
   exercise: "/story/exercise",
   focus: "/focus",
   friend: "/friend",
+  challengeStart: "/friend/challenge/:roomId",
   character: "/character",
   store: "/character/store",
   mypage: "/mypage",
