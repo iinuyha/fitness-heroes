@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom"; // useNavigate 임포트
 import {
   fetchFriendList,
   searchFriend,
@@ -19,11 +20,12 @@ function FriendPage() {
   const [popupMessage, setPopupMessage] = useState("");
   const [newFriendId, setNewFriendId] = useState("");
   const [isChallengePopupOpen, setIsChallengePopupOpen] = useState(false);
-  const [challengeFrom, setChallengeFrom] = useState(null);
-  const [currentRoom, setCurrentRoom] = useState(null);
+  const [challengeInfo, setChallengeInfo] = useState(null);
 
   const token = localStorage.getItem("token");
   const { socket, onlineFriends } = useContext(SocketContext);
+
+  const navigate = useNavigate(); // useNavigate 훅 사용
 
   useEffect(() => {
     loadFriends();
@@ -129,7 +131,7 @@ function FriendPage() {
 
   // 대결 수신 처리 (초대받는 사람)
   const handleChallengeReceived = ({ from, roomId }) => {
-    setChallengeFrom({ from, roomId });
+    setChallengeInfo({ from, roomId });
     setIsChallengePopupOpen(true);
     socket.emit("joinRoom", { roomId });
   };
@@ -137,11 +139,10 @@ function FriendPage() {
   // 초대받은 사람이 대결을 수락함
   const handleChallengeAccept = async () => {
     try {
-      await acceptInvitation(token, challengeFrom.from);
+      await acceptInvitation(token, challengeInfo.from);
       socket.emit("acceptChallenge", {
-        roomId: challengeFrom.roomId,
+        roomId: challengeInfo.roomId,
       });
-      setCurrentRoom(challengeFrom.roomId);
       setIsChallengePopupOpen(false);
     } catch (error) {
       console.error("대결 수락 실패:", error);
@@ -153,9 +154,9 @@ function FriendPage() {
   // 초대받은 사람이 대결을 거절함
   const handleChallengeDecline = async () => {
     try {
-      await declineInvitation(token, challengeFrom.from);
+      await declineInvitation(token, challengeInfo.from);
       socket.emit("declineChallenge", {
-        roomId: challengeFrom.roomId,
+        roomId: challengeInfo.roomId,
       });
 
       setIsChallengePopupOpen(false);
@@ -179,7 +180,6 @@ function FriendPage() {
       setPopupMessage(message);
       setIsPopupOpen(true);
       setIsInvitationSent(false);
-      setCurrentRoom(null);
     }, 300); // 팝업 전환을 위한 약간의 지연 시간
   };
 
@@ -198,15 +198,12 @@ function FriendPage() {
 
   // 게임 시작 처리
   const handleGameStart = ({ roomId }) => {
-    setCurrentRoom(roomId);
-    setPopupMessage("게임을 시작합니다!");
-    setIsPopupOpen(true);
-
     setFriendList((prevFriendList) =>
       prevFriendList.map((friend) =>
         friend.isInvited ? { ...friend, isInvited: false } : friend
       )
     );
+    navigate(`/friend/challenge/${roomId}`);
   };
 
   // 친구 추가 처리
@@ -243,7 +240,7 @@ function FriendPage() {
 
       {isChallengePopupOpen && !isPopupOpen && (
         <YesNoPopup
-          message={`${challengeFrom.from}님이 대결을 신청했습니다. 수락하시겠습니까?`}
+          message={`${challengeInfo.from}님이 대결을 신청했습니다. 수락하시겠습니까?`}
           onConfirm={handleChallengeAccept}
           onCancel={handleChallengeDecline}
         />

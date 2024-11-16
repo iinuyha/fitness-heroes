@@ -11,6 +11,7 @@ import EpisodePage from "../pages/story/episode/page";
 import ExerciseStartPage from "../pages/story/exerciseStart/page";
 import FocusPage from "../pages/focus/page";
 import FriendPage from "../pages/friend/page";
+import ChallengeStartPage from "../pages/friend/challengeStart/page";
 import CharacterPage from "../pages/character/page";
 import StorePage from "../pages/store/page";
 import MypagePage from "../pages/mypage/page";
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
   {
     path: routes.friend,
     element: <FriendPage />,
+  },
+  {
+    path: routes.challengeStart,
+    element: <ChallengeStartPage />,
   },
   {
     path: routes.character,
