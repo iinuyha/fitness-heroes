@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Popup from "../../../components/Popup"; // Popup 컴포넌트 경로 확인
 import { useParams } from "react-router-dom";
+import JumpingJackCounter from "../../../components/JumpingJackCounter";
+
 
 function ExerciseStartPage() {
   const { roomId } = useParams();
@@ -13,23 +15,17 @@ function ExerciseStartPage() {
 
   return (
     <div className="exercise-start-page">
-      {isPopupOpen && (
+      {isPopupOpen ? (
         <Popup
           message="<img alt='점핑잭 튜토리얼' src='/image/jumping_jack.png'/>"
           onClose={handlePopupClose} // 닫기 시 handlePopupClose 호출
         />
+      ) : (
+        // 팝업이 닫혔을 때 JumpingJackCounter 컴포넌트 표시
+        <div className="webcam-exercise-page flex items-center justify-center h-screen">
+          <JumpingJackCounter />
+        </div>
       )}
-
-      {/* 팝업이 닫혔을 때 운동 시작 웹캠 화면 표시 */}
-      <div className="webcam-exercise-page flex items-center justify-center h-screen">
-        <h1 className="text-3xl font-semibold text-center text-black">
-          운동 시작! 여기에 웹캠 화면 표시되면 됨
-        </h1>
-
-        {/* 여기에 웹캠 또는 운동 진행 화면을 위한 로직을 추가하면 됨!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-        {/* 여기에 웹캠 또는 운동 진행 화면을 위한 로직을 추가하면 됨!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-        {/* 여기에 웹캠 또는 운동 진행 화면을 위한 로직을 추가하면 됨!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-      </div>
     </div>
   );
 }
