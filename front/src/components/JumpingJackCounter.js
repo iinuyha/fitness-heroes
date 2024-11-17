@@ -9,11 +9,8 @@ function JumpingJackCounter() {
   const canvasRef = useRef(null);
   const detectorRef = useRef(null);
   const [count, setCount] = useState(0);
-  const [isJumping, setIsJumping] = useState(false);
-  const [isLanding, setIsLanding] = useState(false);
+  let isJumping = false;
 
-  // 점프 높이 및 손목/어깨 위치 조건
-  const jumpThreshold = 75;
 
   useEffect(() => {
     const setupBackend = async () => {
@@ -50,6 +47,7 @@ function JumpingJackCounter() {
     return () => clearInterval(interval);
   }, []);
 
+
   const detectPose = async () => {
     const detector = detectorRef.current;
 
@@ -68,16 +66,16 @@ function JumpingJackCounter() {
       if (poses && poses.length > 0) {
         const pose = poses[0];
         drawPose(pose, video.videoWidth, video.videoHeight);
-        processPose(pose, video.videoHeight);
+        processPose(pose);
       }
     }
   };
 
-  const processPose = (pose, videoHeight) => {
+  const processPose = (pose) => {
     // 필요한 관절만 필터링
     const keypoints = pose.keypoints.filter(
       (kp) =>
-        ['left_ankle', 'right_ankle', 'left_wrist', 'right_wrist', 'left_shoulder', 'right_shoulder'].includes(kp.name)
+        ['left_ankle', 'right_ankle', 'left_wrist', 'right_wrist', 'left_shoulder', 'right_shoulder', 'nose'].includes(kp.name)
     );
   
     // 관절 좌표 및 신뢰도 확인
@@ -87,87 +85,59 @@ function JumpingJackCounter() {
     const rightWrist = keypoints.find((kp) => kp.name === 'right_wrist' && kp.score > 0.5);
     const leftShoulder = keypoints.find((kp) => kp.name === 'left_shoulder' && kp.score > 0.5);
     const rightShoulder = keypoints.find((kp) => kp.name === 'right_shoulder' && kp.score > 0.5);
+    const nose = keypoints.find((kp) => kp.name === 'nose' && kp.score > 0.5);
   
-    if (leftAnkle && rightAnkle && leftWrist && rightWrist && leftShoulder && rightShoulder) {
-      // 땅에서 발목까지의 거리 계산
-      const leftAnkleDistance = videoHeight - leftAnkle.y;
-      const rightAnkleDistance = videoHeight - rightAnkle.y;
+    if (leftAnkle && rightAnkle && leftWrist && rightWrist && leftShoulder && rightShoulder && nose) {
+      // 발목 사이 거리와 어깨 사이 거리 계산
+      const ankleDistance = Math.abs(rightAnkle.x - leftAnkle.x);
+      const shoulderDistance = Math.abs(rightShoulder.x - leftShoulder.x);
   
-      // 발목의 거리 콘솔 출력
-      console.log(`Left Ankle Distance from Ground: ${leftAnkleDistance}`);
-      console.log(`Right Ankle Distance from Ground: ${rightAnkleDistance}`);
-  
-      // 점프 감지: 발목이 땅에서 jumpThreshold 이상 올라간 경우
+      // 점프 감지: 발목 사이의 거리가 어깨보다 크고 손목이 머리 위에 있는 경우
       if (
-        leftAnkleDistance > jumpThreshold &&
-        rightAnkleDistance > jumpThreshold &&
-        leftWrist.y < leftShoulder.y && // 손목이 어깨 위로 올라감
-        rightWrist.y < rightShoulder.y &&
+        ankleDistance > shoulderDistance &&
+        leftWrist.y < nose.y &&
+        rightWrist.y < nose.y &&
         !isJumping // 이미 점프 상태가 아닌 경우만
       ) {
-        setIsJumping(true);
-        setIsLanding(false);
-  
-        // 점프 상태 출력
-        console.log("점프 상태: isJumping = true, isLanding = false");
-        return;
+        isJumping = true;
+        console.log("점프 감지");
       }
   
-      // 착지 감지: 발목이 땅에서 jumpThreshold 이하로 내려온 경우
+      // 착지 감지: 발목 사이의 거리가 어깨보다 작고 손목이 어깨 아래로 내려간 경우
       if (
-        leftAnkleDistance <= jumpThreshold &&
-        rightAnkleDistance <= jumpThreshold &&
-        isJumping && // 이전에 점프 상태여야 함
-        !isLanding // 이미 착지 상태가 아닌 경우
+        ankleDistance <= shoulderDistance &&
+        isJumping &&
+        leftWrist.y > leftShoulder.y && // 손목이 어깨 아래로 내려감
+        rightWrist.y > rightShoulder.y
       ) {
-        // 발목이 땅과 가까워진 뒤 손목 조건을 확인
-        if (
-          leftWrist.y > leftShoulder.y && // 손목이 어깨 아래로 내려감
-          rightWrist.y > rightShoulder.y
-        ) {
-          setCount((prevCount) => prevCount + 1);
-          setIsLanding(true);
-          setIsJumping(false);
-  
-        console.log("점핑잭 카운트 증가! 현재 카운트:", count + 1);
-        console.log("착지 상태: isJumping = false, isLanding = true");
-      }
-    }
-  
-      // 착지 상태 초기화
-      if (
-        leftAnkleDistance <= jumpThreshold &&
-        rightAnkleDistance <= jumpThreshold &&
-        isLanding
-      ) {
-        setIsLanding(false);
-  
-        console.log("착지 상태 초기화: isLanding = false");
+        setCount((prevCount) => prevCount + 1);
+        console.log("착지 감지");
+        console.log("점핑잭 카운트 증가!");
+        isJumping = false;
       }
     }
   };
 
-  
   const drawPose = (pose, videoWidth, videoHeight) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  
+
     const canvasWidth = canvasRef.current.width;
     const canvasHeight = canvasRef.current.height;
-  
+
     const xScale = canvasWidth / videoWidth;
     const yScale = canvasHeight / videoHeight;
-  
+
     // 필요한 관절만 필터링
     const keypoints = pose.keypoints.filter((kp) => 
-      ['left_ankle', 'right_ankle', 'left_wrist', 'right_wrist', 'left_shoulder', 'right_shoulder'].includes(kp.name)
+      ['left_ankle', 'right_ankle', 'left_wrist', 'right_wrist', 'left_shoulder', 'right_shoulder', 'nose'].includes(kp.name)
     );
-  
+
     keypoints.forEach((keypoint) => {
       if (keypoint.score > 0.5) {
         const adjustedX = keypoint.x * xScale;
         const adjustedY = keypoint.y * yScale;
-  
+
         ctx.beginPath();
         ctx.arc(adjustedX, adjustedY, 5, 0, 2 * Math.PI);
         ctx.fillStyle = 'red';
@@ -176,7 +146,6 @@ function JumpingJackCounter() {
     });
   };
 
-  
   return (
     <div style={{ textAlign: 'center', position: 'relative' }}>
       <h1>점핑잭 카운터</h1>
