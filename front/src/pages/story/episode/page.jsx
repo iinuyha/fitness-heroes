@@ -19,9 +19,14 @@ function EpisodePage() {
   const itemsPerPage = 3; // 페이지당 에피소드 개수
 
   useEffect(() => {
+    const token = localStorage.getItem("token"); // JWT 토큰을 가져오기
+
+    if (!token) {
+      navigate(routes.login);
+    }
+
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token"); // JWT 토큰을 가져오기
         const data = await getLatestStoryEpisode(token);
         const userGender = await getUserGender(token);
 

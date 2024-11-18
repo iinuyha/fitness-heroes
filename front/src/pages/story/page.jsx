@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // 팝업 컴포넌트 가져오기
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
@@ -11,6 +11,7 @@ function StoryPage() {
   const [popupMessage, setPopupMessage] = useState("");
   const [concern, setConcern] = useState("근력"); // 예시로 "근력" 설정
   const [episode, setEpisode] = useState(0);
+  const navigate = useNavigate();
 
   const initialConcernList = [
     "근력",
@@ -24,6 +25,9 @@ function StoryPage() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token"); // JWT 토큰을 localStorage에서 가져오기
+        if (!token) {
+          navigate(routes.login);
+        }
         const data = await getLatestStoryEpisode(token);
         setConcern(data.concern);
         setEpisode(data.episode);
@@ -33,7 +37,7 @@ function StoryPage() {
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);

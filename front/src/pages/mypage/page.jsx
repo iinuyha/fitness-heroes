@@ -14,14 +14,29 @@ function MypagePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInfo, setUserInfo] = useState({});
   const [storyInfo, setStoryInfo] = useState([]);
+  const [decodedToken, setDecodedToken] = useState(null);
 
   const { socket } = useContext(SocketContext); // SocketContext에서 socket을 가져옵니다.
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) {
+      navigate(routes.login);
+    } else {
+      try {
+        const decoded = jwtDecode(token);
+        setDecodedToken(decoded);
+      } catch (error) {
+        console.error("토큰 디코딩에 실패했습니다:", error);
+        navigate(routes.login);
+      }
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const token = localStorage.getItem("token");
         const data = await getUserInfo(token);
         setUserInfo(data);
       } catch (error) {
@@ -31,7 +46,6 @@ function MypagePage() {
 
     const fetchStoryInfo = async () => {
       try {
-        const token = localStorage.getItem("token");
         const data = await getStoryInfo(token);
         setStoryInfo(data.slice(1)); // 첫 번째 원소를 제외
       } catch (error) {
@@ -41,7 +55,7 @@ function MypagePage() {
 
     fetchUserInfo();
     fetchStoryInfo();
-  }, []);
+  }, [token]);
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
@@ -105,9 +119,7 @@ function MypagePage() {
                   {userInfo.concern} 히어로즈
                 </span>
               </div>
-              <p className="mb-2">
-                ID | {jwtDecode(localStorage.getItem("token")).id}
-              </p>
+              <p className="mb-2">ID | {decodedToken ? decodedToken.id : ""}</p>
               <p className="mb-2">생년월일 | {userInfo.birthdate}</p>
               <p>성별 | {userInfo.gender ? "남성" : "여성"}</p>
             </div>

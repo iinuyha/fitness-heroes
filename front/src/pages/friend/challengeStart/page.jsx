@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Popup from "../../../components/Popup"; // Popup 컴포넌트 경로 확인
+import { routes } from "../../../constants/routes";
 
 function ChallengeStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true); // 팝업이 처음에 열려있도록 설정
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate(routes.login);
+    }
+  }, [navigate]);
 
   // 팝업 닫기 시 웹캠 화면을 표시
   const handlePopupClose = () => {

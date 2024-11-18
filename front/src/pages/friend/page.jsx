@@ -12,6 +12,7 @@ import ReturnDisplay from "../../components/ReturnDisplay";
 import YesNoPopup from "../../components/YesNoPopup";
 import Popup from "../../components/Popup";
 import SocketContext from "../../contexts/SocketContext";
+import { routes } from "../../constants/routes";
 
 function FriendPage() {
   const [friendList, setFriendList] = useState([]);
@@ -26,6 +27,12 @@ function FriendPage() {
   const { socket, onlineFriends } = useContext(SocketContext);
 
   const navigate = useNavigate(); // useNavigate 훅 사용
+
+  useEffect(() => {
+    if (!token) {
+      navigate(routes.login);
+    }
+  }, [navigate]);
 
   useEffect(() => {
     loadFriends();
