@@ -22,7 +22,7 @@ function SignUpPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate(routes.home); // 토큰이 있으면 홈으로 이동
+      navigate(routes.menu); // 토큰이 있으면 홈으로 이동
     }
   }, [navigate]);
 
@@ -112,12 +112,20 @@ function SignUpPage() {
                 id="userId"
                 type="text"
                 placeholder="아이디"
-                className={`w-4/6 p-2 border-b-2 ${userIdError ? "border-red-500" : "border-white"} focus:border-[#0675C5] bg-transparent text-white focus:outline-none`}
+                className={`w-4/6 p-2 border-b-2 ${
+                  userIdError ? "border-red-500" : "border-white"
+                } focus:border-[#0675C5] bg-transparent text-white focus:outline-none`}
                 value={id}
                 onChange={handleUserIdChange} // 아이디 입력 시 상태 변경
               />
               <button
-                className={`w-2/6 ml-2 ${isCheckButtonDisabled ? "bg-[#0675C5] text-white" : "bg-white text-black"} font-bold py-2 px-4 rounded-full ${isCheckButtonDisabled ? "cursor-not-allowed" : ""}`}
+                className={`w-2/6 ml-2 ${
+                  isCheckButtonDisabled
+                    ? "bg-[#0675C5] text-white"
+                    : "bg-white text-black"
+                } font-bold py-2 px-4 rounded-full ${
+                  isCheckButtonDisabled ? "cursor-not-allowed" : ""
+                }`}
                 onClick={handleCheckId}
                 disabled={isCheckButtonDisabled} // 중복 확인 버튼 비활성화 여부
               >
@@ -146,7 +154,9 @@ function SignUpPage() {
               id="password2"
               type="password"
               placeholder="비밀번호 확인"
-              className={`w-full p-2 border-b-2 ${!isPasswordMatch ? "border-red-500" : "border-white"} focus:border-[#0675C5] bg-transparent text-white focus:outline-none`}
+              className={`w-full p-2 border-b-2 ${
+                !isPasswordMatch ? "border-red-500" : "border-white"
+              } focus:border-[#0675C5] bg-transparent text-white focus:outline-none`}
               value={password2}
               onChange={handlePasswordChange(setPassword2)} // 비밀번호2 변경
               onBlur={handlePasswordBlur}

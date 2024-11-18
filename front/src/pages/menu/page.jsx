@@ -1,10 +1,18 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay"; // InfoPopup 컴포넌트 불러오기
 
 function MenuPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate(routes.login);
+    }
+  }, [navigate]);
 
   const handlePopupOpen = () => {
     setIsPopupOpen(!isPopupOpen);

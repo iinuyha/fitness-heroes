@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
@@ -12,6 +12,13 @@ function StorePage() {
   const [ownedSkins, setOwnedSkins] = useState({}); // 보유한 스킨 초기값
   const [coin, setCoin] = useState(0);
   const token = localStorage.getItem("token"); // 예시로 토큰을 localStorage에서 가져옴
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      navigate(routes.login);
+    }
+  }, [navigate, token]);
 
   useEffect(() => {
     // 초기 캐릭터 정보 불러오기
