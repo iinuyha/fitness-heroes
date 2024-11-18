@@ -32,7 +32,7 @@ function FriendPage() {
     if (!token) {
       navigate(routes.login);
     }
-  }, [navigate]);
+  }, [navigate, token]);
 
   useEffect(() => {
     loadFriends();
@@ -43,7 +43,7 @@ function FriendPage() {
     return () => {
       cleanupSocketListeners();
     };
-  }, [socket, token]);
+  }, [socket]);
 
   // 소켓 이벤트 리스너 설정
   const setupSocketListeners = () => {

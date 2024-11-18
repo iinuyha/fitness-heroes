@@ -52,7 +52,7 @@ function EpisodePage() {
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleGameStart = () => {
     navigate(routes.exercise); // 운동 페이지로 이동
