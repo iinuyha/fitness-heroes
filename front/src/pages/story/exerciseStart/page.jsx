@@ -30,7 +30,7 @@ function ExerciseStartPage() {
   };
 
   return (
-    <div className="exercise-start-page">
+    <div className="exercise-start-page bg-black">
       {isPopupOpen ? (
         <Popup
           message="<img alt='점핑잭 튜토리얼' src='/image/jumping_jack.png'/>"
@@ -38,7 +38,7 @@ function ExerciseStartPage() {
         />
       ) : (
         // 팝업이 닫혔을 때 JumpingJackCounter 컴포넌트 표시
-        <div className="webcam-exercise-page flex items-center justify-center h-screen bg-blue-500">
+        <div className="webcam-exercise-page flex items-center justify-center h-screen bg-black">
           <div className="absolute top-0 left-0 w-full z-10">
             <ReturnDisplay />
           </div>
