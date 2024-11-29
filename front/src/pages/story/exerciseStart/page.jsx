@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from "react";
 import Popup from "../../../components/Popup"; // Popup 컴포넌트 경로 확인
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import JumpingJackCounter from "../../../components/JumpingJackCounter";
 import { routes } from "../../../constants/routes";
 
 function ExerciseStartPage() {
-  const { roomId } = useParams();
   const [isPopupOpen, setIsPopupOpen] = useState(true); // 팝업이 처음에 열려있도록 설정
   const location = useLocation();
-  const { currentEpi } = location.state || {}; // 이게 현재 수행중인 에피소드 숫자임
+  const { currentEpi } = location.state || {}; // 이게 현재 수행중인 에피소드 정보
   const navigate = useNavigate();
+  const episode = currentEpi.episode; // 현재 에피소드의 숫자
+  const count = currentEpi.exe_count; // 현재 에피소드의 카운트 수
+  const set = currentEpi.exe_set; // 현재 에피소드의 세트수
+  const concern = currentEpi.concern; // 현재 에피소드의 운동종류
+
+  // 나중에 운동 다 끝나면 id, concern, episode, date를 Story DB에 저장해야 함!!
 
   useEffect(() => {
     const token = localStorage.getItem("token");

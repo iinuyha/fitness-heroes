@@ -14,7 +14,7 @@ function EpisodePage() {
   const [episodes, setEpisodes] = useState([]);
   const [progressDisplay, setProgressDisplay] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [currentEpi, setCurrentEpi] = useState(0);
+  const [currentEpi, setCurrentEpi] = useState({});
   const navigate = useNavigate();
 
   const itemsPerPage = 3; // 페이지당 에피소드 개수
@@ -39,14 +39,14 @@ function EpisodePage() {
         const episodeCards = exerciseEpisodes.map((exercise) => {
           const isCompleted = exercise.episode <= data.episode;
           const isNext = exercise.episode === data.episode + 1;
-          setCurrentEpi(data.episode + 1);
           return {
             ...exercise,
             buttonEnabled: isNext,
             isVisible: !isCompleted,
           };
         });
-        setEpisodes(episodeCards);
+        setEpisodes(episodeCards); // 남아있는 에피소드들 목록
+        setCurrentEpi(episodeCards[data.episode]); // episodeCards 중 첫 번째 요소를 currentEpi에 저장
       } catch (error) {
         console.error("Failed to fetch story data:", error);
       }
