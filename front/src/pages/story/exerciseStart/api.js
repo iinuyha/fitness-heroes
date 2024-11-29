@@ -1,10 +1,16 @@
 import axios from "axios";
 
-export const saveNewEpisode = async ({ token, episode, concern, date }) => {
+export const saveNewEpisode = async ({
+  token,
+  episode,
+  exe_name,
+  exe_count,
+  exe_set,
+}) => {
   try {
     const response = await axios.post(
-      `${process.env.REACT_APP_SERVER_URL}/api/story`,
-      { episode: episode, concern: concern, date: date },
+      `${process.env.REACT_APP_SERVER_URL}/api/story/save-exercise`,
+      { episode, exe_name, exe_set, exe_count },
       {
         headers: {
           Authorization: `Bearer ${token}`,
