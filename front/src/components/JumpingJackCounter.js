@@ -1,20 +1,19 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import * as tf from "@tensorflow/tfjs"; // TensorFlow.js
 import "@tensorflow/tfjs-backend-webgl"; // WebGL 백엔드
 import * as posedetection from "@tensorflow-models/pose-detection"; // MoveNet 라이브러리
 import Webcam from "react-webcam";
 
-function JumpingJackCounter() {
+function JumpingJackCounter({ onCountIncrease }) {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const detectorRef = useRef(null);
-  const [count, setCount] = useState(0);
   let isJumping = false;
 
   useEffect(() => {
     const setupBackend = async () => {
       try {
-        await tf.setBackend("webgl"); // WebGL 백엔드 설정
+        await tf.setBackend("webgl");
         await tf.ready();
         console.log("WebGL 백엔드 설정 완료");
       } catch (error) {
@@ -71,7 +70,6 @@ function JumpingJackCounter() {
   };
 
   const processPose = (pose) => {
-    // 필요한 관절만 필터링
     const keypoints = pose.keypoints.filter((kp) =>
       [
         "left_ankle",
@@ -136,9 +134,7 @@ function JumpingJackCounter() {
         leftWrist.y > leftShoulder.y && // 손목이 어깨 아래로 내려감
         rightWrist.y > rightShoulder.y
       ) {
-        setCount((prevCount) => prevCount + 1);
-        console.log("착지 감지");
-        console.log("점핑잭 카운트 증가!");
+        onCountIncrease(); // 부모 컴포넌트로 카운트 증가 이벤트 전달
         isJumping = false;
       }
     }
@@ -182,34 +178,21 @@ function JumpingJackCounter() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* Webcam */}
       <Webcam
         ref={webcamRef}
         className="absolute top-0 left-0 w-full h-full object-cover"
         videoConstraints={{
-          width: window.innerWidth, // 웹캠 너비 설정
-          height: window.innerHeight, // 웹캠 높이 설정
-          facingMode: "user", // 전면 카메라 사용
+          width: window.innerWidth,
+          height: window.innerHeight,
+          facingMode: "user",
         }}
       />
-      {/* Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute top-0 left-0 w-full h-full object-cover"
         width={window.innerWidth}
         height={window.innerHeight}
       />
-      {/* 점핑잭 카운트 표시 */}
-      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 z-10 bg-black bg-opacity-50 text-white px-6 py-3 rounded-lg text-lg font-bold">
-        점핑잭 횟수: {count}
-      </div>
-      {/* 리셋 버튼 (하단 가운데) */}
-      <button
-        onClick={() => setCount(0)}
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 bg-black bg-opacity-50 text-white px-6 py-3 rounded-lg text-lg font-bold"
-      >
-        리셋
-      </button>
     </div>
   );
 }

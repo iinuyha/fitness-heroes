@@ -85,14 +85,14 @@ function FriendPage() {
   // 대결 신청하기 (초대하는 사람)
   const handleInvite = async (friend) => {
     if (!onlineFriends[friend.id]) {
-      setPopupMessage("친구가 온라인 상태일 때만 초대할 수 있습니다.");
+      setPopupMessage("친구가 온라인 상태일 때만 신청할 수 있습니다.");
       setIsPopupOpen(true);
       return;
     }
 
     if (isInvitationSent) {
       setPopupMessage(
-        "이미 초대를 보냈습니다.<br>30초 뒤에 다시 초대를 할 수 있습니다."
+        "이미 대결 신청을 보냈습니다.<br>30초 뒤에 다시 신청 할 수 있습니다."
       );
       setIsPopupOpen(true);
       return;
@@ -126,11 +126,11 @@ function FriendPage() {
         setIsPopupOpen(true);
       }
     } catch (error) {
-      console.error("초대 실패:", error);
+      console.error("대결 신청 실패:", error);
       if (error.response?.data?.error) {
         setPopupMessage(error.response.data.error);
       } else {
-        setPopupMessage("초대 처리 중 오류가 발생했습니다.");
+        setPopupMessage("대결 신청 처리 중 오류가 발생했습니다.");
       }
       setIsPopupOpen(true);
     }
@@ -167,7 +167,7 @@ function FriendPage() {
       });
 
       setIsChallengePopupOpen(false);
-      setPopupMessage("초대를 거절하였습니다.");
+      setPopupMessage("대결 신청을 거절하였습니다.");
       setIsPopupOpen(true);
     } catch (error) {
       console.error("대결 거절 실패:", error);
@@ -216,14 +216,14 @@ function FriendPage() {
   // 친구 추가 처리
   const handleAddFriend = async () => {
     if (!newFriendId.trim()) {
-      setPopupMessage("친구의 ID를 입력해주세요.");
+      setPopupMessage("팔로우 할 친구의 ID를 입력해주세요.");
       setIsPopupOpen(true);
       return;
     }
 
     try {
       const response = await searchFriend(token, newFriendId);
-      setPopupMessage(`${newFriendId}님과 친구가 되셨습니다!`);
+      setPopupMessage(`${newFriendId}님을 팔로우합니다!`);
       setIsPopupOpen(true);
       setNewFriendId("");
       loadFriends();
@@ -258,7 +258,7 @@ function FriendPage() {
           className="text-3xl text-white mb-6 font-semibold"
           style={{ textShadow: "0 0 10px rgba(255, 255, 255, 0.5)" }}
         >
-          친구를 초대하여 운동 경쟁을 해보세요!
+          팔로우 중인 친구와 운동 대결을 해보세요!
         </h1>
 
         <div className="flex items-center">
@@ -279,7 +279,7 @@ function FriendPage() {
         {/* 친구 목록 */}
         <div className="w-full max-w-md bg-white bg-opacity-10 rounded-lg p-3">
           <h2 className="text-xl text-white font-semibold mb-2 w-full text-center bg-[#193E59] py-2 rounded-xl">
-            친구 목록
+            팔로우 목록
           </h2>
           <ul className="space-y-0 max-h-72 overflow-y-auto pr-3">
             {friendList.map((friend) => (
@@ -306,7 +306,7 @@ function FriendPage() {
                   } text-white`}
                 >
                   {friend.isInvited
-                    ? "초대 중..." // 초대 상태 표시
+                    ? "대결 신청 중..." // 초대 상태 표시
                     : onlineFriends[friend.id]
                     ? "대결신청"
                     : "오프라인"}
@@ -328,7 +328,7 @@ function FriendPage() {
               onClick={handleAddFriend}
               className="px-4 py-2 rounded-xl bg-[#193E59] text-white font-semibold"
             >
-              친구 추가 +
+              팔로우 추가 +
             </button>
           </div>
         </div>
