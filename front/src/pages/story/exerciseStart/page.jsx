@@ -11,8 +11,8 @@ function ExerciseStartPage() {
   const { currentEpi } = location.state || {}; // 이게 현재 수행중인 에피소드 정보
   const navigate = useNavigate();
   const episode = currentEpi.episode; // 현재 에피소드의 숫자
-  const count = currentEpi.exe_count; // 현재 에피소드의 카운트 수
-  const set = currentEpi.exe_set; // 현재 에피소드의 세트수
+  const countPerSet = currentEpi.exe_count; // 한 세트당 해야 할 카운트
+  const totalSets = currentEpi.exe_set; // 전체 세트 수
   const concern = currentEpi.concern; // 현재 에피소드의 운동종류
 
   // 나중에 운동 다 끝나면 id, concern, episode, date를 Story DB에 저장해야 함!!
