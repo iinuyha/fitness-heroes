@@ -186,6 +186,11 @@ function JumpingJackCounter() {
       <Webcam
         ref={webcamRef}
         className="absolute top-0 left-0 w-full h-full object-cover"
+        videoConstraints={{
+          width: window.innerWidth, // 웹캠 너비 설정
+          height: window.innerHeight, // 웹캠 높이 설정
+          facingMode: "user", // 전면 카메라 사용
+        }}
       />
       {/* Canvas */}
       <canvas
