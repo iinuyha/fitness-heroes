@@ -39,7 +39,9 @@ function ExerciseStartPage() {
       ) : (
         // 팝업이 닫혔을 때 JumpingJackCounter 컴포넌트 표시
         <div className="webcam-exercise-page flex items-center justify-center h-screen bg-blue-500">
-          <ReturnDisplay />
+          <div className="absolute top-0 left-0 w-full z-10">
+            <ReturnDisplay />
+          </div>
           <JumpingJackCounter />
         </div>
       )}
