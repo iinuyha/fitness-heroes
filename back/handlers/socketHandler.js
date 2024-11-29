@@ -37,8 +37,14 @@ module.exports = (server) => {
     // 사용자 상태 업데이트
     io.emit("userStatusUpdate", io.users);
 
-    // handleChallenge 호출
+    // 친구 신청 및 대결 신청 관련 이벤트
     handleChallenge(io, socket);
+
+    // 코인 업데이트 이벤트
+    socket.on("coinUpdated", () => {
+      io.emit("coinUpdated");
+      console.log("서버에서 코인업데이트 발생");
+    });
 
     socket.on("disconnect", () => {
       // 사용자 삭제

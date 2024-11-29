@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
-import * as tf from '@tensorflow/tfjs'; // TensorFlow.js
-import '@tensorflow/tfjs-backend-webgl'; // WebGL 백엔드
-import * as posedetection from '@tensorflow-models/pose-detection'; // MoveNet 라이브러리
-import Webcam from 'react-webcam';
+import React, { useRef, useState, useEffect } from "react";
+import * as tf from "@tensorflow/tfjs"; // TensorFlow.js
+import "@tensorflow/tfjs-backend-webgl"; // WebGL 백엔드
+import * as posedetection from "@tensorflow-models/pose-detection"; // MoveNet 라이브러리
+import Webcam from "react-webcam";
 
 function JumpingJackCounter() {
   const webcamRef = useRef(null);
@@ -11,29 +11,29 @@ function JumpingJackCounter() {
   const [count, setCount] = useState(0);
   let isJumping = false;
 
-
   useEffect(() => {
     const setupBackend = async () => {
       try {
-        await tf.setBackend('webgl'); // WebGL 백엔드 설정
+        await tf.setBackend("webgl"); // WebGL 백엔드 설정
         await tf.ready();
-        console.log('WebGL 백엔드 설정 완료');
+        console.log("WebGL 백엔드 설정 완료");
       } catch (error) {
-        console.error('WebGL 백엔드 설정 실패:', error);
+        console.error("WebGL 백엔드 설정 실패:", error);
       }
     };
 
     const loadModel = async () => {
       try {
         const detector = await posedetection.createDetector(
-          posedetection.SupportedModels.MoveNet, {
+          posedetection.SupportedModels.MoveNet,
+          {
             modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
           }
         );
         detectorRef.current = detector;
-        console.log('MoveNet 모델 로드 성공');
+        console.log("MoveNet 모델 로드 성공");
       } catch (error) {
-        console.error('MoveNet 모델 로드 실패:', error);
+        console.error("MoveNet 모델 로드 실패:", error);
       }
     };
 
@@ -46,7 +46,6 @@ function JumpingJackCounter() {
     }, 100);
     return () => clearInterval(interval);
   }, []);
-
 
   const detectPose = async () => {
     const detector = detectorRef.current;
@@ -73,25 +72,52 @@ function JumpingJackCounter() {
 
   const processPose = (pose) => {
     // 필요한 관절만 필터링
-    const keypoints = pose.keypoints.filter(
-      (kp) =>
-        ['left_ankle', 'right_ankle', 'left_wrist', 'right_wrist', 'left_shoulder', 'right_shoulder', 'nose'].includes(kp.name)
+    const keypoints = pose.keypoints.filter((kp) =>
+      [
+        "left_ankle",
+        "right_ankle",
+        "left_wrist",
+        "right_wrist",
+        "left_shoulder",
+        "right_shoulder",
+        "nose",
+      ].includes(kp.name)
     );
-  
+
     // 관절 좌표 및 신뢰도 확인
-    const leftAnkle = keypoints.find((kp) => kp.name === 'left_ankle' && kp.score > 0.5);
-    const rightAnkle = keypoints.find((kp) => kp.name === 'right_ankle' && kp.score > 0.5);
-    const leftWrist = keypoints.find((kp) => kp.name === 'left_wrist' && kp.score > 0.5);
-    const rightWrist = keypoints.find((kp) => kp.name === 'right_wrist' && kp.score > 0.5);
-    const leftShoulder = keypoints.find((kp) => kp.name === 'left_shoulder' && kp.score > 0.5);
-    const rightShoulder = keypoints.find((kp) => kp.name === 'right_shoulder' && kp.score > 0.5);
-    const nose = keypoints.find((kp) => kp.name === 'nose' && kp.score > 0.5);
-  
-    if (leftAnkle && rightAnkle && leftWrist && rightWrist && leftShoulder && rightShoulder && nose) {
+    const leftAnkle = keypoints.find(
+      (kp) => kp.name === "left_ankle" && kp.score > 0.5
+    );
+    const rightAnkle = keypoints.find(
+      (kp) => kp.name === "right_ankle" && kp.score > 0.5
+    );
+    const leftWrist = keypoints.find(
+      (kp) => kp.name === "left_wrist" && kp.score > 0.5
+    );
+    const rightWrist = keypoints.find(
+      (kp) => kp.name === "right_wrist" && kp.score > 0.5
+    );
+    const leftShoulder = keypoints.find(
+      (kp) => kp.name === "left_shoulder" && kp.score > 0.5
+    );
+    const rightShoulder = keypoints.find(
+      (kp) => kp.name === "right_shoulder" && kp.score > 0.5
+    );
+    const nose = keypoints.find((kp) => kp.name === "nose" && kp.score > 0.5);
+
+    if (
+      leftAnkle &&
+      rightAnkle &&
+      leftWrist &&
+      rightWrist &&
+      leftShoulder &&
+      rightShoulder &&
+      nose
+    ) {
       // 발목 사이 거리와 어깨 사이 거리 계산
       const ankleDistance = Math.abs(rightAnkle.x - leftAnkle.x);
       const shoulderDistance = Math.abs(rightShoulder.x - leftShoulder.x);
-  
+
       // 점프 감지: 발목 사이의 거리가 어깨보다 크고 손목이 머리 위에 있는 경우
       if (
         ankleDistance > shoulderDistance &&
@@ -102,7 +128,7 @@ function JumpingJackCounter() {
         isJumping = true;
         console.log("점프 감지");
       }
-  
+
       // 착지 감지: 발목 사이의 거리가 어깨보다 작고 손목이 어깨 아래로 내려간 경우
       if (
         ankleDistance <= shoulderDistance &&
@@ -119,7 +145,7 @@ function JumpingJackCounter() {
   };
 
   const drawPose = (pose, videoWidth, videoHeight) => {
-    const ctx = canvasRef.current.getContext('2d');
+    const ctx = canvasRef.current.getContext("2d");
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
     const canvasWidth = canvasRef.current.width;
@@ -129,8 +155,16 @@ function JumpingJackCounter() {
     const yScale = canvasHeight / videoHeight;
 
     // 필요한 관절만 필터링
-    const keypoints = pose.keypoints.filter((kp) => 
-      ['left_ankle', 'right_ankle', 'left_wrist', 'right_wrist', 'left_shoulder', 'right_shoulder', 'nose'].includes(kp.name)
+    const keypoints = pose.keypoints.filter((kp) =>
+      [
+        "left_ankle",
+        "right_ankle",
+        "left_wrist",
+        "right_wrist",
+        "left_shoulder",
+        "right_shoulder",
+        "nose",
+      ].includes(kp.name)
     );
 
     keypoints.forEach((keypoint) => {
@@ -140,41 +174,42 @@ function JumpingJackCounter() {
 
         ctx.beginPath();
         ctx.arc(adjustedX, adjustedY, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = "red";
         ctx.fill();
       }
     });
   };
 
   return (
-    <div style={{ textAlign: 'center', position: 'relative' }}>
-      <h1>점핑잭 카운터</h1>
-      <div style={{ position: 'relative', width: 800, height: 600 }}>
-        <Webcam
-          ref={webcamRef}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: 800,
-            height: 600,
-          }}
-        />
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: 800,
-            height: 600,
-          }}
-          width={800}
-          height={600}
-        />
+    <div className="relative w-screen h-screen overflow-hidden">
+      {/* Webcam */}
+      <Webcam
+        ref={webcamRef}
+        className="absolute top-0 left-0 w-full h-full object-cover"
+        videoConstraints={{
+          width: window.innerWidth, // 웹캠 너비 설정
+          height: window.innerHeight, // 웹캠 높이 설정
+          facingMode: "user", // 전면 카메라 사용
+        }}
+      />
+      {/* Canvas */}
+      <canvas
+        ref={canvasRef}
+        className="absolute top-0 left-0 w-full h-full object-cover"
+        width={window.innerWidth}
+        height={window.innerHeight}
+      />
+      {/* 점핑잭 카운트 표시 */}
+      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 z-10 bg-black bg-opacity-50 text-white px-6 py-3 rounded-lg text-lg font-bold">
+        점핑잭 횟수: {count}
       </div>
-      <h2>점핑잭 횟수: {count}</h2>
-      <button onClick={() => setCount(0)}>리셋</button>
+      {/* 리셋 버튼 (하단 가운데) */}
+      <button
+        onClick={() => setCount(0)}
+        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 bg-black bg-opacity-50 text-white px-6 py-3 rounded-lg text-lg font-bold"
+      >
+        리셋
+      </button>
     </div>
   );
 }

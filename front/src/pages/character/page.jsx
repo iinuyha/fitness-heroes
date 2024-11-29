@@ -39,7 +39,7 @@ function CharacterPage() {
     };
 
     fetchCharacterInfo();
-  }, []);
+  }, [navigate]);
 
   // 스킨 변경 함수
   const handleSkinChange = async (skin) => {
