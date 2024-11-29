@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Popup from "../../../components/Popup"; // Popup 컴포넌트 경로 확인
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import JumpingJackCounter from "../../../components/JumpingJackCounter";
 import { routes } from "../../../constants/routes";
 
 function ExerciseStartPage() {
   const { roomId } = useParams();
   const [isPopupOpen, setIsPopupOpen] = useState(true); // 팝업이 처음에 열려있도록 설정
+  const location = useLocation();
+  const { currentEpi } = location.state || {}; // 이게 현재 수행중인 에피소드 숫자임
   const navigate = useNavigate();
 
   useEffect(() => {

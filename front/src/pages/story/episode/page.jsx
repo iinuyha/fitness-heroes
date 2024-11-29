@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { routes } from "../../../constants/routes";
 import Popup from "../../../components/Popup";
 import CoinInfoDisplay from "../../../components/CoinInfoDisplay";
@@ -14,6 +14,7 @@ function EpisodePage() {
   const [episodes, setEpisodes] = useState([]);
   const [progressDisplay, setProgressDisplay] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [currentEpi, setCurrentEpi] = useState(0);
   const navigate = useNavigate();
 
   const itemsPerPage = 3; // 페이지당 에피소드 개수
@@ -31,7 +32,6 @@ function EpisodePage() {
         const userGender = await getUserGender(token);
 
         setConcern(data.concern);
-
         setProgressDisplay(`${data.episode} / 33`);
 
         const exerciseEpisodes = await getEpCardData(data.concern, userGender);
@@ -39,6 +39,7 @@ function EpisodePage() {
         const episodeCards = exerciseEpisodes.map((exercise) => {
           const isCompleted = exercise.episode <= data.episode;
           const isNext = exercise.episode === data.episode + 1;
+          setCurrentEpi(data.episode + 1);
           return {
             ...exercise,
             buttonEnabled: isNext,
@@ -53,10 +54,6 @@ function EpisodePage() {
 
     fetchData();
   }, [navigate]);
-
-  const handleGameStart = () => {
-    navigate(routes.exercise); // 운동 페이지로 이동
-  };
 
   // 현재 페이지에 표시할 에피소드 계산
   const paginatedEpisodes = episodes
@@ -128,6 +125,7 @@ function EpisodePage() {
           ) : (
             <div className="w-10" /> // 빈 공간을 만들어 위치 고정
           )}
+
           {/* 에피소드 카드 리스트 */}
           <div className="flex space-x-6 items-center">
             {paginatedEpisodes.map((epCard, index) => (
@@ -140,7 +138,7 @@ function EpisodePage() {
                 } w-64`}
               >
                 <h3 className="font-semibold text-2xl">
-                  에피소드{epCard.episode}
+                  에피소드 {epCard.episode}
                 </h3>
                 <ul className="text-left mt-4 text-base">
                   <li>
@@ -148,15 +146,19 @@ function EpisodePage() {
                     {epCard.exe_count}회 X {epCard.exe_set}세트
                   </li>
                 </ul>
-                <button
-                  className={`mt-4 py-2 px-6 rounded-lg font-semibold text-white ${
-                    epCard.buttonEnabled ? "bg-blue-500" : "bg-gray-400"
-                  }`}
-                  disabled={!epCard.buttonEnabled}
-                  onClick={handleGameStart}
-                >
-                  게임 시작
-                </button>
+                {epCard.buttonEnabled ? (
+                  <Link
+                    to={routes.exercise}
+                    state={{ currentEpi }} // nextEpi을 props로 전달
+                    className="mt-4 py-2 px-6 rounded-lg font-semibold text-white bg-blue-500 inline-block"
+                  >
+                    게임 시작
+                  </Link>
+                ) : (
+                  <div className="mt-4 py-2 px-6 rounded-lg font-semibold text-white bg-gray-400 inline-block">
+                    잠금
+                  </div>
+                )}
               </div>
             ))}
           </div>
