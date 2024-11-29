@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Popup from "../../../components/Popup"; // Popup 컴포넌트 경로 확인
 import { useNavigate, useLocation } from "react-router-dom";
 import JumpingJackCounter from "../../../components/JumpingJackCounter";
+import ReturnDisplay from "../../../components/ReturnDisplay";
 import { routes } from "../../../constants/routes";
 
 function ExerciseStartPage() {
@@ -37,7 +38,8 @@ function ExerciseStartPage() {
         />
       ) : (
         // 팝업이 닫혔을 때 JumpingJackCounter 컴포넌트 표시
-        <div className="webcam-exercise-page flex items-center justify-center h-screen">
+        <div className="webcam-exercise-page flex items-center justify-center h-screen bg-blue-500">
+          <ReturnDisplay />
           <JumpingJackCounter />
         </div>
       )}
