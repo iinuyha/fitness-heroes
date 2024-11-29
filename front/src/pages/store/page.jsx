@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import { buySkin, getCharacterInfo } from "./api";
+import SocketContext from "../../contexts/SocketContext";
 
 function StorePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -13,6 +14,7 @@ function StorePage() {
   const [coin, setCoin] = useState(0);
   const token = localStorage.getItem("token"); // 예시로 토큰을 localStorage에서 가져옴
   const navigate = useNavigate();
+  const { socket } = useContext(SocketContext);
 
   useEffect(() => {
     if (!token) {
@@ -33,7 +35,7 @@ function StorePage() {
     };
 
     fetchCharacterInfo();
-  }, [token]);
+  }, [token, socket]);
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
@@ -75,6 +77,7 @@ function StorePage() {
         setOwnedSkins(data.skins);
         setCoin(data.remainingCoin);
         handlePopupOpen(`${skinId} 스킨을 구매했습니다!`);
+        socket.emit("coinUpdated");
       } catch (error) {
         handlePopupOpen("스킨 구매에 실패했습니다.");
       }
