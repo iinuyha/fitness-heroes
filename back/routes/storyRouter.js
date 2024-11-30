@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/user");
 const Story = require("../models/story");
+const Character = require("../models/character")
 const Exercise = require("../models/exercise"); // 경로 확인
 
 const secretKey = "hi"; // 환경 변수 대신 character.js에서 사용하는 동일한 key 사용
@@ -63,35 +64,77 @@ router.get("/", authenticateToken, async (req, res) => {
 // POST /api/story/save-exercise 엔드포인트
 router.post("/save-exercise", authenticateToken, async (req, res) => {
   const { episode, exe_name, exe_set, exe_count } = req.body;
-
   const userId = req.user.id;
 
-  // 사용자 존재 확인
-  const user = await User.findOne({ id: userId });
-  if (!user) {
-    return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
-  }
-
   try {
-    // 새로운 Story 인스턴스 생성
-    const newStory = new Story({
-      id: userId,
-      concern: user.concern,
-      episode,
-      exe_name,
-      exe_set,
-      exe_count,
-      date: new Date(),
-    });
+    // 사용자 존재 확인
+    const user = await User.findOne({ id: userId });
+    if (!user) {
+      return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
+    }
 
-    // MongoDB에 저장
-    await newStory.save();
+    // 기존 데이터 확인
+    const existingStory = await Story.findOne({ id: userId });
 
-    res.json({ message: "운동 정보가 성공적으로 저장되었습니다." });
+    if (existingStory) {
+      // 데이터가 존재하면 업데이트
+      existingStory.episode = episode;
+      existingStory.exe_name = exe_name;
+      existingStory.exe_set = exe_set;
+      existingStory.exe_count = exe_count;
+      existingStory.date = new Date(); // 업데이트 시간 갱신
+      await existingStory.save();
+
+      res.json({
+        message: "운동 정보가 성공적으로 업데이트되었습니다.",
+        story: existingStory,
+      });
+    } else {
+      // 데이터가 없으면 새로 생성
+      const newStory = new Story({
+        id: userId,
+        concern: user.concern,
+        episode,
+        exe_name,
+        exe_set,
+        exe_count,
+        date: new Date(),
+      });
+
+      await newStory.save();
+
+      res.json({
+        message: "운동 정보가 성공적으로 생성되었습니다.",
+        story: newStory,
+      });
+    }
   } catch (error) {
-    console.error("데이터 저장 오류:", error);
-    res.status(500).json({ error: "데이터 저장 실패" });
+    console.error("데이터 처리 오류:", error);
+    res.status(500).json({ error: "데이터 처리 실패" });
   }
 });
+
+// POST /api/story/add-coin 엔드포인트
+router.post("/add-coin", authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // 캐릭터 정보 조회
+    const character = await Character.findOne({ id: userId });
+    if (!character) {
+      return res.status(404).json({ error: "캐릭터 정보를 찾을 수 없습니다." });
+    }
+
+    // 코인 +20 추가
+    character.coin = (character.coin || 0) + 20;
+    await character.save();
+
+    res.json({ message: "코인이 성공적으로 추가되었습니다.", coin: character.coin });
+  } catch (error) {
+    console.error("코인 추가 오류:", error);
+    res.status(500).json({ error: "코인 추가 실패" });
+  }
+});
+
 
 module.exports = router;
