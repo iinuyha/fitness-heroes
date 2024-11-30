@@ -130,70 +130,75 @@ function MypagePage() {
                 src={`/image/concern/${userInfo.concern}.png`}
                 alt={`${userInfo.concern} 지역`}
                 className="h-28"
-              />
+                />
             </div>
-            <p className="text-lg font-semibold">
-              진행도 | {storyInfo.length}/33
-            </p>
+            {currentStoryInfo.map((episode) =>
+              <p className="text-lg font-semibold">
+                진행도 | {episode.episode}/33
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="bg-white bg-opacity-20 rounded-xl p-10 text-white w-2/4 relative">
-          <div className="mb-4 flex justify-between">
-            <h2 className="text-xl font-semibold text-white">지난 에피소드</h2>
-            <div className="text-right text-sm text-white">
-              시작일 | {storyInfo[0] ? storyInfo[0].date : "데이터 없음"}
+        {/* "지난 에피소드" 섹션 조건부 렌더링 */}
+        {currentStoryInfo.some((episode) => episode.episode > 0) > 0 && (
+          <div className="bg-white bg-opacity-20 rounded-xl p-10 text-white w-2/4 relative">
+            <div className="mb-4 flex justify-between">
+              <h2 className="text-xl font-semibold text-white">지난 에피소드</h2>
+              <div className="text-right text-sm text-white">
+                시작일 | {storyInfo[0] ? storyInfo[0].date : "데이터 없음"}
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-center relative">
-            {currentIndex > 0 && (
-              <button
-                onClick={prevSlide}
-                className="absolute left-0 text-white text-3xl"
-              >
-                &#10094;
-              </button>
-            )}
-            <div className="flex space-x-4 w-full max-w-2xl mx-10 justify-center">
-              {currentStoryInfo.map((episode) => (
-                <div
-                  key={`${episode.concern}-${episode.episode}`}
-                  className="bg-white rounded-lg p-4 w-1/4 text-center text-gray-800"
+            <div className="flex items-center justify-center relative">
+              {currentIndex > 0 && (
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-0 text-white text-3xl"
                 >
-                  <h3 className="font-semibold text-lg">
-                    {episode.concern} 지역
-                  </h3>
-                  <p className="font-semibold text-sm mt-2">
-                    에피소드 {episode.episode}
-                  </p>
-                  <p className="font-semibold text-xs mt-2 text-gray-500">
-                    {episode.date}
-                  </p>
-                </div>
+                  &#10094;
+                </button>
+              )}
+              <div className="flex space-x-4 w-full max-w-2xl mx-10 justify-center">
+                {currentStoryInfo.map((episode) => (
+                  <div
+                    key={`${episode.concern}-${episode.episode}`}
+                    className="bg-white rounded-lg p-4 w-1/4 text-center text-gray-800"
+                  >
+                    <h3 className="font-semibold text-lg">
+                      {episode.concern} 지역
+                    </h3>
+                    <p className="font-semibold text-sm mt-2">
+                      에피소드 {episode.episode}
+                    </p>
+                    <p className="font-semibold text-xs mt-2 text-gray-500">
+                      {episode.date}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              {currentIndex < totalPages - 1 && (
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-0 text-white text-3xl"
+                >
+                  &#10095;
+                </button>
+              )}
+            </div>
+
+            <div className="flex justify-center mt-4 space-x-2">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <span
+                  key={index}
+                  className={`h-2 w-2 rounded-full ${
+                    index === currentIndex ? "bg-white" : "bg-gray-500"
+                  }`}
+                />
               ))}
             </div>
-            {currentIndex < totalPages - 1 && (
-              <button
-                onClick={nextSlide}
-                className="absolute right-0 text-white text-3xl"
-              >
-                &#10095;
-              </button>
-            )}
           </div>
-
-          <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <span
-                key={index}
-                className={`h-2 w-2 rounded-full ${
-                  index === currentIndex ? "bg-white" : "bg-gray-500"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
+        )}
 
         <button
           onClick={handleLogout}
