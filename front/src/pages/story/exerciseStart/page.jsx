@@ -40,50 +40,49 @@ function ExerciseStartPage() {
     };
   }, [navigate]);
 
+  useEffect(() => {
+    if (count === countPerSet) {
+      // countPerSet에 도달하면 카운트 초기화 및 세트 증가
+      setCount(0); // count 초기화
+      if (currentSet < totalSets) {
+        handleToNextSet(); // 다음 세트로 이동
+      } else {
+        setIsWorkoutComplete(true); // 운동 종료
+      }
+    }
+  }, [count, countPerSet, currentSet, totalSets]);
+  
+
   const handlePopupClose = () => {
     setIsPopupOpen(false);
   };
 
   const handleCountIncrease = () => {
     if (!isResting) {
-      setCount((prevCount) => {
-        if (prevCount + 1 === countPerSet) {
-          setCurrentSet((prevSet) => {
-            const nextSet = prevSet + 1;
-            if (nextSet > totalSets) {
-              setIsWorkoutComplete(true); // 운동 종료
-              return prevSet;
-            } else {
-              handleToNextSet(); // 다음 세트로 넘어가기
-              return nextSet;
-            }
-          });
-          return 0; // 다음 세트를 위해 카운트 초기화
-        }
-        return prevCount + 1;
-      });
+      setCount((prevCount) => prevCount + 1); // count 증가
     }
   };
-
+  
   const handleToNextSet = () => {
-    // 기존 인터벌 정리
+    // 세트 증가
+    setCurrentSet((prevSet) => prevSet + 1);
+  
+    // 휴식 로직 시작
+    setIsResting(true);
+    setRestTime(20);
+  
     if (restIntervalRef.current) {
       clearInterval(restIntervalRef.current);
     }
-
-    setIsResting(true); // 휴식 시작
-    setRestTime(20); // 휴식 시간 초기화
-
+  
     restIntervalRef.current = setInterval(() => {
       setRestTime((prevTime) => {
         if (prevTime <= 1) {
-          if (restIntervalRef.current) {
-            clearInterval(restIntervalRef.current);
-          }
-          setIsResting(false); // 휴식 종료
-          return 20; // 다음 초기값 설정
+          clearInterval(restIntervalRef.current);
+          setIsResting(false);
+          return 20;
         }
-        return prevTime - 1; // 남은 시간
+        return prevTime - 1;
       });
     }, 1000);
   };
@@ -126,6 +125,16 @@ function ExerciseStartPage() {
                   : `${count}/${countPerSet} (세트 ${currentSet}/${totalSets})`}
               </div>
               <JumpingJackCounter onCountIncrease={handleCountIncrease} />
+  
+              {/* 테스트 버튼 */}
+              <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+                <button
+                  onClick={handleCountIncrease}
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-base font-semibold"
+                >
+                  테스트: Count 증가
+                </button>
+              </div>
             </>
           )}
           {isWorkoutComplete && (
