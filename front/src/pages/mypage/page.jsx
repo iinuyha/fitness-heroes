@@ -47,7 +47,7 @@ function MypagePage() {
     const fetchStoryInfo = async () => {
       try {
         const data = await getStoryInfo(token);
-        setStoryInfo(data.slice(1)); // 첫 번째 원소를 제외
+        setStoryInfo(data);
       } catch (error) {
         handlePopupOpen("스토리 정보를 불러오는데 실패했습니다.");
       }
