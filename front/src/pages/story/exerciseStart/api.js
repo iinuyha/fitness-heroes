@@ -25,3 +25,22 @@ export const saveNewEpisode = async ({
     throw error;
   }
 };
+
+export const addStoryCoin = async (token) => {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_SERVER_URL}/api/story/add-coin`,
+      {}, // 요청 바디가 필요 없으면 빈 객체
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("코인 추가 성공:", response.data);
+    return response.data; // 성공적으로 추가된 데이터 반환
+  } catch (error) {
+    console.error("코인 추가 실패:", error);
+    throw error; // 에러를 상위로 전달
+  }
+};

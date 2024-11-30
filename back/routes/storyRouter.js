@@ -101,7 +101,7 @@ router.post("/add-coin", authenticateToken, async (req, res) => {
 
   try {
     // 캐릭터 정보 조회
-    const character = await Character.findOne({ userId });
+    const character = await Character.findOne({ id: userId });
     if (!character) {
       return res.status(404).json({ error: "캐릭터 정보를 찾을 수 없습니다." });
     }

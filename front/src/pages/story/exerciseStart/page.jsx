@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import JumpingJackCounter from "../../../components/JumpingJackCounter";
 import ReturnDisplay from "../../../components/ReturnDisplay";
 import { routes } from "../../../constants/routes";
-import { saveNewEpisode } from "./api";
+import { saveNewEpisode, addStoryCoin } from "./api";
 
 function ExerciseStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
@@ -87,9 +87,11 @@ function ExerciseStartPage() {
     }, 1000);
   };
 
-  const saveExercise = async () => {
-    const token = localStorage.getItem("token"); // JWT 토큰을 localStorage에서 가져오기
+  const handleExerciseComplete = async () => {
+    const token = localStorage.getItem("token"); // 로컬스토리지에서 토큰 가져오기
+
     try {
+      // 1. 운동 기록 저장
       await saveNewEpisode({
         token,
         episode,
@@ -97,11 +99,18 @@ function ExerciseStartPage() {
         exe_count: countPerSet,
         exe_set: totalSets,
       });
-      console.log("운동 기록 저장 후 페이지 이동");
-      navigate(routes.episode); // 저장 성공 후 페이지 이동
+
+      console.log("운동 기록 저장 완료");
+
+      // 2. 코인 추가
+      await addStoryCoin(token);
+      console.log("코인 추가 완료");
+
+      // 성공 시 페이지 이동
+      navigate(routes.episode);
     } catch (error) {
-      console.error("운동 기록 저장 실패:", error.message);
-      alert("운동 기록 저장에 실패했습니다. 다시 시도해주세요.");
+      console.error("운동 저장 또는 코인 추가 중 오류 발생:", error);
+      alert("운동 기록 저장 또는 코인 추가에 실패했습니다.");
     }
   };
 
@@ -141,12 +150,10 @@ function ExerciseStartPage() {
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-10">
               <div className="text-white px-6 py-3 rounded-lg text-2xl font-bold text-center">
                 <p>
-                  운동이 종료되었습니다! 수고하셨습니다! (코인 얻는 로직 및 내용
-                  추가해야 함) 이거 확인 버튼 누르면 현재 운동 저장되어서 다음
-                  에피소드로 넘어가버리니까 일단 확인 누르지 마
+                  운동이 종료되었습니다! 수고하셨습니다!
                 </p>
                 <button
-                  onClick={saveExercise}
+                  onClick={handleExerciseComplete}
                   className="block mt-4 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold"
                 >
                   확인
