@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/user");
 const Story = require("../models/story");
+const Character = require("../models/character")
 const Exercise = require("../models/exercise"); // 경로 확인
 
 const secretKey = "hi"; // 환경 변수 대신 character.js에서 사용하는 동일한 key 사용
@@ -93,5 +94,28 @@ router.post("/save-exercise", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "데이터 저장 실패" });
   }
 });
+
+// POST /api/story/add-coin 엔드포인트
+router.post("/add-coin", authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // 캐릭터 정보 조회
+    const character = await Character.findOne({ userId });
+    if (!character) {
+      return res.status(404).json({ error: "캐릭터 정보를 찾을 수 없습니다." });
+    }
+
+    // 코인 +20 추가
+    character.coin = (character.coin || 0) + 20;
+    await character.save();
+
+    res.json({ message: "코인이 성공적으로 추가되었습니다.", coin: character.coin });
+  } catch (error) {
+    console.error("코인 추가 오류:", error);
+    res.status(500).json({ error: "코인 추가 실패" });
+  }
+});
+
 
 module.exports = router;
