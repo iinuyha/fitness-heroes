@@ -27,13 +27,6 @@ function OnBoardingPage() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate(routes.menu);
-    }
-  }, [navigate]);
-
-  useEffect(() => {
     if (step === 5) {
       const timer = setTimeout(() => {
         setStep(6);
