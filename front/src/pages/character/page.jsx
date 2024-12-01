@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
@@ -12,6 +12,7 @@ function CharacterPage() {
   const [character, setCharacter] = useState("크로"); // 기본 캐릭터 이름
   const [currentSkin, setCurrentSkin] = useState("회원복"); // 기본 선택 스킨
   const [skins, setSkins] = useState([]); // 사용자가 소유한 스킨 목록
+  const navigate = useNavigate();
 
   const handlePopupOpen = (message) => {
     setPopupMessage(message);
@@ -23,6 +24,9 @@ function CharacterPage() {
     const fetchCharacterInfo = async () => {
       try {
         const token = localStorage.getItem("token"); // 토큰 가져오기
+        if (!token) {
+          navigate(routes.login);
+        }
         const data = await getCharacterInfo(token);
         setCharacter(data.character);
         setCurrentSkin(data.currentSkin);
@@ -35,7 +39,7 @@ function CharacterPage() {
     };
 
     fetchCharacterInfo();
-  }, []);
+  }, [navigate]);
 
   // 스킨 변경 함수
   const handleSkinChange = async (skin) => {

@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
       user.concern == null &&
       user.character == null;
 
-    const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: "1h" });
+    const token = jwt.sign({ id: user.id }, secretKey); // 토큰 만료 시간 없앰
 
     // 로그인 성공 응답
     return res.status(200).json({
