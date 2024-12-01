@@ -1,6 +1,7 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const { handleChallenge } = require("../sockets/inviteFriend");
+const { startChallenge } = require("../sockets/startChallenge");
 
 const SECRET_KEY = "hi";
 
@@ -39,6 +40,9 @@ module.exports = (server) => {
 
     // 친구 신청 및 대결 신청 관련 이벤트
     handleChallenge(io, socket);
+
+    // 운동대결 관련 이벤트
+    startChallenge(io, socket);
 
     // 코인 업데이트 이벤트
     socket.on("coinUpdated", () => {
