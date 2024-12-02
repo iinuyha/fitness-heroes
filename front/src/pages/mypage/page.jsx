@@ -47,7 +47,7 @@ function MypagePage() {
     const fetchStoryInfo = async () => {
       try {
         const data = await getStoryInfo(token);
-        setStoryInfo(data);
+        setStoryInfo(data.slice(1));
       } catch (error) {
         handlePopupOpen("스토리 정보를 불러오는데 실패했습니다.");
       }
@@ -132,16 +132,14 @@ function MypagePage() {
                 className="h-28"
                 />
             </div>
-            {currentStoryInfo.map((episode) =>
               <p className="text-lg font-semibold">
-                진행도 | {episode.episode}/33
+                진행도 | {storyInfo.length}/33
               </p>
-            )}
           </div>
         </div>
 
         {/* "지난 에피소드" 섹션 조건부 렌더링 */}
-        {currentStoryInfo.some((episode) => episode.episode > 0) > 0 && (
+       {storyInfo.length > 0 && (
           <div className="bg-white bg-opacity-20 rounded-xl p-10 text-white w-2/4 relative">
             <div className="mb-4 flex justify-between">
               <h2 className="text-xl font-semibold text-white">지난 에피소드</h2>
