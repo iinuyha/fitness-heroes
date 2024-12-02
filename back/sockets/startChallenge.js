@@ -80,7 +80,7 @@ function startChallenge(io, socket) {
     socket.leave(roomId);
     io.to(roomId).emit("userLeft");
 
-    //////// TODO: DB에 status를 declined으로 바꾸는 내용 추가하기
+    //////// ✅ TODO: DB에 status를 declined으로 바꾸는 내용 추가하기
 
     setTimeout(() => {
       io.socketsLeave(roomId);
@@ -126,9 +126,9 @@ function startChallenge(io, socket) {
       resultMessage: winnerMessage,
     });
 
-    // TODO: challenge 컬렉션에 대결 결과 저장하는 로직 추가
-    // TODO: 각 사용자의 friend 컬렉션에 승무패 결과 저장
-    // TODO: challenge 컬렉션의 status를 completed로 업데이트
+    //////////// ✅ TODO: challenge 컬렉션에 대결 결과 저장하는 로직 추가
+    //////////// ✅ TODO: 각 사용자의 friend 컬렉션에 승무패 결과 저장
+    //////////// ✅ TODO: challenge 컬렉션의 status를 completed로 업데이트
 
     // 방 상태 정리
     setTimeout(() => {

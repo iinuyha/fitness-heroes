@@ -5,6 +5,7 @@ import { routes } from "../../../constants/routes";
 import SocketContext from "../../../contexts/SocketContext";
 import { jwtDecode } from "jwt-decode";
 import JumpingJackCounter from "../../../components/JumpingJackCounter";
+import "./progressbar.css";
 
 function ChallengeStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
@@ -155,6 +156,7 @@ function ChallengeStartPage() {
 
     // 상대방이 나갔을 때 처리
     socket.on("userLeft", () => {
+      canCount(false);
       setOpponentLeft(true); // 상대방 나감 상태 업데이트
       setTimeout(() => {
         navigate(-1); // 이전 페이지로 이동
@@ -266,7 +268,7 @@ function ChallengeStartPage() {
   const startGameTimer = () => {
     const gameDuration = 30; // 게임 시간 30초
     setRemainingTime(gameDuration); // 초기 시간 설정
-    setCanCount(true); // 점핑잭 카운트 활성화
+    // setCanCount(true); // 점핑잭 카운트 활성화
 
     const timerInterval = setInterval(() => {
       setRemainingTime((prevTime) => {
@@ -304,9 +306,6 @@ function ChallengeStartPage() {
           돌아갑니다.
         </div>
       )}
-      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-black text-white text-xl font-bold px-4 py-2 rounded-lg z-30">
-        남은 시간: {remainingTime}초
-      </div>
       <div className="absolute top-0 left-0 w-full z-10">
         <button
           onClick={() => {
@@ -348,6 +347,15 @@ function ChallengeStartPage() {
                 </button>
               )}
             </div>
+            {/* 프로그레스 바 */}
+            <div className="progress-bar-container">
+              <div
+                className="progress-bar"
+                style={{
+                  height: `${(remainingTime / 30) * 100}%`, // 시간에 따라 높이 조정
+                }}
+              />
+            </div>
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
               <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {opponentId} (상대) - 점핑잭: {opponentCount}
@@ -378,6 +386,15 @@ function ChallengeStartPage() {
               <div className="absolute bottom-4 left-1/2 text-white text-xl z-20">
                 {opponentReady ? "상대방 준비 완료" : "상대방 준비 중..."}
               </div>
+            </div>
+            {/* 프로그레스 바 */}
+            <div className="progress-bar-container">
+              <div
+                className="progress-bar"
+                style={{
+                  height: `${(remainingTime / 30) * 100}%`, // 시간에 따라 높이 조정
+                }}
+              />
             </div>
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
               <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
