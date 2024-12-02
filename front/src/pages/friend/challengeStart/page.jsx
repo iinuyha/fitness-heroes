@@ -16,6 +16,11 @@ function ChallengeStartPage() {
   const [myCount, setMyCount] = useState(0); // 내 점핑잭 카운트
   const [opponentCount, setOpponentCount] = useState(0); // 상대방 점핑잭 카운트
 
+  const [isReady, setIsReady] = useState(false); // 내가 준비되었는지 여부
+  const [opponentReady, setOpponentReady] = useState(false); // 상대방 준비 여부
+  const [countdown, setCountdown] = useState(0); // 카운트다운 값
+  const [canCount, setCanCount] = useState(false); // 점핑잭 카운트 활성화 여부
+
   const navigate = useNavigate();
   const { roomId } = useParams(); // roomId 가져오기
   const { socket } = useContext(SocketContext);
@@ -116,6 +121,24 @@ function ChallengeStartPage() {
       }
     );
 
+    // 상대방이 준비됐는지
+    socket.on("opponentReady", () => {
+      setOpponentReady(true);
+    });
+
+    // 카운트다운 시작
+    socket.on("startCountdown", () => {
+      let countdownValue = 3;
+      setCountdown(countdownValue);
+      const countdownInterval = setInterval(() => {
+        countdownValue -= 1;
+        setCountdown(countdownValue);
+        if (countdownValue === 0) {
+          clearInterval(countdownInterval);
+          setCanCount(true); // 카운트 활성화
+        }
+      }, 1000);
+    });
     // 상대방 점핑잭 카운트 업데이트
     socket.on("updatedCount", ({ userId, count }) => {
       if (userId !== myId) {
@@ -128,6 +151,8 @@ function ChallengeStartPage() {
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
+      socket.off("opponentReady");
+      socket.off("startCountdown");
       socket.off("updatedCount");
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => track.stop());
@@ -181,6 +206,11 @@ function ChallengeStartPage() {
     }
   };
 
+  const handleReady = () => {
+    setIsReady(true);
+    socket.emit("ready", { roomId });
+  };
+
   // 팝업 닫기
   const handlePopupClose = () => {
     setIsPopupOpen(false);
@@ -188,22 +218,26 @@ function ChallengeStartPage() {
 
   // 점핑잭 카운트 증가 핸들러
   const handleCountIncrease = () => {
-    const newCount = myCount + 1;
-    setMyCount(newCount);
-    socket.emit("updateCount", { roomId, count: newCount });
+    // 카운트 가능한 상태
+    if (canCount) {
+      const newCount = myCount + 1;
+      setMyCount(newCount);
+      socket.emit("updateCount", { roomId, count: newCount });
+    }
   };
 
   return (
     <div className="exercise-start-page">
       {isPopupOpen && (
-        <Popup message="게임을 시작합니다!" onClose={handlePopupClose} />
+        <Popup
+          message="게임을 시작합니다!"
+          onClose={() => setIsPopupOpen(false)}
+        />
       )}
 
-      {/* 화상 통화 화면 */}
       <div className="webcam-container flex h-screen">
         {isChallenger ? (
           <>
-            {/* 챌린저 웹캠 왼쪽 */}
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {myId} (나) - 점핑잭: {myCount}
@@ -221,8 +255,15 @@ function ChallengeStartPage() {
               >
                 테스트: Count 증가
               </button>
+              {!isReady && (
+                <button
+                  onClick={handleReady}
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
+                >
+                  준비 완료
+                </button>
+              )}
             </div>
-            {/* 상대방 웹캠 오른쪽 */}
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {opponentId} (상대) - 점핑잭: {opponentCount}
@@ -233,11 +274,13 @@ function ChallengeStartPage() {
                 playsInline
                 className="w-full h-full object-cover"
               />
+              <div className="absolute bottom-4 left-4 text-white text-xl z-20">
+                {opponentReady ? "상대방 준비 완료" : "상대방 준비 중..."}
+              </div>
             </div>
           </>
         ) : (
           <>
-            {/* 상대방 웹캠 왼쪽 */}
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {opponentId} (상대) - 점핑잭: {opponentCount}
@@ -248,8 +291,10 @@ function ChallengeStartPage() {
                 playsInline
                 className="w-full h-full object-cover"
               />
+              <div className="absolute bottom-4 left-4 text-white text-xl z-20">
+                {opponentReady ? "상대방 준비 완료" : "상대방 준비 중..."}
+              </div>
             </div>
-            {/* 챌린저 웹캠 오른쪽 */}
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {myId} (나) - 점핑잭: {myCount}
@@ -267,10 +312,23 @@ function ChallengeStartPage() {
               >
                 테스트: Count 증가
               </button>
+              {!isReady && (
+                <button
+                  onClick={handleReady}
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
+                >
+                  준비 완료
+                </button>
+              )}
             </div>
           </>
         )}
       </div>
+      {countdown > 0 && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-6xl font-bold z-30">
+          {countdown}
+        </div>
+      )}
       <JumpingJackCounter
         videoRef={localVideoRef}
         onCountIncrease={handleCountIncrease}
