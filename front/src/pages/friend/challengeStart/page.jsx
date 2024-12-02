@@ -255,6 +255,7 @@ function ChallengeStartPage() {
     // 카운트 가능한 상태
     console.log("canCount 상태:", canCount);
     if (canCount) {
+      ///////////////// 여기서 카운트 버튼 클릭 시에는 canCount가 true여서 카운트가 올라가는데, 점핑잭을 실제로 하면 얘가 자꾸 false가 됨.. 이거만 true로 되게끔 하면 해결될듯
       setMyCount((prevCount) => {
         console.log("이전 카운트:", prevCount);
         const newCount = prevCount + 1;
