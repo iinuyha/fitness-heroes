@@ -76,7 +76,7 @@ function startChallenge(io, socket) {
   socket.on("disconnectFromChallenge", ({ roomId }) => {
     console.log(`${socket.userId}님이 방 ${roomId}에서 나갔습니다.`);
     socket.leave(roomId);
-    io.to(roomId).emit("userLeft", { userId: socket.userId });
+    io.to(roomId).emit("userLeft");
   });
 
   socket.on("endChallenge", ({ roomId }) => {

@@ -9,6 +9,7 @@ import JumpingJackCounter from "../../../components/JumpingJackCounter";
 function ChallengeStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
   const [isChallenger, setIsChallenger] = useState(false); // 챌린저 여부
+  const [opponentLeft, setOpponentLeft] = useState(false); // 상대방이 나갔는지 여부
 
   const [myId, setMyId] = useState(""); // 자신의 ID
   const [opponentId, setOpponentId] = useState(""); // 상대방의 ID
@@ -134,8 +135,8 @@ function ChallengeStartPage() {
         countdownValue -= 1;
         setCountdown(countdownValue);
         if (countdownValue === 0) {
-          clearInterval(countdownInterval);
           setCanCount(true); // 카운트 활성화
+          clearInterval(countdownInterval);
         }
       }, 1000);
     });
@@ -146,14 +147,24 @@ function ChallengeStartPage() {
       }
     });
 
+    // 상대방이 나갔을 때 처리
+    socket.on("userLeft", () => {
+      setOpponentLeft(true); // 상대방 나감 상태 업데이트
+      setTimeout(() => {
+        navigate(-1); // 이전 페이지로 이동
+      }, 2000); // 2초 뒤 페이지 이동
+    });
+
     return () => {
-      // Clean up
+      // 이벤트 정리
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
       socket.off("opponentReady");
       socket.off("startCountdown");
       socket.off("updatedCount");
+      socket.off("userLeft");
+
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => track.stop());
       }
@@ -234,12 +245,29 @@ function ChallengeStartPage() {
           onClose={() => setIsPopupOpen(false)}
         />
       )}
-
+      {opponentLeft && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-xl font-bold z-30">
+          상대방이 방을 나가 대결이 중단되었습니다. 2초 후 이전 화면으로
+          돌아갑니다.
+        </div>
+      )}
+      <div className="absolute top-0 left-0 w-full z-10">
+        <button
+          onClick={() => {
+            socket.emit("disconnectFromChallenge", { roomId }); // 이벤트 발생
+            navigate(-1); // 이전 페이지로 이동
+          }}
+          className="px-2 py-1 bg-red-500 text-white"
+        >
+          나가기
+        </button>
+      </div>
       <div className="webcam-container flex h-screen">
         {isChallenger ? (
           <>
+            <div></div>
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
-              <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
+              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {myId} (나) - 점핑잭: {myCount}
               </div>
               <video
@@ -258,14 +286,14 @@ function ChallengeStartPage() {
               {!isReady && (
                 <button
                   onClick={handleReady}
-                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 left-4 z-20"
                 >
                   준비 완료
                 </button>
               )}
             </div>
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
-              <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
+              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {opponentId} (상대) - 점핑잭: {opponentCount}
               </div>
               <video
@@ -274,7 +302,7 @@ function ChallengeStartPage() {
                 playsInline
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-4 left-4 text-white text-xl z-20">
+              <div className="absolute bottom-4 left-1/2 text-white text-xl z-20">
                 {opponentReady ? "상대방 준비 완료" : "상대방 준비 중..."}
               </div>
             </div>
@@ -282,7 +310,7 @@ function ChallengeStartPage() {
         ) : (
           <>
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
-              <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
+              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {opponentId} (상대) - 점핑잭: {opponentCount}
               </div>
               <video
@@ -291,12 +319,12 @@ function ChallengeStartPage() {
                 playsInline
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-4 left-4 text-white text-xl z-20">
+              <div className="absolute bottom-4 left-1/2 text-white text-xl z-20">
                 {opponentReady ? "상대방 준비 완료" : "상대방 준비 중..."}
               </div>
             </div>
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
-              <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
+              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
                 {myId} (나) - 점핑잭: {myCount}
               </div>
               <video
@@ -315,7 +343,7 @@ function ChallengeStartPage() {
               {!isReady && (
                 <button
                   onClick={handleReady}
-                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 left-4 z-20"
                 >
                   준비 완료
                 </button>
