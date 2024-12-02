@@ -36,6 +36,8 @@ function startChallenge(io, socket) {
       `사용자 ${socket.userId}의 점프잭 카운트가 ${count}로 업데이트됨 (방: ${roomId})`
     );
 
+    console.log(roomCounts[roomId]);
+
     socket.to(roomId).emit("updatedCount", {
       userId: socket.userId,
       count,
@@ -77,12 +79,66 @@ function startChallenge(io, socket) {
     console.log(`${socket.userId}님이 방 ${roomId}에서 나갔습니다.`);
     socket.leave(roomId);
     io.to(roomId).emit("userLeft");
+
+    //////// ✅ TODO: DB에 status를 declined으로 바꾸는 내용 추가하기
+
+    setTimeout(() => {
+      io.socketsLeave(roomId);
+      delete roomCounts[roomId];
+      delete roomReadyStates[roomId];
+      console.log(
+        `방 ${roomId}의 모든 소켓이 제거되고 상태가 초기화되었습니다.`
+      );
+    }, 5000);
   });
 
   socket.on("endChallenge", ({ roomId }) => {
     console.log(`방 ${roomId}에서 대결이 종료되었습니다.`);
-    io.to(roomId).emit("challengeEnded", { message: "대결이 종료되었습니다." });
-    io.socketsLeave(roomId); // 방에 있는 모든 소켓을 방에서 제거
+
+    // roomCounts에서 해당 방의 점수 데이터 가져오기
+    const results = roomCounts[roomId];
+    if (!results) {
+      console.error(`방 ${roomId}의 대결 결과를 찾을 수 없습니다.`);
+      return;
+    }
+
+    // 결과 계산
+    const scores = Object.entries(results); // results: { userId1: score1, userId2: score2 }
+    scores.sort((a, b) => b[1] - a[1]); // 점수 내림차순 정렬
+
+    let winnerMessage = "";
+    if (scores[0][1] === scores[1][1]) {
+      // 무승부
+      winnerMessage = "무승부";
+    } else {
+      // 승자 결정
+      winnerMessage = `${scores[0][0]}님이 승리하셨습니다!`; // 최고 점수의 사용자
+    }
+
+    // 결과 로그
+    console.log(`최종 스코어:`, results);
+    console.log(`결과 메시지: ${winnerMessage}`);
+
+    // 클라이언트로 결과 전송
+    io.to(roomId).emit("challengeEnded", {
+      message: "대결이 종료되었습니다.",
+      scores: results, // 최종 점수
+      resultMessage: winnerMessage,
+    });
+
+    //////////// ✅ TODO: challenge 컬렉션에 대결 결과 저장하는 로직 추가
+    //////////// ✅ TODO: 각 사용자의 friend 컬렉션에 승무패 결과 저장
+    //////////// ✅ TODO: challenge 컬렉션의 status를 completed로 업데이트
+
+    // 방 상태 정리
+    setTimeout(() => {
+      io.socketsLeave(roomId);
+      delete roomCounts[roomId];
+      delete roomReadyStates[roomId];
+      console.log(
+        `방 ${roomId}의 모든 소켓이 제거되고 상태가 초기화되었습니다.`
+      );
+    }, 5000);
   });
 }
 

@@ -16,7 +16,7 @@ const challengeSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "accepted", "declined", "completed"],
       default: "pending",
-    }, // 대결 상태 (진행 중, 수락됨, 거절됨, 완료됨)
+    }, // 대결 상태 (요청 중, 수락됨, 거절됨, 완료됨)
     winnerId: {
       type: String,
       ref: "User",
