@@ -1,4 +1,5 @@
 const roomCounts = {};
+const roomReadyStates = require("./inviteFriend"); // 공유된 roomReadyStates 불러오기
 
 function startChallenge(io, socket) {
   socket.on("startWebRTC", ({ roomId }) => {
@@ -39,6 +40,37 @@ function startChallenge(io, socket) {
       userId: socket.userId,
       count,
     });
+  });
+
+  socket.on("ready", ({ roomId }) => {
+    console.log(`${socket.userId}님이 방 ${roomId}에서 준비 완료`);
+
+    if (!roomReadyStates[roomId]) {
+      console.error(`방 ${roomId} 상태가 초기화되지 않았습니다.`);
+      roomReadyStates[roomId] = {}; // 상태 초기화
+    }
+
+    // 현재 사용자를 준비 상태로 설정
+    roomReadyStates[roomId][socket.userId] = true;
+
+    // 방의 사용자 목록 가져오기
+    const roomUsers = Object.keys(roomReadyStates[roomId]); // roomReadyStates 기준
+
+    // 모든 사용자가 준비되었는지 확인
+    const allReady =
+      roomUsers.length === 2 && // 방에 사용자가 두 명이어야 하고
+      roomUsers.every((user) => roomReadyStates[roomId][user] === true); // 두 명 모두 준비 상태여야 함
+
+    if (allReady) {
+      console.log(`방 ${roomId}의 모든 사용자가 준비 완료. 카운트다운 시작.`);
+      io.to(roomId).emit("startCountdown"); // 카운트다운 시작 이벤트 전송
+    } else {
+      console.log(
+        `방 ${roomId}: 일부 사용자 준비 중. 현재 상태:`,
+        roomReadyStates[roomId]
+      );
+      socket.to(roomId).emit("opponentReady", { userId: socket.userId });
+    }
   });
 
   socket.on("disconnectFromChallenge", ({ roomId }) => {
