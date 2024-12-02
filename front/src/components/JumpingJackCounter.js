@@ -1,24 +1,17 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import * as tf from "@tensorflow/tfjs"; // TensorFlow.js
-import "@tensorflow/tfjs-backend-webgl"; // WebGL 백엔드
 import * as posedetection from "@tensorflow-models/pose-detection"; // MoveNet 라이브러리
-import Webcam from "react-webcam";
+import "@tensorflow/tfjs-backend-webgl"; // WebGL 백엔드
 
-function JumpingJackCounter({ onCountIncrease }) {
-  const webcamRef = useRef(null);
+function JumpingJackCounter({ videoRef, onCountIncrease }) {
   const canvasRef = useRef(null);
   const detectorRef = useRef(null);
   let isJumping = false;
 
   useEffect(() => {
     const setupBackend = async () => {
-      try {
-        await tf.setBackend("webgl");
-        await tf.ready();
-        console.log("WebGL 백엔드 설정 완료");
-      } catch (error) {
-        console.error("WebGL 백엔드 설정 실패:", error);
-      }
+      await tf.setBackend("webgl");
+      await tf.ready();
     };
 
     const loadModel = async () => {
@@ -47,24 +40,22 @@ function JumpingJackCounter({ onCountIncrease }) {
   }, []);
 
   const detectPose = async () => {
-    const detector = detectorRef.current;
-
     if (
-      webcamRef.current &&
-      webcamRef.current.video.readyState === 4 &&
-      detector
+      videoRef.current &&
+      videoRef.current.readyState === 4 &&
+      detectorRef.current
     ) {
-      const video = webcamRef.current.video;
+      const video = videoRef.current;
 
-      const poses = await detector.estimatePoses(video, {
+      const poses = await detectorRef.current.estimatePoses(video, {
         maxPoses: 1,
         flipHorizontal: false,
       });
 
       if (poses && poses.length > 0) {
         const pose = poses[0];
-        drawPose(pose, video.videoWidth, video.videoHeight);
         processPose(pose);
+        drawPose(pose, video.videoWidth, video.videoHeight);
       }
     }
   };
@@ -144,56 +135,30 @@ function JumpingJackCounter({ onCountIncrease }) {
     const ctx = canvasRef.current.getContext("2d");
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-    const canvasWidth = canvasRef.current.width;
-    const canvasHeight = canvasRef.current.height;
-
-    const xScale = canvasWidth / videoWidth;
-    const yScale = canvasHeight / videoHeight;
+    const xScale = canvasRef.current.width / videoWidth;
+    const yScale = canvasRef.current.height / videoHeight;
 
     // 필요한 관절만 필터링
-    const keypoints = pose.keypoints.filter((kp) =>
-      [
-        "left_ankle",
-        "right_ankle",
-        "left_wrist",
-        "right_wrist",
-        "left_shoulder",
-        "right_shoulder",
-        "nose",
-      ].includes(kp.name)
-    );
+    const keypoints = pose.keypoints.filter((kp) => kp.score > 0.5);
 
     keypoints.forEach((keypoint) => {
-      if (keypoint.score > 0.5) {
-        const adjustedX = keypoint.x * xScale;
-        const adjustedY = keypoint.y * yScale;
+      const x = keypoint.x * xScale;
+      const y = keypoint.y * yScale;
 
-        ctx.beginPath();
-        ctx.arc(adjustedX, adjustedY, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = "red";
-        ctx.fill();
-      }
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = "red";
+      ctx.fill();
     });
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      <Webcam
-        ref={webcamRef}
-        className="absolute top-0 left-0 w-full h-full object-cover"
-        videoConstraints={{
-          width: window.innerWidth,
-          height: window.innerHeight,
-          facingMode: "user",
-        }}
-      />
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full object-cover"
-        width={window.innerWidth}
-        height={window.innerHeight}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="absolute top-0 left-0 w-full h-full object-cover"
+      width={window.innerWidth}
+      height={window.innerHeight}
+    />
   );
 }
 
