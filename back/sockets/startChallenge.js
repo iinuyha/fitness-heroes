@@ -1,5 +1,6 @@
 const roomCounts = {};
 const roomReadyStates = require("./inviteFriend"); // 공유된 roomReadyStates 불러오기
+const Challenge = require("../models/challenge");
 
 function startChallenge(io, socket) {
   socket.on("startWebRTC", ({ roomId }) => {
@@ -75,12 +76,38 @@ function startChallenge(io, socket) {
     }
   });
 
-  socket.on("disconnectFromChallenge", ({ roomId }) => {
+  socket.on("disconnectFromChallenge", async ({ roomId }) => {
     console.log(`${socket.userId}님이 방 ${roomId}에서 나갔습니다.`);
     socket.leave(roomId);
     io.to(roomId).emit("userLeft");
 
-    //////// ✅ TODO: DB에 status를 declined으로 바꾸는 내용 추가하기
+    try {
+      // roomId에서 챌린저와 챌린지드 ID 추출
+      const [challengerId, challengedId] = roomId.split("-");
+  
+
+      const matchData = await Challenge.findOne(
+        { challengerId, challengedId, status: "accepted" }
+      ).sort({ createdAt: -1 });
+      
+      
+      if (!matchData) {
+        console.error(`해당 데이터를 찾을 수 없습니다. (방: ${roomId})`);
+      } else {
+        // status를 declined로 업데이트
+        matchData.status = "declined";
+        await matchData.save();
+        console.log(
+          `DB 상태 변경 성공: 방 ${roomId}, 업데이트된 데이터:`,
+          matchData
+        );
+      }
+    } catch (error) {
+      console.error(
+        `DB 상태 변경 실패: 방 ${roomId}, 에러 메시지:`,
+        error.message
+      );
+    }
 
     setTimeout(() => {
       io.socketsLeave(roomId);

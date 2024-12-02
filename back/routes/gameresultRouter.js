@@ -31,6 +31,7 @@ router.post("/", async (req, res) => {
       { new: true, upsert: true } // 없으면 생성 (upsert)
     );
 
+
     // 4. Friend DB 업데이트
     const updateFriendStats = async (userId, resultType) => {
       const friend = await Friend.findOne({ id: userId });
