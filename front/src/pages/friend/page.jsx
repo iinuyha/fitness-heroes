@@ -6,6 +6,8 @@ import {
   inviteFriend,
   acceptInvitation,
   declineInvitation,
+  checkCoin,
+  reduceCoin,
 } from "./api/api";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
@@ -99,6 +101,13 @@ function FriendPage() {
     }
 
     try {
+      const coinResponse = await checkCoin(token);
+      if (!coinResponse.data.canProceed) {
+        setPopupMessage("코인의 수가 부족합니다. 대결 신청을 보낼 수 없습니다.");
+        setIsPopupOpen(true);
+        return;
+      }
+
       const response = await inviteFriend(token, friend.id);
       if (response.success) {
         setIsInvitationSent(true);
@@ -142,14 +151,13 @@ function FriendPage() {
     setIsChallengePopupOpen(true);
     socket.emit("joinRoom", { roomId });
   };
-
   // 초대받은 사람이 대결을 수락함
   const handleChallengeAccept = async () => {
     try {
       await acceptInvitation(token, challengeInfo.from);
       socket.emit("acceptChallenge", {
         roomId: challengeInfo.roomId,
-      });
+      });  
       setIsChallengePopupOpen(false);
     } catch (error) {
       console.error("대결 수락 실패:", error);
