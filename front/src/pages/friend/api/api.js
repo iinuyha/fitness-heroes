@@ -97,3 +97,46 @@ export const declineInvitation = async (token, friendId) => {
     throw error;
   }
 };
+
+// 코인 확인 함수
+export const checkCoin = async (token) => {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_SERVER_URL}/api/match/check-coin`,
+      {}, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("코인 확인 중 오류 발생:", error);
+    throw error.response
+      ? error.response.data
+      : new Error("코인 확인 중 오류 발생");
+  }
+};
+
+// 코인 차감 함수
+export const reduceCoin = async (token) => {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_SERVER_URL}/api/match/reduce-coin`,
+      {}, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("코인 차감 중 오류 발생:", error);
+    throw error.response
+      ? error.response.data
+      : new Error("코인 차감 중 오류 발생");
+  }
+};
+
