@@ -24,6 +24,8 @@ function ChallengeStartPage() {
 
   const [remainingTime, setRemainingTime] = useState(0); // 남은 게임 시간
 
+  const [popupContent, setPopupContent] = useState(null); // 결과 Popup 내용을 저장
+
   const navigate = useNavigate();
   const { roomId } = useParams(); // roomId 가져오기
   const { socket } = useContext(SocketContext);
@@ -129,7 +131,7 @@ function ChallengeStartPage() {
       setOpponentReady(true);
     });
 
-    // 카운트다운 시작
+    // 모두 준비 되면 카운트다운 3초 시작
     socket.on("startCountdown", () => {
       let countdownValue = 3;
       setCountdown(countdownValue);
@@ -156,7 +158,21 @@ function ChallengeStartPage() {
       setOpponentLeft(true); // 상대방 나감 상태 업데이트
       setTimeout(() => {
         navigate(-1); // 이전 페이지로 이동
-      }, 2000); // 2초 뒤 페이지 이동
+      }, 5000); // 5초 뒤 페이지 이동
+    });
+
+    // 대결 종료시
+    socket.on("challengeEnded", ({ message, scores, resultMessage }) => {
+      // 최종 스코어와 결과 메시지를 Popup에 표시
+      setPopupContent(`
+        ${message}
+        
+          ${Object.entries(scores)
+            .map(([userId, score]) => `${score}점`)
+            .join(":")}
+        
+        ${resultMessage}
+      `);
     });
 
     return () => {
@@ -168,6 +184,7 @@ function ChallengeStartPage() {
       socket.off("startCountdown");
       socket.off("updatedCount");
       socket.off("userLeft");
+      socket.off("challengeEnded");
 
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => track.stop());
@@ -234,10 +251,15 @@ function ChallengeStartPage() {
   // 점핑잭 카운트 증가 핸들러
   const handleCountIncrease = () => {
     // 카운트 가능한 상태
+    console.log("canCount 상태:", canCount);
     if (canCount) {
-      const newCount = myCount + 1;
-      setMyCount(newCount);
-      socket.emit("updateCount", { roomId, count: newCount });
+      setMyCount((prevCount) => {
+        console.log("이전 카운트:", prevCount);
+        const newCount = prevCount + 1;
+        console.log("새로운 카운트:", newCount);
+        socket.emit("updateCount", { roomId, count: newCount });
+        return newCount;
+      });
     }
   };
 
@@ -251,7 +273,7 @@ function ChallengeStartPage() {
         if (prevTime <= 1) {
           clearInterval(timerInterval); // 타이머 종료
           setCanCount(false); // 점핑잭 카운트 비활성화
-          alert("게임 종료! 결과를 확인하세요.");
+          socket.emit("endChallenge", { roomId });
           return 0;
         }
         return prevTime - 1; // 1초씩 감소
@@ -263,13 +285,22 @@ function ChallengeStartPage() {
     <div className="exercise-start-page">
       {isPopupOpen && (
         <Popup
-          message="게임을 시작합니다!"
+          message="<b><u>준비 버튼</u></b>을 눌러주세요!<br>모두 준비가 완료되면 3초 카운트다운 후 대결이 시작됩니다."
           onClose={() => setIsPopupOpen(false)}
+        />
+      )}
+      {popupContent && (
+        <Popup
+          message={popupContent}
+          onClose={() => {
+            setIsPopupOpen(false);
+            navigate(-1); // 이전 페이지로 이동
+          }}
         />
       )}
       {opponentLeft && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-xl font-bold z-30">
-          상대방이 방을 나가 대결이 중단되었습니다. 2초 후 이전 화면으로
+          상대방이 방을 나가 대결이 중단되었습니다. 5초 후 이전 화면으로
           돌아갑니다.
         </div>
       )}
@@ -313,7 +344,7 @@ function ChallengeStartPage() {
                   onClick={handleReady}
                   className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 left-4 z-20"
                 >
-                  준비 완료
+                  준비
                 </button>
               )}
             </div>
@@ -370,7 +401,7 @@ function ChallengeStartPage() {
                   onClick={handleReady}
                   className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 left-4 z-20"
                 >
-                  준비 완료
+                  준비
                 </button>
               )}
             </div>
