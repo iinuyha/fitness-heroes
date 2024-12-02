@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken"); 
 const router = express.Router();
 const Friend = require("../models/friend");
+const Character = require("../models/character");
 
 const secretKey = "hi"; // 인증에 사용할 비밀 키
 
@@ -92,5 +93,76 @@ router.post("/save", authenticateToken, async (req, res) => {
     });
   }
 });
+
+// 코인 확인
+router.post("/check-coin", authenticateToken, async (req, res) => {
+  const userId = req.user.id; // 토큰에서 추출한 사용자 ID
+
+  try {
+    // 사용자 캐릭터 조회
+    let character = await Character.findOne({ id: userId });
+
+    // 캐릭터가 존재하지 않으면 에러 반환
+    if (!character) {
+      return res.status(404).json({
+        status: "error",
+        message: "해당 사용자를 찾을 수 없습니다.",
+      });
+    }
+
+    // 코인이 3 이상인지 확인
+    if (character.coin >= 3) {
+
+      // 성공 응답 반환
+      return res.status(200).json({
+        status: "success",
+        message: "코인이 3개 이상 있습니다.",
+        data: {
+          canProceed: true,
+        },
+      });
+    } else {
+      // 코인이 부족한 경우
+      return res.status(200).json({
+        status: "fail",
+        message: "코인이 부족합니다.",
+        data: {
+          canProceed: false,
+        },
+      });
+    }
+  } catch (error) {
+    // 에러 처리
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: "코인 처리 중 오류가 발생했습니다.",
+      error: error.message,
+    });
+  }
+});
+
+// 코인 차감
+router.post("/reduce-coin", authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // 캐릭터 정보 조회
+    const character = await Character.findOne({ id: userId });
+    if (!character) {
+      return res.status(404).json({ error: "캐릭터 정보를 찾을 수 없습니다." });
+    }
+
+    // 코인 차감
+    character.coin -= 3;
+    await character.save();
+
+    res.json({ message: "코인이 성공적으로 차감되었습니다.", coin: character.coin });
+  } catch (error) {
+    console.error("코인 차감 오류:", error);
+    res.status(500).json({ error: "코인 차감 실패" });
+  }
+});
+
 
 module.exports = router;
