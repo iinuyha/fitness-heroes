@@ -9,6 +9,7 @@ import { saveNewEpisode, addStoryCoin } from "./api";
 function ExerciseStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
   const [count, setCount] = useState(0); // 현재 카운트
+  const localVideoRef = useRef(null); // 비디오
   const [currentSet, setCurrentSet] = useState(1); // 현재 세트
   const [isResting, setIsResting] = useState(false); // 휴식 여부
   const [restTime, setRestTime] = useState(20); // 휴식 카운트다운
@@ -25,6 +26,22 @@ function ExerciseStartPage() {
   const exe_name = currentEpi.exe_name; // 현재 운동 이름 (story db 저장용 변수)
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const initializeWebRTC = async () => {
+      try {
+        const localStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        localVideoRef.current.srcObject = localStream;
+      } catch (error) {
+        console.error("비디오 초기화 실패:", error);
+      }
+    };
+
+    initializeWebRTC();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -51,7 +68,6 @@ function ExerciseStartPage() {
       }
     }
   }, [count, countPerSet, currentSet, totalSets]);
-  
 
   const handlePopupClose = () => {
     setIsPopupOpen(false);
@@ -62,19 +78,19 @@ function ExerciseStartPage() {
       setCount((prevCount) => prevCount + 1); // count 증가
     }
   };
-  
+
   const handleToNextSet = () => {
     // 세트 증가
     setCurrentSet((prevSet) => prevSet + 1);
-  
+
     // 휴식 로직 시작
     setIsResting(true);
     setRestTime(20);
-  
+
     if (restIntervalRef.current) {
       clearInterval(restIntervalRef.current);
     }
-  
+
     restIntervalRef.current = setInterval(() => {
       setRestTime((prevTime) => {
         if (prevTime <= 1) {
@@ -133,8 +149,11 @@ function ExerciseStartPage() {
                   ? `휴식 중: ${restTime}초 남음`
                   : `${count}/${countPerSet} (세트 ${currentSet}/${totalSets})`}
               </div>
-              <JumpingJackCounter onCountIncrease={handleCountIncrease} />
-  
+              <JumpingJackCounter
+                videoRef={localVideoRef}
+                onCountIncrease={handleCountIncrease}
+              />
+
               {/* 테스트 버튼 */}
               <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
                 <button
@@ -144,14 +163,19 @@ function ExerciseStartPage() {
                   테스트: Count 증가
                 </button>
               </div>
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
             </>
           )}
           {isWorkoutComplete && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-10">
               <div className="text-white px-6 py-3 rounded-lg text-2xl font-bold text-center">
-                <p>
-                  운동이 종료되었습니다! 수고하셨습니다!
-                </p>
+                <p>운동이 종료되었습니다! 수고하셨습니다!</p>
                 <button
                   onClick={handleExerciseComplete}
                   className="block mt-4 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold"

@@ -4,12 +4,18 @@ import Popup from "../../../components/Popup";
 import { routes } from "../../../constants/routes";
 import SocketContext from "../../../contexts/SocketContext";
 import { jwtDecode } from "jwt-decode";
+import JumpingJackCounter from "../../../components/JumpingJackCounter";
 
 function ChallengeStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
   const [isChallenger, setIsChallenger] = useState(false); // 챌린저 여부
+
   const [myId, setMyId] = useState(""); // 자신의 ID
   const [opponentId, setOpponentId] = useState(""); // 상대방의 ID
+
+  const [myCount, setMyCount] = useState(0); // 내 점핑잭 카운트
+  const [opponentCount, setOpponentCount] = useState(0); // 상대방 점핑잭 카운트
+
   const navigate = useNavigate();
   const { roomId } = useParams(); // roomId 가져오기
   const { socket } = useContext(SocketContext);
@@ -110,11 +116,17 @@ function ChallengeStartPage() {
       }
     );
 
+    // 상대방 점핑잭 카운트 업데이트
+    socket.on("updateCount", (count) => {
+      setOpponentCount(count);
+    });
+
     return () => {
       // Clean up
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
+      socket.on("updateCount");
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => track.stop());
       }
@@ -172,6 +184,13 @@ function ChallengeStartPage() {
     setIsPopupOpen(false);
   };
 
+  // 점핑잭 카운트 증가 핸들러
+  const handleCountIncrease = () => {
+    const newCount = myCount + 1;
+    setMyCount(newCount);
+    socket.emit("updateCount", { roomId, count: newCount });
+  };
+
   return (
     <div className="exercise-start-page">
       {isPopupOpen && (
@@ -185,7 +204,7 @@ function ChallengeStartPage() {
             {/* 챌린저 웹캠 왼쪽 */}
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {myId} (나)
+                {myId} (나) - 점핑잭: {myCount}
               </div>
               <video
                 ref={localVideoRef}
@@ -198,7 +217,7 @@ function ChallengeStartPage() {
             {/* 상대방 웹캠 오른쪽 */}
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {opponentId} (상대)
+                {opponentId} (상대) - 점핑잭: {opponentCount}
               </div>
               <video
                 ref={remoteVideoRef}
@@ -213,7 +232,7 @@ function ChallengeStartPage() {
             {/* 상대방 웹캠 왼쪽 */}
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {opponentId} (상대)
+                {opponentId} (상대) - 점핑잭: {opponentCount}
               </div>
               <video
                 ref={remoteVideoRef}
@@ -225,7 +244,7 @@ function ChallengeStartPage() {
             {/* 챌린저 웹캠 오른쪽 */}
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
               <div className="absolute top-4 left-4 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {myId} (나)
+                {myId} (나) - 점핑잭: {myCount}
               </div>
               <video
                 ref={localVideoRef}
@@ -238,6 +257,10 @@ function ChallengeStartPage() {
           </>
         )}
       </div>
+      <JumpingJackCounter
+        videoRef={localVideoRef}
+        onCountIncrease={handleCountIncrease}
+      />
     </div>
   );
 }
