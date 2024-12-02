@@ -22,6 +22,8 @@ function ChallengeStartPage() {
   const [countdown, setCountdown] = useState(0); // 카운트다운 값
   const [canCount, setCanCount] = useState(false); // 점핑잭 카운트 활성화 여부
 
+  const [remainingTime, setRemainingTime] = useState(0); // 남은 게임 시간
+
   const navigate = useNavigate();
   const { roomId } = useParams(); // roomId 가져오기
   const { socket } = useContext(SocketContext);
@@ -137,9 +139,11 @@ function ChallengeStartPage() {
         if (countdownValue === 0) {
           setCanCount(true); // 카운트 활성화
           clearInterval(countdownInterval);
+          startGameTimer();
         }
       }, 1000);
     });
+
     // 상대방 점핑잭 카운트 업데이트
     socket.on("updatedCount", ({ userId, count }) => {
       if (userId !== myId) {
@@ -237,6 +241,24 @@ function ChallengeStartPage() {
     }
   };
 
+  const startGameTimer = () => {
+    const gameDuration = 30; // 게임 시간 30초
+    setRemainingTime(gameDuration); // 초기 시간 설정
+    setCanCount(true); // 점핑잭 카운트 활성화
+
+    const timerInterval = setInterval(() => {
+      setRemainingTime((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerInterval); // 타이머 종료
+          setCanCount(false); // 점핑잭 카운트 비활성화
+          alert("게임 종료! 결과를 확인하세요.");
+          return 0;
+        }
+        return prevTime - 1; // 1초씩 감소
+      });
+    }, 1000);
+  };
+
   return (
     <div className="exercise-start-page">
       {isPopupOpen && (
@@ -251,6 +273,9 @@ function ChallengeStartPage() {
           돌아갑니다.
         </div>
       )}
+      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-black text-white text-xl font-bold px-4 py-2 rounded-lg z-30">
+        남은 시간: {remainingTime}초
+      </div>
       <div className="absolute top-0 left-0 w-full z-10">
         <button
           onClick={() => {
