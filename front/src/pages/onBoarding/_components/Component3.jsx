@@ -20,7 +20,7 @@ function Component3({ moveToNext, setGender }) {
             type="radio"
             name="gender"
             value="male"
-            checked={gender === "male"}
+            checked={gender === true}
             onChange={() => setSelectedGender(true)}
             className="mr-2"
           />
