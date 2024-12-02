@@ -117,8 +117,10 @@ function ChallengeStartPage() {
     );
 
     // 상대방 점핑잭 카운트 업데이트
-    socket.on("updateCount", (count) => {
-      setOpponentCount(count);
+    socket.on("updatedCount", ({ userId, count }) => {
+      if (userId !== myId) {
+        setOpponentCount(count);
+      }
     });
 
     return () => {
@@ -126,7 +128,7 @@ function ChallengeStartPage() {
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
-      socket.on("updateCount");
+      socket.off("updatedCount");
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => track.stop());
       }
@@ -213,6 +215,12 @@ function ChallengeStartPage() {
                 muted
                 className="w-full h-full object-cover"
               />
+              <button
+                onClick={handleCountIncrease}
+                className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
+              >
+                테스트: Count 증가
+              </button>
             </div>
             {/* 상대방 웹캠 오른쪽 */}
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
@@ -253,6 +261,12 @@ function ChallengeStartPage() {
                 muted
                 className="w-full h-full object-cover"
               />
+              <button
+                onClick={handleCountIncrease}
+                className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
+              >
+                테스트: Count 증가
+              </button>
             </div>
           </>
         )}

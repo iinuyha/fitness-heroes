@@ -1,3 +1,5 @@
+const roomCounts = {};
+
 function startChallenge(io, socket) {
   socket.on("startWebRTC", ({ roomId }) => {
     console.log(`startWebRTC 이벤트 수신: 방 ${roomId}`);
@@ -21,6 +23,22 @@ function startChallenge(io, socket) {
     console.log(`ICE 후보 수신: 방 ${roomId}`);
     // 방의 다른 사용자에게 ICE 후보 전달
     socket.to(roomId).emit("ice-candidate", { candidate, roomId });
+  });
+  // 점프잭 카운트 업데이트
+  socket.on("updateCount", ({ roomId, count }) => {
+    if (!roomCounts[roomId]) {
+      roomCounts[roomId] = {};
+    }
+    roomCounts[roomId][socket.userId] = count;
+
+    console.log(
+      `사용자 ${socket.userId}의 점프잭 카운트가 ${count}로 업데이트됨 (방: ${roomId})`
+    );
+
+    socket.to(roomId).emit("updatedCount", {
+      userId: socket.userId,
+      count,
+    });
   });
 
   socket.on("disconnectFromChallenge", ({ roomId }) => {
