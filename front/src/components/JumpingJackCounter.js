@@ -127,6 +127,7 @@ function JumpingJackCounter({ videoRef, onCountIncrease }) {
       ) {
         onCountIncrease(); // 부모 컴포넌트로 카운트 증가 이벤트 전달
         isJumping = false;
+        console.log("착지 감지");
       }
     }
   };
