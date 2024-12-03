@@ -154,7 +154,9 @@ function startChallenge(io, socket) {
     });
 
     const [challengerId, challengedId] = roomId.split("-");
-    const winnerId = scores[0][0];
+    const winnerId = scores[0][0]; // winnerId에는 friend 컬렉션의 win에 1 늘리기
+    const loserId = scores[1][0]; // loserId에는 friend 컬렉션의 lose에 1 늘리기
+    const isDraw = scores[0][1] === scores[1][1]; // 무승부 여부 (얘가 만약에 true이면 winnerId, loserId에 대해서 friend 컬렉션의 lose를 둘 다 1 늘리기)
     const challengerScore = roomCounts[roomId][challengerId];
     const challengedScore = roomCounts[roomId][challengedId];
 
