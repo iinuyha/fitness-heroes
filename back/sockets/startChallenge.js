@@ -1,5 +1,5 @@
-const roomCounts = {};
 const roomReadyStates = require("./inviteFriend"); // 공유된 roomReadyStates 불러오기
+const roomCounts = require("./inviteFriend");
 const Challenge = require("../models/challenge");
 
 function startChallenge(io, socket) {
@@ -84,13 +84,13 @@ function startChallenge(io, socket) {
     try {
       // roomId에서 챌린저와 챌린지드 ID 추출
       const [challengerId, challengedId] = roomId.split("-");
-  
 
-      const matchData = await Challenge.findOne(
-        { challengerId, challengedId, status: "accepted" }
-      ).sort({ createdAt: -1 });
-      
-      
+      const matchData = await Challenge.findOne({
+        challengerId,
+        challengedId,
+        status: "accepted",
+      }).sort({ createdAt: -1 });
+
       if (!matchData) {
         console.error(`해당 데이터를 찾을 수 없습니다. (방: ${roomId})`);
       } else {
@@ -119,7 +119,7 @@ function startChallenge(io, socket) {
     }, 5000);
   });
 
-  socket.on("endChallenge", ({ roomId }) => {
+  socket.on("endChallenge", async ({ roomId }) => {
     console.log(`방 ${roomId}에서 대결이 종료되었습니다.`);
 
     // roomCounts에서 해당 방의 점수 데이터 가져오기
@@ -153,6 +153,11 @@ function startChallenge(io, socket) {
       resultMessage: winnerMessage,
     });
 
+    const [challengerId, challengedId] = roomId.split("-");
+    const winnerId = scores[0][0];
+    const challengerScore = roomCounts[roomId][challengerId];
+    const challengedScore = roomCounts[roomId][challengedId];
+
     //////////// ✅ TODO: challenge 컬렉션에 대결 결과 저장하는 로직 추가
     //////////// ✅ TODO: 각 사용자의 friend 컬렉션에 승무패 결과 저장
     //////////// ✅ TODO: challenge 컬렉션의 status를 completed로 업데이트
@@ -169,4 +174,4 @@ function startChallenge(io, socket) {
   });
 }
 
-module.exports = { startChallenge };
+module.exports = { startChallenge, roomCounts };

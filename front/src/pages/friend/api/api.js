@@ -99,11 +99,11 @@ export const declineInvitation = async (token, friendId) => {
 };
 
 // 코인 확인 함수
-export const checkCoin = async (token) => {
+export const checkCoin = async (token, friendId) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_SERVER_URL}/api/match/check-coin`,
-      {}, 
+      { friendId },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -124,7 +124,7 @@ export const reduceCoin = async (token) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_SERVER_URL}/api/match/reduce-coin`,
-      {}, 
+      {},
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -139,4 +139,3 @@ export const reduceCoin = async (token) => {
       : new Error("코인 차감 중 오류 발생");
   }
 };
-
