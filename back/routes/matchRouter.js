@@ -1,5 +1,5 @@
 const express = require("express");
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 const Friend = require("../models/friend");
 const Character = require("../models/character");
@@ -10,7 +10,7 @@ const secretKey = "hi"; // 인증에 사용할 비밀 키
 // 인증 미들웨어
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Authorization 토큰이 필요합니다." });
   }
@@ -44,14 +44,16 @@ router.post("/save", authenticateToken, async (req, res) => {
   if (!validResults.includes(result)) {
     return res.status(400).json({
       status: "error",
-      message: `Invalid result value. Expected one of ${validResults.join(", ")}.`,
+      message: `Invalid result value. Expected one of ${validResults.join(
+        ", "
+      )}.`,
     });
   }
 
   try {
     // 사용자의 대결 기록 조회
     let userRecord = await Friend.findOne({ id: userId });
-    
+
     // 사용자 기록이 없으면 새로 생성
     if (!userRecord) {
       userRecord = new Friend({ id: userId, win: 0, draw: 0, lose: 0 });
@@ -81,8 +83,8 @@ router.post("/save", authenticateToken, async (req, res) => {
           win: userRecord.win,
           draw: userRecord.draw,
           lose: userRecord.lose,
-        }
-      }
+        },
+      },
     });
   } catch (error) {
     // 에러 처리
@@ -98,38 +100,45 @@ router.post("/save", authenticateToken, async (req, res) => {
 // 코인 확인
 router.post("/check-coin", authenticateToken, async (req, res) => {
   const userId = req.user.id; // 토큰에서 추출한 사용자 ID
+  const { friendId } = req.body;
 
   try {
     // 사용자 캐릭터 조회
-    let character = await Character.findOne({ id: userId });
+    let userCharacter = await Character.findOne({ id: userId });
+    let friendCharacter = await Character.findOne({ id: friendId });
 
-    // 캐릭터가 존재하지 않으면 에러 반환
-    if (!character) {
+    // 사용자의 캐릭터가 존재하지 않으면 에러 반환
+    if (!userCharacter) {
       return res.status(404).json({
         status: "error",
         message: "해당 사용자를 찾을 수 없습니다.",
       });
     }
 
-    // 코인이 3 이상인지 확인
-    if (character.coin >= 3) {
-
-      // 성공 응답 반환
-      return res.status(200).json({
-        status: "success",
-        message: "코인이 3개 이상 있습니다.",
-        data: {
-          canProceed: true,
-        },
+    // 친구의 캐릭터가 존재하지 않으면 에러 반환
+    if (!friendCharacter) {
+      return res.status(404).json({
+        status: "error",
+        message: "해당 사용자를 찾을 수 없습니다.",
       });
-    } else {
+    }
+
+    // 자신의 코인이 3 이상인지 확인
+    if (userCharacter.coin < 3) {
+      return res.status(200).json({
+        status: "fail",
+        message: "코인이 부족하여 대결 신청을 할 수 없습니다.",
+      });
+    } else if (friendCharacter.coin < 3) {
       // 코인이 부족한 경우
       return res.status(200).json({
         status: "fail",
-        message: "코인이 부족합니다.",
-        data: {
-          canProceed: false,
-        },
+        message: "상대방의 코인이 부족하여 대결 신청을 할 수 없습니다.",
+      });
+    } else {
+      return res.status(200).json({
+        status: "success",
+        message: "대결을 신청합니다.",
       });
     }
   } catch (error) {
@@ -158,7 +167,10 @@ router.post("/reduce-coin", authenticateToken, async (req, res) => {
     character.coin -= 3;
     await character.save();
 
-    res.json({ message: "코인이 성공적으로 차감되었습니다.", coin: character.coin });
+    res.json({
+      message: "코인이 성공적으로 차감되었습니다.",
+      coin: character.coin,
+    });
   } catch (error) {
     console.error("코인 차감 오류:", error);
     res.status(500).json({ error: "코인 차감 실패" });
@@ -173,11 +185,11 @@ router.post("/status-declined", async (req, res) => {
     // roomId에서 챌린저와 챌린지드 ID 추출
     const [challengerId, challengedId] = roomId.split("-");
 
-   // 가장 최근의 Challenge 데이터 가져오기
-   const matchData = await Challenge.findOne(
-    { challengerId: challengerId, challengedId: challengedId } 
-    ).sort({ createdAt: -1 });
-
+    // 가장 최근의 Challenge 데이터 가져오기
+    const matchData = await Challenge.findOne({
+      challengerId: challengerId,
+      challengedId: challengedId,
+    }).sort({ createdAt: -1 });
 
     if (!matchData) {
       return res.status(404).json({
@@ -188,7 +200,6 @@ router.post("/status-declined", async (req, res) => {
 
     matchData.status = "declined";
     await matchData.save();
-    
 
     // 성공 응답 반환
     return res.status(200).json({
@@ -198,18 +209,15 @@ router.post("/status-declined", async (req, res) => {
         matchData: matchData, // 업데이트된 문서 수 반환
       },
     });
-    } catch (error) {
-      // 에러 처리
-      console.error("status 상태 변경 오류:", error);
-      return res.status(500).json({
-        status: "error",
-        message: "status 상태 변경 중 오류가 발생했습니다.",
-        error: error.message,
-      });
-    }
+  } catch (error) {
+    // 에러 처리
+    console.error("status 상태 변경 오류:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "status 상태 변경 중 오류가 발생했습니다.",
+      error: error.message,
+    });
+  }
 });
 
-
-
-
-module.exports = router
+module.exports = router;

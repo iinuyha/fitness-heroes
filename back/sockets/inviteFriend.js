@@ -1,6 +1,7 @@
 const users = {}; // 사용자 ID와 소켓 ID 매핑을 저장하는 객체
 const activeChallenges = {}; // 대결 신청을 추적하는 객체
 const roomReadyStates = {}; // 방별 준비 상태 저장
+const roomCounts = {};
 const Challenge = require("../models/challenge");
 
 function handleChallenge(io, socket) {
@@ -125,8 +126,14 @@ function handleChallenge(io, socket) {
     // 방 상태 초기화 (두 명 연결 시 생성)
     if (!roomReadyStates[roomId]) {
       roomReadyStates[roomId] = {};
+      roomCounts[roomId] = {};
+    }
+    if (!roomCounts[roomId]) {
+      roomCounts[roomId] = {};
     }
     roomReadyStates[roomId][socket.userId] = false; // 초기 준비 상태는 false
+    roomCounts[roomId][socket.userId] = 0; // 초기 카운트는 0
+
     const totalUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
     console.log(`방 ${roomId}에 현재 사용자 수: ${totalUsers}`);
 
@@ -142,4 +149,5 @@ module.exports = {
   users,
   activeChallenges,
   roomReadyStates,
+  roomCounts,
 };

@@ -24,7 +24,6 @@ function ChallengeStartPage() {
   const [canCount, setCanCount] = useState(false); // 점핑잭 카운트 활성화 여부
   const canCountRef = useRef(canCount); // 최신 canCount 상태를 저장
 
-
   const [remainingTime, setRemainingTime] = useState(0); // 남은 게임 시간
 
   const [popupContent, setPopupContent] = useState(null); // 결과 Popup 내용을 저장
@@ -181,9 +180,9 @@ function ChallengeStartPage() {
       setPopupContent(`
         ${message}
         
-          ${Object.entries(scores)
-            .map(([userId, score]) => `${score}점`)
-            .join(":")}
+        ${Object.entries(scores)
+          .map(([userId, score]) => `${parseInt(score)}점`)
+          .join(":")}
         
         ${resultMessage}
       `);
@@ -290,7 +289,8 @@ function ChallengeStartPage() {
           clearInterval(timerInterval); // 타이머 종료
           if (canCountRef.current) {
             setCanCount(false); // 점핑잭 카운트 비활성화
-          }          socket.emit("endChallenge", { roomId });
+          }
+          socket.emit("endChallenge", { roomId });
           return 0;
         }
         return prevTime - 1; // 1초씩 감소

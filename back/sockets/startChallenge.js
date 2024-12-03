@@ -1,5 +1,5 @@
-const roomCounts = {};
 const roomReadyStates = require("./inviteFriend"); // 공유된 roomReadyStates 불러오기
+const roomCounts = require("./inviteFriend");
 const Challenge = require("../models/challenge");
 
 function startChallenge(io, socket) {
@@ -155,8 +155,8 @@ function startChallenge(io, socket) {
 
     const [challengerId, challengedId] = roomId.split("-");
     const winnerId = scores[0][0];
-    const challengerScore = scores[0][1];
-    const challengedScore = scores[1][1];
+    const challengerScore = roomCounts[roomId][challengerId];
+    const challengedScore = roomCounts[roomId][challengedId];
 
     //////////// ✅ TODO: challenge 컬렉션에 대결 결과 저장하는 로직 추가
     //////////// ✅ TODO: 각 사용자의 friend 컬렉션에 승무패 결과 저장
@@ -174,4 +174,4 @@ function startChallenge(io, socket) {
   });
 }
 
-module.exports = { startChallenge };
+module.exports = { startChallenge, roomCounts };

@@ -101,9 +101,9 @@ function FriendPage() {
     }
 
     try {
-      const coinResponse = await checkCoin(token);
-      if (!coinResponse.data.canProceed) {
-        setPopupMessage("코인의 수가 부족합니다. 대결 신청을 보낼 수 없습니다.");
+      const coinResponse = await checkCoin(token, friend.id);
+      if (coinResponse.status === "fail") {
+        setPopupMessage(coinResponse.message);
         setIsPopupOpen(true);
         return;
       }
@@ -157,7 +157,7 @@ function FriendPage() {
       await acceptInvitation(token, challengeInfo.from);
       socket.emit("acceptChallenge", {
         roomId: challengeInfo.roomId,
-      });  
+      });
       setIsChallengePopupOpen(false);
     } catch (error) {
       console.error("대결 수락 실패:", error);
