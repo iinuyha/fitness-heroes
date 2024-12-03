@@ -22,6 +22,8 @@ function ChallengeStartPage() {
   const [opponentReady, setOpponentReady] = useState(false); // 상대방 준비 여부
   const [countdown, setCountdown] = useState(0); // 카운트다운 값
   const [canCount, setCanCount] = useState(false); // 점핑잭 카운트 활성화 여부
+  const canCountRef = useRef(canCount); // 최신 canCount 상태를 저장
+
 
   const [remainingTime, setRemainingTime] = useState(0); // 남은 게임 시간
 
@@ -43,6 +45,13 @@ function ChallengeStartPage() {
       },
     ],
   };
+  useEffect(() => {
+    console.log("canCount 상태 변화:", canCount);
+  }, [canCount]);
+
+  useEffect(() => {
+    canCountRef.current = canCount; // 상태가 업데이트될 때마다 ref에 저장
+  }, [canCount]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -134,17 +143,19 @@ function ChallengeStartPage() {
 
     // 모두 준비 되면 카운트다운 3초 시작
     socket.on("startCountdown", () => {
-      let countdownValue = 3;
-      setCountdown(countdownValue);
-      const countdownInterval = setInterval(() => {
-        countdownValue -= 1;
+      if (countdown === 0) {
+        let countdownValue = 3;
         setCountdown(countdownValue);
-        if (countdownValue === 0) {
-          setCanCount(true); // 카운트 활성화
-          clearInterval(countdownInterval);
-          startGameTimer();
-        }
-      }, 1000);
+        const countdownInterval = setInterval(() => {
+          countdownValue -= 1;
+          setCountdown(countdownValue);
+          if (countdownValue === 0) {
+            clearInterval(countdownInterval);
+            setCanCount(true); // 상태를 명확히 true로 설정
+            startGameTimer(); // 게임 시작
+          }
+        }, 1000);
+      }
     });
 
     // 상대방 점핑잭 카운트 업데이트
@@ -156,7 +167,8 @@ function ChallengeStartPage() {
 
     // 상대방이 나갔을 때 처리
     socket.on("userLeft", () => {
-      canCount(false);
+      setCanCount(false);
+      canCountRef.current = false;
       setOpponentLeft(true); // 상대방 나감 상태 업데이트
       setTimeout(() => {
         navigate(-1); // 이전 페이지로 이동
@@ -253,9 +265,8 @@ function ChallengeStartPage() {
   // 점핑잭 카운트 증가 핸들러
   const handleCountIncrease = () => {
     // 카운트 가능한 상태
-    console.log("canCount 상태:", canCount);
-    if (canCount) {
-      ///////////////// 여기서 카운트 버튼 클릭 시에는 canCount가 true여서 카운트가 올라가는데, 점핑잭을 실제로 하면 얘가 자꾸 false가 됨.. 이거만 true로 되게끔 하면 해결될듯
+    console.log("canCount 상태 (ref):", canCountRef.current);
+    if (canCountRef.current) {
       setMyCount((prevCount) => {
         console.log("이전 카운트:", prevCount);
         const newCount = prevCount + 1;
@@ -263,20 +274,23 @@ function ChallengeStartPage() {
         socket.emit("updateCount", { roomId, count: newCount });
         return newCount;
       });
+    } else {
+      console.warn("점핑잭 카운트를 증가시킬 수 없는 상태입니다.");
     }
   };
 
   const startGameTimer = () => {
     const gameDuration = 30; // 게임 시간 30초
     setRemainingTime(gameDuration); // 초기 시간 설정
-    // setCanCount(true); // 점핑잭 카운트 활성화
+    setCanCount(true); // 점핑잭 카운트 활성화
 
     const timerInterval = setInterval(() => {
       setRemainingTime((prevTime) => {
         if (prevTime <= 1) {
           clearInterval(timerInterval); // 타이머 종료
-          setCanCount(false); // 점핑잭 카운트 비활성화
-          socket.emit("endChallenge", { roomId });
+          if (canCountRef.current) {
+            setCanCount(false); // 점핑잭 카운트 비활성화
+          }          socket.emit("endChallenge", { roomId });
           return 0;
         }
         return prevTime - 1; // 1초씩 감소
