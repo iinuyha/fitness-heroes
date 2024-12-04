@@ -33,7 +33,7 @@ const storyRouter = require("./routes/storyRouter");
 const exerciseRouter = require("./routes/exerciseRouter");
 const friendRouter = require("./routes/friendRouter");
 const matchRouter = require("./routes/matchRouter"); // 임의로 추가한 matchRouter
-const gameresultRouter = require("./routes/gameresultRouter");
+// const gameresultRouter = require("./routes/gameresultRouter");
 
 // API 엔드포인트 설정
 app.use("/api", protectedRouter);
@@ -46,6 +46,6 @@ app.use("/api/story", storyRouter);
 app.use("/api/exercise", exerciseRouter);
 app.use("/api/friend", friendRouter);
 app.use("/api/match", matchRouter);
-app.use("/api/gameresult",gameresultRouter);
+// app.use("/api/gameresult",gameresultRouter);
 
 module.exports = app;

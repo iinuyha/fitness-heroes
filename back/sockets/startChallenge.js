@@ -154,63 +154,60 @@ function startChallenge(io, socket) {
       resultMessage: winnerMessage,
     });
 
-    const [challengerId, challengedId] = roomId.split("-");
-    const winnerId = scores[0][0]; // winnerId에는 friend 컬렉션의 win에 1 늘리기
-    const loserId = scores[1][0]; // loserId에는 friend 컬렉션의 lose에 1 늘리기
-    const isDraw = scores[0][1] === scores[1][1]; // 무승부 여부 (얘가 만약에 true이면 winnerId, loserId에 대해서 friend 컬렉션의 lose를 둘 다 1 늘리기)
-    const challengerScore = roomCounts[roomId][challengerId];
-    const challengedScore = roomCounts[roomId][challengedId];
+    const [challengerId, challengedId] = roomId.split("-"); // roomId에서 challenger와 challenged 추출
+    const winnerId = scores[0][0]; // 승자 ID
+    const loserId = scores[1][0]; // 패자 ID
+    const isDraw = scores[0][1] === scores[1][1]; // 무승부 여부 확인
+    const challengerScore = roomCounts[roomId][challengerId]; // challenger 점수
+    const challengedScore = roomCounts[roomId][challengedId]; // challenged 점수
 
-    //////////// ✅ TODO: challenge 컬렉션에 대결 결과 저장하는 로직 추가
-    //////////// ✅ TODO: 각 사용자의 friend 컬렉션에 승무패 결과 저장
-    //////////// ✅ TODO: challenge 컬렉션의 status를 completed로 업데이트
     try {
-      // ✅ challenge 컬렉션에 대결 결과 저장
+      // ✅ 1. Challenge 컬렉션에 대결 결과 저장
       const challenge = await Challenge.findOneAndUpdate(
-        { challengerId, challengedId }, // 검색 조건
+        { challengerId, challengedId }, // challengerId와 challengedId 기준
         {
-          $set: {
-            scores: { challengerScore, challengedScore }, // 점수 저장
-            winnerId: isDraw ? null : winnerId, // 무승부이면 null, 아니면 승자 ID
-            status: "completed", // 상태 업데이트
-            completedAt: new Date(), // 완료 날짜
-          },
-        },{ new: true, upsert: true } // 없으면 생성, 있으면 업데이트 후 반환
+          scores: { challengerScore, challengedScore }, // 점수 저장
+          winnerId: isDraw ? null : winnerId, // 무승부라면 winnerId는 null
+          status: "completed", // 상태를 'completed'로 설정
+        },
+        { new: true, upsert: true } // 없으면 생성, 있으면 업데이트
       );
 
       console.log(`Challenge 컬렉션 업데이트 완료:`, challenge);
-  
-      // ✅ 각 사용자의 friend 컬렉션에 승무패 결과 저장
+
+      // ✅ 2. Friend 컬렉션 업데이트 함수 정의
       const updateFriendStats = async (userId, resultType) => {
         const friend = await Friend.findOne({ id: userId });
         if (!friend) {
           throw new Error(`Friend with id ${userId} not found.`);
         }
-  
+
+        // 승무패에 따른 값 증가
         if (resultType === "win") friend.win = (friend.win || 0) + 1;
         if (resultType === "lose") friend.lose = (friend.lose || 0) + 1;
         if (resultType === "draw") friend.draw = (friend.draw || 0) + 1;
-  
+
         await friend.save();
         console.log(`Friend 컬렉션 업데이트 완료: ${userId}, ${resultType}`);
       };
 
-      if (isDraw) {
-        // 무승부일 경우 두 사용자의 lose 증가
-          await Promise.all([
-            updateFriendStats(challengerId, "lose"),
-            updateFriendStats(challengedId, "lose"),
-        ]);
+      // ✅ 3. 승/무/패에 따른 Friend 컬렉션 업데이트
+      if (winnerId === challengerId) {
+        await updateFriendStats(challengerId, "win");
+        await updateFriendStats(challengedId, "lose");
+      } else if (winnerId === challengedId) {
+        await updateFriendStats(challengedId, "win");
+        await updateFriendStats(challengerId, "lose");
       } else {
-        // 승/패 처리
-        await updateFriendStats(winnerId, "win");
-        await updateFriendStats(loserId, "lose");
+        // 무승부
+        await updateFriendStats(challengerId, "draw");
+        await updateFriendStats(challengedId, "draw");
       }
+
       console.log(`대결 결과가 Friend 컬렉션에 성공적으로 저장되었습니다.`);
     } catch (error) {
       console.error(`대결 결과 저장 중 에러 발생: ${error.message}`);
     }
-    
     // 방 상태 정리
     setTimeout(() => {
       io.socketsLeave(roomId);
