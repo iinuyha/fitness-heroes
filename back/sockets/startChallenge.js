@@ -1,6 +1,7 @@
 const roomReadyStates = require("./inviteFriend"); // 공유된 roomReadyStates 불러오기
 const roomCounts = require("./inviteFriend");
 const Challenge = require("../models/challenge");
+const Friend = require("../models/friend");
 
 function startChallenge(io, socket) {
   socket.on("startWebRTC", ({ roomId }) => {
@@ -163,7 +164,53 @@ function startChallenge(io, socket) {
     //////////// ✅ TODO: challenge 컬렉션에 대결 결과 저장하는 로직 추가
     //////////// ✅ TODO: 각 사용자의 friend 컬렉션에 승무패 결과 저장
     //////////// ✅ TODO: challenge 컬렉션의 status를 completed로 업데이트
+    try {
+      // ✅ challenge 컬렉션에 대결 결과 저장
+      const challenge = await Challenge.findOneAndUpdate(
+        { challengerId, challengedId }, // 검색 조건
+        {
+          $set: {
+            scores: { challengerScore, challengedScore }, // 점수 저장
+            winnerId: isDraw ? null : winnerId, // 무승부이면 null, 아니면 승자 ID
+            status: "completed", // 상태 업데이트
+            completedAt: new Date(), // 완료 날짜
+          },
+        },{ new: true, upsert: true } // 없으면 생성, 있으면 업데이트 후 반환
+      );
 
+      console.log(`Challenge 컬렉션 업데이트 완료:`, challenge);
+  
+      // ✅ 각 사용자의 friend 컬렉션에 승무패 결과 저장
+      const updateFriendStats = async (userId, resultType) => {
+        const friend = await Friend.findOne({ id: userId });
+        if (!friend) {
+          throw new Error(`Friend with id ${userId} not found.`);
+        }
+  
+        if (resultType === "win") friend.win = (friend.win || 0) + 1;
+        if (resultType === "lose") friend.lose = (friend.lose || 0) + 1;
+        if (resultType === "draw") friend.draw = (friend.draw || 0) + 1;
+  
+        await friend.save();
+        console.log(`Friend 컬렉션 업데이트 완료: ${userId}, ${resultType}`);
+      };
+
+      if (isDraw) {
+        // 무승부일 경우 두 사용자의 lose 증가
+          await Promise.all([
+            updateFriendStats(challengerId, "lose"),
+            updateFriendStats(challengedId, "lose"),
+        ]);
+      } else {
+        // 승/패 처리
+        await updateFriendStats(winnerId, "win");
+        await updateFriendStats(loserId, "lose");
+      }
+      console.log(`대결 결과가 Friend 컬렉션에 성공적으로 저장되었습니다.`);
+    } catch (error) {
+      console.error(`대결 결과 저장 중 에러 발생: ${error.message}`);
+    }
+    
     // 방 상태 정리
     setTimeout(() => {
       io.socketsLeave(roomId);
