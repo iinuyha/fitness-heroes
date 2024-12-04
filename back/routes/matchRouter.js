@@ -26,76 +26,76 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// 대결 기록 저장 API (인증 적용)
-router.post("/save", authenticateToken, async (req, res) => {
-  const { friendId, result } = req.body;
-  const userId = req.user.id; // 토큰에서 추출한 사용자 ID
+// // 대결 기록 저장 API (인증 적용)
+// router.post("/save", authenticateToken, async (req, res) => {
+//   const { friendId, result } = req.body;
+//   const userId = req.user.id; // 토큰에서 추출한 사용자 ID
 
-  // 요청 데이터가 충분한지 확인
-  if (!friendId || !result) {
-    return res.status(400).json({
-      status: "error",
-      message: "friendId와 result 필드는 필수입니다.",
-    });
-  }
+//   // 요청 데이터가 충분한지 확인
+//   if (!friendId || !result) {
+//     return res.status(400).json({
+//       status: "error",
+//       message: "friendId와 result 필드는 필수입니다.",
+//     });
+//   }
 
-  // result 값이 유효한지 확인
-  const validResults = ["win", "draw", "lose"];
-  if (!validResults.includes(result)) {
-    return res.status(400).json({
-      status: "error",
-      message: `Invalid result value. Expected one of ${validResults.join(
-        ", "
-      )}.`,
-    });
-  }
+//   // result 값이 유효한지 확인
+//   const validResults = ["win", "draw", "lose"];
+//   if (!validResults.includes(result)) {
+//     return res.status(400).json({
+//       status: "error",
+//       message: `Invalid result value. Expected one of ${validResults.join(
+//         ", "
+//       )}.`,
+//     });
+//   }
 
-  try {
-    // 사용자의 대결 기록 조회
-    let userRecord = await Friend.findOne({ id: userId });
+//   try {
+//     // 사용자의 대결 기록 조회
+//     let userRecord = await Friend.findOne({ id: userId });
 
-    // 사용자 기록이 없으면 새로 생성
-    if (!userRecord) {
-      userRecord = new Friend({ id: userId, win: 0, draw: 0, lose: 0 });
-    }
+//     // 사용자 기록이 없으면 새로 생성
+//     if (!userRecord) {
+//       userRecord = new Friend({ id: userId, win: 0, draw: 0, lose: 0 });
+//     }
 
-    // 대결 결과에 따라 기록을 업데이트
-    if (result === "win") {
-      userRecord.win += 1;
-    } else if (result === "draw") {
-      userRecord.draw += 1;
-    } else if (result === "lose") {
-      userRecord.lose += 1;
-    }
+//     // 대결 결과에 따라 기록을 업데이트
+//     if (result === "win") {
+//       userRecord.win += 1;
+//     } else if (result === "draw") {
+//       userRecord.draw += 1;
+//     } else if (result === "lose") {
+//       userRecord.lose += 1;
+//     }
 
-    // 기록 저장
-    await userRecord.save();
+//     // 기록 저장
+//     await userRecord.save();
 
-    // 성공 응답 반환
-    return res.status(200).json({
-      status: "success",
-      message: "Match record saved successfully.",
-      data: {
-        userId: userRecord.id,
-        friendId: friendId,
-        result: result,
-        updatedRecord: {
-          win: userRecord.win,
-          draw: userRecord.draw,
-          lose: userRecord.lose,
-        },
-      },
-    });
-  } catch (error) {
-    // 에러 처리
-    console.error(error);
-    return res.status(500).json({
-      status: "error",
-      message: "Failed to save match record.",
-      error: error.message,
-    });
-  }
-});
+//     // 성공 응답 반환
+//     return res.status(200).json({
+//       status: "success",
+//       message: "Match record saved successfully.",
+//       data: {
+//         userId: userRecord.id,
+//         friendId: friendId,
+//         result: result,
+//         updatedRecord: {
+//           win: userRecord.win,
+//           draw: userRecord.draw,
+//           lose: userRecord.lose,
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     // 에러 처리
+//     console.error(error);
+//     return res.status(500).json({
+//       status: "error",
+//       message: "Failed to save match record.",
+//       error: error.message,
+//     });
+//   }
+// });
 
 // 코인 확인
 router.post("/check-coin", authenticateToken, async (req, res) => {
