@@ -1,41 +1,95 @@
-import React, { createContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useState, useEffect, useRef, useContext } from "react";
 import io from "socket.io-client";
+import { PopupContext } from "./PopupContext";
 
 const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
   const [onlineFriends, setOnlineFriends] = useState({});
+  const [isConnected, setIsConnected] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false); // 소켓 초기화 상태 추가
+  const [token, setToken] = useState(localStorage.getItem("token")); // 토큰 상태 추가
   const socketRef = useRef(null);
-  const token = localStorage.getItem("token");
+  const { showPopup } = useContext(PopupContext);
+  
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken); // 로컬 스토리지에서 가져온 토큰으로 상태 업데이트
+    }
+  }, []); // 컴포넌트 마운트 시 로컬 스토리지에서 토큰 가져오기
 
   useEffect(() => {
+    console.log(token);
     if (token) {
-      socketRef.current = io(process.env.REACT_APP_SERVER_URL, {
-        auth: { token },
-        transports: ["websocket"],
-        reconnection: true,
-        reconnectionAttempts: 10,
-        reconnectionDelay: 2000,
-      });
+      if (!socketRef.current) {
+        // 소켓 초기화
+        socketRef.current = io(process.env.REACT_APP_SERVER_URL, {
+          auth: { token },
+          transports: ["websocket"],
+          reconnection: true,
+          reconnectionAttempts: 10,
+          reconnectionDelay: 2000,
+          autoConnect: false,
+        });
 
-      socketRef.current.on("connect", () => {
-        console.log("Connected to server with ID:", socketRef.current.id);
-      });
+        const socket = socketRef.current;
 
-      // 전체 사용자 온라인 상태 업데이트
-      socketRef.current.on("userStatusUpdate", (updatedStatus) => {
-        setOnlineFriends(updatedStatus);
-      });
+        socket.on("connect", () => {
+          console.log("Connected to server with ID:", socket.id);
+          setIsConnected(true);
+        });
 
-      return () => {
-        socketRef.current.disconnect();
-      };
+        socket.on("disconnect", () => {
+          console.log("Disconnected from server");
+          setIsConnected(false);
+        });
+
+        socket.on("userStatusUpdate", (updatedStatus) => {
+          console.log("User status updated:", updatedStatus);
+          setOnlineFriends(updatedStatus);
+        });
+
+        // 대결 신청 이벤트 처리
+        socket.on("challengeReceived", ({ from, roomId }) => {
+          showPopup(
+            `${from}님이 대결을 신청했습니다. 수락하시겠습니까?`,
+            // 확인 버튼 동작
+            () => socket.emit("acceptChallenge", { roomId }),
+            // 거절 버튼 동작
+            () => socket.emit("declineChallenge", { roomId })
+          );
+        });
+
+        socket.on("connect_error", (err) => {
+          console.error("Connection error:", err.message);
+        });
+
+        socket.connect();
+      }
+
+      setIsInitialized(true);
+    } else {
+      console.error("No token found, socket cannot initialize.");
     }
-  }, [token]);
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+        setIsConnected(false);
+      }
+    };
+  }, [token]); // token 상태가 변경될 때만 실행
 
   return (
     <SocketContext.Provider
-      value={{ socket: socketRef.current, onlineFriends }}
+      value={{
+        socket: socketRef.current,
+        onlineFriends,
+        isConnected,
+        isInitialized,
+      }}
     >
       {children}
     </SocketContext.Provider>

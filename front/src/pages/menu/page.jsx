@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay"; // InfoPopup 컴포넌트 불러오기
+import SocketContext from "../../contexts/SocketContext";
+
 
 function MenuPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const navigate = useNavigate();
+  const { socket, isConnected, isInitialized } = useContext(SocketContext); // 초기화 상태 가져오기
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -13,6 +17,24 @@ function MenuPage() {
       navigate(routes.login);
     }
   }, [navigate]);
+
+   // 소켓 연결 관리
+   useEffect(() => {
+    if (isInitialized && socket && !isConnected) {
+      socket.connect(); // 소켓 초기화가 완료된 후 연결
+    }
+  }, [socket, isConnected, isInitialized]);
+
+
+  if (!isInitialized) {
+    // 초기화 완료 전 로딩 화면 표시
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>소켓 초기화 중...</p>
+      </div>
+    );
+  }
+
 
   const handlePopupOpen = () => {
     setIsPopupOpen(!isPopupOpen);

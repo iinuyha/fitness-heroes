@@ -4,6 +4,7 @@ import { login } from "./api";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // Popup 컴포넌트 추가
 
+
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
@@ -22,22 +23,37 @@ function LoginPage() {
   const handleLogin = async () => {
     try {
       const response = await login(id, password);
-      if (response.success) {
+      console.log("로그인 응답:", response);
+  
+      if (response?.success) {
+        console.log("로그인 성공");
+        localStorage.setItem("token", response.token);
+        
+        
         if (response.isFirstTime) {
           navigate(routes.onboarding);
         } else {
+          handleLoginSuccess(response.token);
           navigate(routes.menu);
         }
       } else {
-        // 로그인 실패 시 오류 메시지를 Popup으로 표시
+        console.log("로그인 실패 - 응답:", response);
         setPopupMessage(response.message || "로그인 실패: 다시 시도해주세요.");
-        setIsPopupOpen(true); // 팝업 열기
+        setIsPopupOpen(true);
       }
     } catch (error) {
       console.error("로그인 에러:", error);
-      setPopupMessage("로그인 실패: 다시 시도해주세요."); // 일반 오류 메시지 설정
-      setIsPopupOpen(true); // 팝업 열기
+      setPopupMessage("로그인 실패: 다시 시도해주세요.");
+      setIsPopupOpen(true);
     }
+  };
+
+  const handleLoginSuccess = (token) => {
+    // 토큰을 로컬 스토리지에 저장
+    localStorage.setItem("token", token);
+
+    // 앱 전체를 다시 렌더링
+    window.location.reload(); // 페이지 새로고침
   };
 
   return (
