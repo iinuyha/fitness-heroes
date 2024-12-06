@@ -25,27 +25,27 @@ function FriendPage() {
   const [isChallengePopupOpen, setIsChallengePopupOpen] = useState(false);
   const [challengeInfo, setChallengeInfo] = useState(null);
 
-  const token = localStorage.getItem("token");
   const { socket, onlineFriends } = useContext(SocketContext);
-
   const navigate = useNavigate(); // useNavigate 훅 사용
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!token) {
-      navigate(routes.login);
+      navigate("/login");
+      return;
     }
-  }, [navigate, token]);
+    loadFriends(); // 친구 목록 로드
+  }, [token, navigate]);
+
 
   useEffect(() => {
-    loadFriends();
-    if (socket) {
-      setupSocketListeners();
-    }
-
-    return () => {
-      cleanupSocketListeners();
-    };
-  }, [socket]);
+    setFriendList((prevList) =>
+      prevList.map((friend) => ({
+        ...friend,
+        isOnline: !!onlineFriends[friend.id],
+      }))
+    );
+  }, [onlineFriends]);
 
   // 소켓 이벤트 리스너 설정
   const setupSocketListeners = () => {
@@ -54,14 +54,33 @@ function FriendPage() {
       setIsPopupOpen(true);
       setIsInvitationSent(false);
     });
-
+  
     socket.on("challengeReceived", handleChallengeReceived);
     socket.on("challengeDeclined", handleChallengeDeclined);
     socket.on("challengeCancelled", handleChallengeCancelled);
     socket.on("gameStart", handleGameStart);
+  
+    // 친구 온라인 상태 업데이트 이벤트
+    socket.on("friendOnline", ({ friendId }) => {
+      onlineFriends[friendId] = true; // 친구 상태를 업데이트
+      setFriendList((prevList) =>
+        prevList.map((friend) =>
+          friend.id === friendId ? { ...friend, isOnline: true } : friend
+        )
+      );
+    });
+  
+    // 친구 오프라인 상태 업데이트 이벤트
+    socket.on("friendOffline", ({ friendId }) => {
+      onlineFriends[friendId] = false; // 친구 상태를 업데이트
+      setFriendList((prevList) =>
+        prevList.map((friend) =>
+          friend.id === friendId ? { ...friend, isOnline: false } : friend
+        )
+      );
+    });
   };
 
-  // 소켓 리스너 정리
   const cleanupSocketListeners = () => {
     if (socket) {
       socket.off("error");
@@ -76,13 +95,18 @@ function FriendPage() {
   const loadFriends = async () => {
     try {
       const friends = await fetchFriendList(token);
-      setFriendList(friends.friends);
+      setFriendList(
+        friends.friends.map((friend) => ({
+          ...friend,
+          isOnline: !!onlineFriends[friend.id],
+        }))
+      );
     } catch (error) {
-      console.error("친구 목록 로드 실패:", error);
       setPopupMessage("친구 목록을 불러오는데 실패했습니다.");
       setIsPopupOpen(true);
     }
   };
+
 
   // 대결 신청하기 (초대하는 사람)
   const handleInvite = async (friend) => {
@@ -303,19 +327,19 @@ function FriendPage() {
                   </span>
                 </span>
                 <button
-                  disabled={!onlineFriends[friend.id] || friend.isInvited}
+                  disabled={!friend.isOnline || friend.isInvited}
                   onClick={() => handleInvite(friend)}
                   className={`px-4 py-1 rounded-full font-semibold ${
                     friend.isInvited
                       ? "bg-[#175874]" // 초대 중일 때 버튼 색상
-                      : onlineFriends[friend.id]
+                      : friend.isOnline
                       ? "bg-[#00B2FF]"
                       : "bg-gray-400"
                   } text-white`}
                 >
                   {friend.isInvited
                     ? "대결 신청 중..." // 초대 상태 표시
-                    : onlineFriends[friend.id]
+                    : friend.isOnline
                     ? "대결신청"
                     : "오프라인"}
                 </button>
