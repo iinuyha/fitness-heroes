@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useState, useEffect, useRef, useContext } from "react";
 import io from "socket.io-client";
+import { PopupContext } from "./PopupContext";
 
 const SocketContext = createContext();
 
@@ -9,6 +10,7 @@ export const SocketProvider = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false); // 소켓 초기화 상태 추가
   const [token, setToken] = useState(localStorage.getItem("token")); // 토큰 상태 추가
   const socketRef = useRef(null);
+  const { showPopup } = useContext(PopupContext);
   
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -46,6 +48,17 @@ export const SocketProvider = ({ children }) => {
         socket.on("userStatusUpdate", (updatedStatus) => {
           console.log("User status updated:", updatedStatus);
           setOnlineFriends(updatedStatus);
+        });
+
+        // 대결 신청 이벤트 처리
+        socket.on("challengeReceived", ({ from, roomId }) => {
+          showPopup(
+            `${from}님이 대결을 신청했습니다. 수락하시겠습니까?`,
+            // 확인 버튼 동작
+            () => socket.emit("acceptChallenge", { roomId }),
+            // 거절 버튼 동작
+            () => socket.emit("declineChallenge", { roomId })
+          );
         });
 
         socket.on("connect_error", (err) => {
