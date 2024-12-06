@@ -25,9 +25,9 @@ function FriendPage() {
   const [isChallengePopupOpen, setIsChallengePopupOpen] = useState(false);
   const [challengeInfo, setChallengeInfo] = useState(null);
 
+  const token = localStorage.getItem("token");
   const { socket, onlineFriends } = useContext(SocketContext);
   const navigate = useNavigate(); // useNavigate 훅 사용
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!token) {
@@ -36,6 +36,16 @@ function FriendPage() {
     }
     loadFriends(); // 친구 목록 로드
   }, [token, navigate]);
+
+  useEffect(() => {
+    if (socket) {
+      setupSocketListeners(); // 소켓 이벤트 리스너 설정
+    }
+
+    return () => {
+      cleanupSocketListeners(); // 소켓 이벤트 리스너 정리
+    };
+  }, [socket]);
 
 
   useEffect(() => {
@@ -49,6 +59,8 @@ function FriendPage() {
 
   // 소켓 이벤트 리스너 설정
   const setupSocketListeners = () => {
+    if (!socket) return;
+
     socket.on("error", ({ message }) => {
       setPopupMessage(message);
       setIsPopupOpen(true);
@@ -82,13 +94,13 @@ function FriendPage() {
   };
 
   const cleanupSocketListeners = () => {
-    if (socket) {
-      socket.off("error");
-      socket.off("challengeReceived");
-      socket.off("challengeDeclined");
-      socket.off("challengeCancelled");
-      socket.off("gameStart");
-    }
+    if (!socket) return;
+    
+    socket.off("error");
+    socket.off("challengeReceived");
+    socket.off("challengeDeclined");
+    socket.off("challengeCancelled");
+    socket.off("gameStart");
   };
 
   // 친구 목록 로드

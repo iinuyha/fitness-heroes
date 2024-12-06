@@ -17,7 +17,6 @@ function OnBoardingPage() {
   const [gender, setGender] = useState(null);
   const [concern, setConcern] = useState("");
   const [character, setCharacter] = useState("");
-  const navigate = useNavigate();
 
   const handleNext = () => {
     if (isComplete) {
@@ -38,7 +37,7 @@ function OnBoardingPage() {
 
   // 새로고침 후 메뉴로 이동하는 함수
   const moveToMenuWithRefresh = () => {
-    window.location.replace(routes.menu); // 페이지 새로고침 후 menu로 이동
+    window.location.replace(routes.menu);
   };
 
   const components = [
