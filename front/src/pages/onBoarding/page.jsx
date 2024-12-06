@@ -36,6 +36,11 @@ function OnBoardingPage() {
     }
   }, [step]);
 
+  // 새로고침 후 메뉴로 이동하는 함수
+  const moveToMenuWithRefresh = () => {
+    window.location.replace(routes.menu); // 페이지 새로고침 후 menu로 이동
+  };
+
   const components = [
     <Component1 moveToNext={() => setIsComplete(true)} setName={setName} />,
     <Component2
@@ -58,7 +63,7 @@ function OnBoardingPage() {
       birthdate={birthdate}
       gender={gender}
       concern={concern}
-      moveToMenu={() => navigate(routes.menu)}
+      moveToMenu={moveToMenuWithRefresh}
     />,
   ];
 

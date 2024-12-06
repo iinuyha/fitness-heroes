@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "./api";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // Popup 컴포넌트 추가
-import SocketContext from "../../contexts/SocketContext";
 
 
 function LoginPage() {
@@ -11,7 +10,6 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [popupMessage, setPopupMessage] = useState(""); // 팝업 메시지 상태 추가
   const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 열림 상태 추가
-  const { socket, setIsConnected } = useContext(SocketContext); // 소켓 상태 추가
   const navigate = useNavigate();
 
   // 페이지 로드 시 토큰이 있으면 자동으로 메뉴로 리다이렉트
@@ -30,27 +28,13 @@ function LoginPage() {
       if (response?.success) {
         console.log("로그인 성공");
         localStorage.setItem("token", response.token);
-        console.log('socket??:', socket);
-  
+        
         
         if (response.isFirstTime) {
           navigate(routes.onboarding);
         } else {
+          handleLoginSuccess(response.token);
           navigate(routes.menu);
-          // 소켓 연결 확인 및 실행
-          if (socket) {
-            socket.auth = { token: response.token }; // 토큰 전달
-            await socket.connect();
-            socket.on("connect", () => {
-              setIsConnected(true);
-              console.log("소켓 연결 성공");
-            });
-            socket.on("connect_error", (err) => {
-              console.error("소켓 연결 에러:", err);
-            });
-          } else {
-            console.error("소켓이 초기화되지 않았습니다.");
-          }
         }
       } else {
         console.log("로그인 실패 - 응답:", response);
@@ -62,6 +46,14 @@ function LoginPage() {
       setPopupMessage("로그인 실패: 다시 시도해주세요.");
       setIsPopupOpen(true);
     }
+  };
+
+  const handleLoginSuccess = (token) => {
+    // 토큰을 로컬 스토리지에 저장
+    localStorage.setItem("token", token);
+
+    // 앱 전체를 다시 렌더링
+    window.location.reload(); // 페이지 새로고침
   };
 
   return (
