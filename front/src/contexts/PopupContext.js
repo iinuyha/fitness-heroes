@@ -30,7 +30,9 @@ export const PopupProvider = ({ children }) => {
   };
 
   return (
-    <PopupContext.Provider value={{ popup, showPopup, hidePopup, handleConfirm, handleCancel }}>
+    <PopupContext.Provider
+      value={{ popup, showPopup, hidePopup, handleConfirm, handleCancel }}
+    >
       {children}
     </PopupContext.Provider>
   );

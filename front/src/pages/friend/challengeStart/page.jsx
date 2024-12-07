@@ -208,6 +208,7 @@ ${Object.entries(scores)
       }
       if (peerConnection.current) {
         peerConnection.current.close();
+        peerConnection.current = null;
       }
     };
   }, [socket, navigate, roomId]);
