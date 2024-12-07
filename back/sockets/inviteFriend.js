@@ -36,6 +36,19 @@ function handleChallenge(io, socket) {
           return;
         }
 
+        // 친구의 가장 최근 대결 확인
+        const latestFriendChallenge = await Challenge.findOne({
+          challengedId: friendId,
+        }).sort({ createdAt: -1 });
+
+        if (latestFriendChallenge.status == "accepted") {
+          socket.emit("error", {
+            message:
+              "현재 상대가 대결중입니다. 잠시 후에 다시 대결을 신청해주세요.",
+          });
+          return;
+        }
+
         const challenge = new Challenge({
           challengerId: userId,
           challengedId: friendId,
