@@ -49,6 +49,13 @@ function handleChallenge(io, socket) {
             message:
               "현재 상대가 대결중입니다. 잠시 후에 다시 대결을 신청해주세요.",
           });
+
+          // 친구가 이미 대결 중임을 클라이언트에 알림
+          io.to(io.users[userId]).emit("friendStatusUpdate", {
+            friendId,
+            isInChallenge: true,
+          });
+
           return;
         }
 

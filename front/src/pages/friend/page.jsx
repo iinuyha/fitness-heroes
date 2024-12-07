@@ -90,6 +90,14 @@ function FriendPage() {
         )
       );
     });
+
+    socket.on("friendStatusUpdate", ({ friendId, isInChallenge }) => {
+      setFriendList((prevList) =>
+        prevList.map((friend) =>
+          friend.id === friendId ? { ...friend, isInChallenge } : friend
+        )
+      );
+    });
   };
 
   const cleanupSocketListeners = () => {
@@ -100,6 +108,9 @@ function FriendPage() {
     socket.off("challengeDeclined");
     socket.off("challengeCancelled");
     socket.off("gameStart");
+    socket.on("friendOnline");
+    socket.on("friendOffline");
+    socket.on("friendStatusUpdate");
   };
 
   // 친구 목록 로드
@@ -329,17 +340,25 @@ function FriendPage() {
                   </span>
                 </span>
                 <button
-                  disabled={!friend.isOnline || friend.isInvited}
+                  disabled={
+                    !friend.isOnline ||
+                    friend.isInvited ||
+                    friend.isInChallenge === true
+                  }
                   onClick={() => handleInvite(friend)}
                   className={`px-4 py-1 rounded-full font-semibold ${
-                    friend.isInvited
+                    friend.isInChallenge
+                      ? "bg-gray-500" // 이미 대결 중인 경우
+                      : friend.isInvited
                       ? "bg-[#175874]" // 초대 중일 때 버튼 색상
                       : friend.isOnline
                       ? "bg-[#00B2FF]"
                       : "bg-gray-400"
                   } text-white`}
                 >
-                  {friend.isInvited
+                  {friend.isInChallenge
+                    ? "대결 중" // 이미 대결 중인 경우
+                    : friend.isInvited
                     ? "대결 신청 중..." // 초대 상태 표시
                     : friend.isOnline
                     ? "대결신청"
