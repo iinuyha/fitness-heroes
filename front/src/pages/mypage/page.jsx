@@ -96,7 +96,7 @@ function MypagePage() {
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
       <ReturnDisplay />
-      <CoinInfoDisplay message="마이페이지 관련된 설명 적으면 됨" />
+      <CoinInfoDisplay message="마이페이지에선 나에 대한 정보를 알 수 있습니다." />
 
       {isPopupOpen && (
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />
@@ -130,19 +130,21 @@ function MypagePage() {
                 src={`/image/concern/${userInfo.concern}.png`}
                 alt={`${userInfo.concern} 지역`}
                 className="h-28"
-                />
+              />
             </div>
-              <p className="text-lg font-semibold">
-                진행도 | {storyInfo.length}/33
-              </p>
+            <p className="text-lg font-semibold">
+              진행도 | {storyInfo.length}/33
+            </p>
           </div>
         </div>
 
         {/* "지난 에피소드" 섹션 조건부 렌더링 */}
-       {storyInfo.length > 0 && (
+        {storyInfo.length > 0 && (
           <div className="bg-white bg-opacity-20 rounded-xl p-10 text-white w-2/4 relative">
             <div className="mb-4 flex justify-between">
-              <h2 className="text-xl font-semibold text-white">지난 에피소드</h2>
+              <h2 className="text-xl font-semibold text-white">
+                지난 에피소드
+              </h2>
               <div className="text-right text-sm text-white">
                 시작일 | {storyInfo[0] ? storyInfo[0].date : "데이터 없음"}
               </div>

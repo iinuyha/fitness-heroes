@@ -284,7 +284,7 @@ function FriendPage() {
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
       <ReturnDisplay />
-      <CoinInfoDisplay message="<u>운동 경쟁 설명</u>" />
+      <CoinInfoDisplay message="친구와 코인을 걸고 운동 대결을 펼쳐보세요!" />
 
       {isPopupOpen && (
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />

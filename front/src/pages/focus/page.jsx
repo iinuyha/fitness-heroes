@@ -23,7 +23,7 @@ function FocusPage() {
       <ReturnDisplay />
 
       {/* 코인 및 정보 팝업 */}
-      <CoinInfoDisplay message="집중운동 관련된 설명 적으면 됨.. html이나 마크다운 문법 사용 가능" />
+      <CoinInfoDisplay message="특정 부위를 집중적으로 운동해보세요!<br><u>(현재 준비 중인 기능입니다. 곧 만나보실 수 있습니다.)</u>" />
 
       {/* 팝업창 */}
       {isPopupOpen && (
