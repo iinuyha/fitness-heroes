@@ -18,6 +18,7 @@ function ChallengeStartPage() {
   const [myCount, setMyCount] = useState(0); // 내 점핑잭 카운트
   const [opponentCount, setOpponentCount] = useState(0); // 상대방 점핑잭 카운트
 
+  const [hideReadyMessage, setHideReadyMessage] = useState(false);
   const [isReady, setIsReady] = useState(false); // 내가 준비되었는지 여부
   const [opponentReady, setOpponentReady] = useState(false); // 상대방 준비 여부
   const [countdown, setCountdown] = useState(0); // 카운트다운 값
@@ -153,6 +154,7 @@ function ChallengeStartPage() {
     // 모두 준비 되면 카운트다운 3초 시작
     socket.on("startCountdown", () => {
       if (countdown === 0) {
+        setHideReadyMessage(true); // 메시지 숨기기
         let countdownValue = 3;
         setCountdown(countdownValue);
         const countdownInterval = setInterval(() => {
@@ -180,7 +182,7 @@ function ChallengeStartPage() {
       canCountRef.current = false;
       setOpponentLeft(true); // 상대방 나감 상태 업데이트
       setTimeout(() => {
-        navigate(-1); // 이전 페이지로 이동
+        navigate(routes.friend); // 이전 페이지로 이동
       }, 5000); // 5초 뒤 페이지 이동
     });
 
@@ -332,15 +334,29 @@ ${Object.entries(scores)
           돌아갑니다.
         </div>
       )}
-      <div className="absolute top-0 left-0 w-full z-10">
+      <div className="absolute top-4 left-4 z-10">
         <button
           onClick={() => {
             socket.emit("disconnectFromChallenge", { roomId }); // 이벤트 발생
-            navigate(-1); // 이전 페이지로 이동
+            navigate(routes.friend); // 이전 페이지로 이동
           }}
-          className="px-2 py-1 bg-red-500 text-white"
+          className="flex items-center gap-3 px-3 py-1 border-2 border-white hover:bg-white hover:text-black text-white font-bold rounded-lg transform hover:scale-105 transition-all duration-200"
         >
-          나가기
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          <span className="font-semibold text-lg">나가기</span>
         </button>
       </div>
       <div className="webcam-container flex h-screen">
@@ -348,8 +364,13 @@ ${Object.entries(scores)
           <>
             <div></div>
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
-              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {myId} (나) - 점핑잭: {myCount}
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 text-white text-xl font-bold z-10 rounded-lg flex flex-col items-center justify-center">
+                <p className="font-sans mb-4 text-3xl bg-black bg-opacity-40 px-3 py-1 rounded">
+                  {myId} (나)
+                </p>
+                <p className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-press-start text-7xl">
+                  {myCount}
+                </p>
               </div>
               <video
                 ref={localVideoRef}
@@ -361,7 +382,7 @@ ${Object.entries(scores)
               {!isReady && (
                 <button
                   onClick={handleReady}
-                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 left-4 z-20"
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-5 rounded-3xl text-2xl font-semibold absolute bottom-4 left-1/2 -translate-x-1/2 z-20 hover:scale-105 transition-all duration-200"
                 >
                   준비
                 </button>
@@ -377,8 +398,13 @@ ${Object.entries(scores)
               />
             </div>
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
-              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {opponentId} (상대) - 점핑잭: {opponentCount}
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 text-white text-xl font-bold z-10 rounded-lg flex flex-col items-center justify-center">
+                <p className="font-sans mb-4 text-3xl bg-black bg-opacity-40 px-3 py-1 rounded">
+                  {opponentId} (상대)
+                </p>
+                <p className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-press-start text-7xl">
+                  {opponentCount}
+                </p>
               </div>
               <video
                 ref={remoteVideoRef}
@@ -386,16 +412,22 @@ ${Object.entries(scores)
                 playsInline
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-4 left-1/2 text-white text-xl z-20">
-                {opponentReady ? "상대방 준비 완료" : "상대방 준비 중..."}
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white text-3xl font-bold z-20">
+                {!hideReadyMessage &&
+                  (opponentReady ? "준비 완료" : "준비 중...")}
               </div>
             </div>
           </>
         ) : (
           <>
             <div className="remote-video w-1/2 h-full flex items-center justify-center bg-gray-300 relative">
-              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {opponentId} (상대) - 점핑잭: {opponentCount}
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 text-white text-xl font-bold z-10 rounded-lg flex flex-col items-center justify-center">
+                <p className="font-sans mb-4 text-3xl bg-black bg-opacity-40 px-3 py-1 rounded">
+                  {opponentId} (상대)
+                </p>
+                <p className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-press-start text-7xl">
+                  {opponentCount}
+                </p>
               </div>
               <video
                 ref={remoteVideoRef}
@@ -403,8 +435,9 @@ ${Object.entries(scores)
                 playsInline
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-4 left-1/2 text-white text-xl z-20">
-                {opponentReady ? "상대방 준비 완료" : "상대방 준비 중..."}
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white font-bold text-3xl z-20">
+                {!hideReadyMessage &&
+                  (opponentReady ? "준비 완료" : "준비 중...")}
               </div>
             </div>
             {/* 프로그레스 바 */}
@@ -417,8 +450,13 @@ ${Object.entries(scores)
               />
             </div>
             <div className="local-video w-1/2 h-full flex items-center justify-center bg-gray-200 relative">
-              <div className="absolute top-5 left-1/2 text-white text-xl font-bold z-10 bg-black rounded-lg">
-                {myId} (나) - 점핑잭: {myCount}
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 text-white text-xl font-bold z-10 rounded-lg flex flex-col items-center justify-center">
+                <p className="font-sans mb-4 text-3xl bg-black bg-opacity-40 px-3 py-1 rounded">
+                  {myId} (나)
+                </p>
+                <p className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-press-start text-7xl">
+                  {myCount}
+                </p>
               </div>
               <video
                 ref={localVideoRef}
@@ -427,16 +465,11 @@ ${Object.entries(scores)
                 muted
                 className="w-full h-full object-cover"
               />
-              <button
-                onClick={handleCountIncrease}
-                className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
-              >
-                테스트: Count 증가
-              </button>
+
               {!isReady && (
                 <button
                   onClick={handleReady}
-                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 left-4 z-20"
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-5 rounded-xl text-2xl font-semibold absolute bottom-4 left-1/2 -translate-x-1/2 z-20 hover:scale-105 transition-all duration-200"
                 >
                   준비
                 </button>
