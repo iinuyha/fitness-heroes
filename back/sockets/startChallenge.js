@@ -2,6 +2,7 @@ const roomReadyStates = require("./inviteFriend"); // 공유된 roomReadyStates 
 const roomCounts = require("./inviteFriend");
 const Challenge = require("../models/challenge");
 const Friend = require("../models/friend");
+const Character = require("../models/character");
 
 function startChallenge(io, socket) {
   socket.on("startWebRTC", ({ roomId }) => {
@@ -202,6 +203,23 @@ function startChallenge(io, socket) {
         // 무승부
         await updateFriendStats(challengerId, "draw");
         await updateFriendStats(challengedId, "draw");
+      }
+
+      // 4. 승자는 3코인 플러스, 패자는 3코인 마이너스
+
+      const winnerCharacter = await Character.findOne({ id: winnerId });
+      const loserCharacter = await Character.findOne({ id: loserId });
+
+      if (winnerCharacter && loserCharacter) {
+        // 코인 업데이트
+        winnerCharacter.coin += 3;
+        loserCharacter.coin -= 3;
+
+        // 데이터베이스에 저장
+        await winnerCharacter.save();
+        await loserCharacter.save();
+      } else {
+        console.error("캐릭터를 찾을 수 없습니다.");
       }
 
       console.log(`대결 결과가 Friend 컬렉션에 성공적으로 저장되었습니다.`);
