@@ -193,7 +193,10 @@ function ChallengeStartPage() {
 ${message}
         
 ${Object.entries(scores)
-  .map(([userId, score]) => `${parseInt(score)}점`)
+  .map(([userId, score]) => {
+    const validScore = Number(score) || 0; // 숫자로 변환 불가 시 기본값 0
+    return `${validScore}점`;
+  })
   .join(":")}
         
 <b>${resultMessage}</b>

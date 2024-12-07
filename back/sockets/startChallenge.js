@@ -165,13 +165,17 @@ function startChallenge(io, socket) {
     try {
       // ✅ 1. Challenge 컬렉션에 대결 결과 저장
       const challenge = await Challenge.findOneAndUpdate(
-        { challengerId, challengedId }, // challengerId와 challengedId 기준
+        { challengerId, challengedId, status: "accepted" }, // challengerId와 challengedId 기준
         {
           scores: { challengerScore, challengedScore }, // 점수 저장
           winnerId: isDraw ? null : winnerId, // 무승부라면 winnerId는 null
           status: "completed", // 상태를 'completed'로 설정
         },
-        { new: true, upsert: true } // 없으면 생성, 있으면 업데이트
+        {
+          new: true, // 업데이트된 문서를 반환
+          upsert: false, // 없으면 생성하지 않음
+          sort: { createdAt: -1 }, // 최신 데이터 기준으로 정렬
+        }
       );
 
       console.log(`Challenge 컬렉션 업데이트 완료:`, challenge);
