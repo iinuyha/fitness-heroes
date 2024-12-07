@@ -351,12 +351,6 @@ function ChallengeStartPage() {
                 muted
                 className="w-full h-full object-cover"
               />
-              <button
-                onClick={handleCountIncrease}
-                className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
-              >
-                테스트: Count 증가
-              </button>
               {!isReady && (
                 <button
                   onClick={handleReady}
