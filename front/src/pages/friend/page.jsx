@@ -47,7 +47,6 @@ function FriendPage() {
     };
   }, [socket]);
 
-
   useEffect(() => {
     setFriendList((prevList) =>
       prevList.map((friend) => ({
@@ -66,12 +65,12 @@ function FriendPage() {
       setIsPopupOpen(true);
       setIsInvitationSent(false);
     });
-  
+
     socket.on("challengeReceived", handleChallengeReceived);
     socket.on("challengeDeclined", handleChallengeDeclined);
     socket.on("challengeCancelled", handleChallengeCancelled);
     socket.on("gameStart", handleGameStart);
-  
+
     // 친구 온라인 상태 업데이트 이벤트
     socket.on("friendOnline", ({ friendId }) => {
       onlineFriends[friendId] = true; // 친구 상태를 업데이트
@@ -81,7 +80,7 @@ function FriendPage() {
         )
       );
     });
-  
+
     // 친구 오프라인 상태 업데이트 이벤트
     socket.on("friendOffline", ({ friendId }) => {
       onlineFriends[friendId] = false; // 친구 상태를 업데이트
@@ -95,7 +94,7 @@ function FriendPage() {
 
   const cleanupSocketListeners = () => {
     if (!socket) return;
-    
+
     socket.off("error");
     socket.off("challengeReceived");
     socket.off("challengeDeclined");
@@ -118,7 +117,6 @@ function FriendPage() {
       setIsPopupOpen(true);
     }
   };
-
 
   // 대결 신청하기 (초대하는 사람)
   const handleInvite = async (friend) => {
@@ -191,9 +189,6 @@ function FriendPage() {
   const handleChallengeAccept = async () => {
     try {
       await acceptInvitation(token, challengeInfo.from);
-      socket.emit("acceptChallenge", {
-        roomId: challengeInfo.roomId,
-      });
       setIsChallengePopupOpen(false);
     } catch (error) {
       console.error("대결 수락 실패:", error);
@@ -206,10 +201,6 @@ function FriendPage() {
   const handleChallengeDecline = async () => {
     try {
       await declineInvitation(token, challengeInfo.from);
-      socket.emit("declineChallenge", {
-        roomId: challengeInfo.roomId,
-      });
-
       setIsChallengePopupOpen(false);
       setPopupMessage("대결 신청을 거절하였습니다.");
       setIsPopupOpen(true);
@@ -247,14 +238,13 @@ function FriendPage() {
     );
   };
 
-  // 게임 시작 처리
+  // 게임 시작시 친구 목록 업데이트
   const handleGameStart = ({ roomId }) => {
     setFriendList((prevFriendList) =>
       prevFriendList.map((friend) =>
         friend.isInvited ? { ...friend, isInvited: false } : friend
       )
     );
-    navigate(`/friend/challenge/${roomId}`);
   };
 
   // 친구 추가 처리

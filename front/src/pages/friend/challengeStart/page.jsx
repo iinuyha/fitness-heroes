@@ -53,6 +53,10 @@ function ChallengeStartPage() {
   }, [canCount]);
 
   useEffect(() => {
+    if (!socket) {
+      console.error("Socket is not initialized.");
+      return;
+    }
     const token = localStorage.getItem("token");
     if (!token) {
       navigate(routes.login);

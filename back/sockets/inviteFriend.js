@@ -38,10 +38,13 @@ function handleChallenge(io, socket) {
 
         // 친구의 가장 최근 대결 확인
         const latestFriendChallenge = await Challenge.findOne({
-          challengedId: friendId,
+          $or: [{ challengedId: friendId }, { challengerId: friendId }],
         }).sort({ createdAt: -1 });
 
-        if (latestFriendChallenge.status == "accepted") {
+        if (
+          latestFriendChallenge &&
+          latestFriendChallenge.status === "accepted"
+        ) {
           socket.emit("error", {
             message:
               "현재 상대가 대결중입니다. 잠시 후에 다시 대결을 신청해주세요.",
@@ -109,6 +112,7 @@ function handleChallenge(io, socket) {
         { status: "accepted", acceptedAt: new Date() }
       );
       io.to(roomId).emit("gameStart", { roomId });
+      // io.to(roomId).emit("redirect", { url: `/friend/challenge/${roomId}` });
     } catch (error) {
       console.error("대결 수락 처리 중 오류 발생:", error);
       socket.emit("error", { message: "대결 수락에 실패했습니다." });
