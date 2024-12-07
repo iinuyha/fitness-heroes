@@ -113,13 +113,17 @@ function handleChallenge(io, socket) {
   });
 
   socket.on("acceptChallenge", async ({ roomId }) => {
+    console.log("received acceptChallenge");
     try {
       await Challenge.updateOne(
-        { challengerId: userId, challengedId: roomId.split("-")[1] },
+        {
+          challengerId: roomId.split("-")[0],
+          challengedId: roomId.split("-")[1],
+          status: "pending",
+        },
         { status: "accepted", acceptedAt: new Date() }
       );
       io.to(roomId).emit("gameStart", { roomId });
-      // io.to(roomId).emit("redirect", { url: `/friend/challenge/${roomId}` });
     } catch (error) {
       console.error("대결 수락 처리 중 오류 발생:", error);
       socket.emit("error", { message: "대결 수락에 실패했습니다." });
@@ -127,9 +131,15 @@ function handleChallenge(io, socket) {
   });
 
   socket.on("declineChallenge", async ({ roomId }) => {
+    console.log("received declineChallenge");
+
     try {
       await Challenge.updateOne(
-        { challengerId: roomId.split("-")[0], challengedId: userId },
+        {
+          challengerId: roomId.split("-")[0],
+          challengedId: roomId.split("-")[1],
+          status: "pending",
+        },
         { status: "declined" }
       );
       io.to(roomId).emit("challengeDeclined", {
@@ -150,7 +160,6 @@ function handleChallenge(io, socket) {
     // 방 상태 초기화 (두 명 연결 시 생성)
     if (!roomReadyStates[roomId]) {
       roomReadyStates[roomId] = {};
-      roomCounts[roomId] = {};
     }
     if (!roomCounts[roomId]) {
       roomCounts[roomId] = {};
