@@ -64,7 +64,7 @@ export const SocketProvider = ({ children }) => {
             `${from}님이 대결을 신청했습니다. 수락하시겠습니까?`,
             // 확인 버튼 동작
             async () => {
-              await acceptInvitation(token, roomId.split("-")[0]);
+              await acceptInvitation(token, from);
               socket.emit("acceptChallenge", {
                 roomId,
               });
@@ -72,7 +72,7 @@ export const SocketProvider = ({ children }) => {
             },
             // 거절 버튼 동작
             async () => {
-              await declineInvitation(token, roomId.split("-")[0]);
+              await declineInvitation(token, from);
               socket.emit("declineChallenge", {
                 roomId,
               });

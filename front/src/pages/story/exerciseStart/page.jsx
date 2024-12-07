@@ -10,6 +10,8 @@ function ExerciseStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
   const [count, setCount] = useState(0); // 현재 카운트
   const localVideoRef = useRef(null); // 비디오
+  const localStreamRef = useRef(null); // 로컬 스트림
+
   const [currentSet, setCurrentSet] = useState(1); // 현재 세트
   const [isResting, setIsResting] = useState(false); // 휴식 여부
   const [restTime, setRestTime] = useState(20); // 휴식 카운트다운
@@ -34,13 +36,24 @@ function ExerciseStartPage() {
           video: true,
           audio: false,
         });
-        localVideoRef.current.srcObject = localStream;
+        localStreamRef.current = localStream; // 로컬 스트림 저장
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = localStream;
+        }
       } catch (error) {
         console.error("비디오 초기화 실패:", error);
       }
     };
 
     initializeWebRTC();
+
+    // Cleanup 함수: 페이지 나갈 때 로컬 스트림 해제
+    return () => {
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
+        console.log("로컬 스트림 해제됨");
+      }
+    };
   }, []);
 
   useEffect(() => {
