@@ -60,44 +60,6 @@ export const inviteFriend = async (token, friendId) => {
   }
 };
 
-// 초대 수락 함수
-export const acceptInvitation = async (token, friendId) => {
-  try {
-    const response = await axios.post(
-      `${process.env.REACT_APP_SERVER_URL}/api/friend/accept-invitation`,
-      { friendId },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("초대 수락 중 오류 발생:", error);
-    throw error;
-  }
-};
-
-// 초대 거절 함수
-export const declineInvitation = async (token, friendId) => {
-  try {
-    const response = await axios.post(
-      `${process.env.REACT_APP_SERVER_URL}/api/friend/decline-invitation`,
-      { friendId },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("초대 수락 중 오류 발생:", error);
-    throw error;
-  }
-};
-
 // 코인 확인 함수
 export const checkCoin = async (token, friendId) => {
   try {
@@ -116,26 +78,5 @@ export const checkCoin = async (token, friendId) => {
     throw error.response
       ? error.response.data
       : new Error("코인 확인 중 오류 발생");
-  }
-};
-
-// 코인 차감 함수
-export const reduceCoin = async (token) => {
-  try {
-    const response = await axios.post(
-      `${process.env.REACT_APP_SERVER_URL}/api/match/reduce-coin`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("코인 차감 중 오류 발생:", error);
-    throw error.response
-      ? error.response.data
-      : new Error("코인 차감 중 오류 발생");
   }
 };

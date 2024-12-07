@@ -26,8 +26,13 @@ function MenuPage() {
   if (!isInitialized) {
     // 초기화 완료 전 로딩 화면 표시
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>소켓 초기화 중...</p>
+      <div
+        className="relative w-full h-screen bg-cover bg-center"
+        style={{ backgroundImage: "url('/image/background.png')" }}
+      >
+        <div className="font-sans flex items-center justify-center h-screen z-10">
+          <p>로딩 중...</p>
+        </div>
       </div>
     );
   }
