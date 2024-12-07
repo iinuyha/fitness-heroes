@@ -104,13 +104,14 @@ export const SocketProvider = ({ children }) => {
         socketRef.current.off("challengeReceived");
         // socketRef.current.off("redirect");
         socketRef.current.off("gameStart");
+        socketRef.current.off("userStatusUpdate");
         socketRef.current.off("connect_error");
         socketRef.current.disconnect();
         socketRef.current = null;
         setIsConnected(false);
       }
     };
-  }, [token]); // token 상태가 변경될 때만 실행
+  }, [token, showPopup]); // token 상태가 변경될 때만 실행
 
   return (
     <SocketContext.Provider
