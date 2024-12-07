@@ -182,13 +182,13 @@ function ChallengeStartPage() {
     socket.on("challengeEnded", ({ message, scores, resultMessage }) => {
       // 최종 스코어와 결과 메시지를 Popup에 표시
       setPopupContent(`
-        ${message}
+${message}
         
-        ${Object.entries(scores)
-          .map(([userId, score]) => `${parseInt(score)}점`)
-          .join(":")}
+${Object.entries(scores)
+  .map(([userId, score]) => `${parseInt(score)}점`)
+  .join(":")}
         
-        ${resultMessage}
+<b>${resultMessage}</b>
       `);
     });
 

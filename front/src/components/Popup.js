@@ -9,7 +9,7 @@ function Popup({ message, onClose }) {
       <div className="fixed inset-0 bg-black bg-opacity-70 z-10"></div>
 
       {/* 팝업창 */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg shadow-lg z-20 flex flex-col justify-between h-fit">
+      <div className="text-lg fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg shadow-lg z-20 flex flex-col justify-between h-fit">
         {/* Markdown 문법을 적용한 메시지 내용 */}
         <ReactMarkdown rehypePlugins={[rehypeRaw]}>{message}</ReactMarkdown>
 
