@@ -5,6 +5,7 @@ import Popup from "../../components/Popup"; // 팝업 컴포넌트 가져오기
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import { getLatestStoryEpisode } from "./api"; // API 함수 가져오기
+import ChallengeHandler from "../../components/ChallengeHandler";
 
 function StoryPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -52,6 +53,7 @@ function StoryPage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       {/* 뒤로가기 버튼 */}
       <ReturnDisplay />
 

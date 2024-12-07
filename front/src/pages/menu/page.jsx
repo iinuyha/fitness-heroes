@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay"; // InfoPopup 컴포넌트 불러오기
 import SocketContext from "../../contexts/SocketContext";
+import ChallengeHandler from "../../components/ChallengeHandler";
 
 function MenuPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -46,6 +47,7 @@ function MenuPage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       {/* 코인 및 정보 팝업 */}
       <CoinInfoDisplay
         message="  

@@ -7,6 +7,7 @@ import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import { getUserInfo, getStoryInfo } from "./api";
 import SocketContext from "../../contexts/SocketContext";
+import ChallengeHandler from "../../components/ChallengeHandler";
 
 function MypagePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -95,6 +96,7 @@ function MypagePage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       <ReturnDisplay />
       <CoinInfoDisplay message="마이페이지에선 나에 대한 정보를 알 수 있습니다." />
 

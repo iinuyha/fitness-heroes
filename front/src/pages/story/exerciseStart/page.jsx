@@ -5,6 +5,7 @@ import JumpingJackCounter from "../../../components/JumpingJackCounter";
 import ReturnDisplay from "../../../components/ReturnDisplay";
 import { routes } from "../../../constants/routes";
 import { saveNewEpisode, addStoryCoin } from "./api";
+import ChallengeHandler from "../../../components/ChallengeHandler";
 
 function ExerciseStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
@@ -145,6 +146,7 @@ function ExerciseStartPage() {
 
   return (
     <div className="exercise-start-page bg-black">
+      <ChallengeHandler />
       {isPopupOpen ? (
         <Popup
           message="<img alt='점핑잭 튜토리얼' src='/image/jumping_jack.png'/>"

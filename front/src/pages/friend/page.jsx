@@ -12,6 +12,7 @@ import YesNoPopup from "../../components/YesNoPopup";
 import Popup from "../../components/Popup";
 import SocketContext from "../../contexts/SocketContext";
 import { routes } from "../../constants/routes";
+import ChallengeHandler from "../../components/ChallengeHandler";
 
 function FriendPage() {
   const [friendList, setFriendList] = useState([]);
@@ -237,6 +238,7 @@ function FriendPage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       <ReturnDisplay />
       <CoinInfoDisplay message="친구와 코인을 걸고 운동 대결을 펼쳐보세요!" />
 
