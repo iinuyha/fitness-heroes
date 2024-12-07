@@ -6,6 +6,7 @@ import CoinInfoDisplay from "../../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../../components/ReturnDisplay";
 import { getEpCardData, getUserGender } from "./api";
 import { getLatestStoryEpisode } from "../api";
+import ChallengeHandler from "../../../components/ChallengeHandler";
 
 function EpisodePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -80,11 +81,9 @@ function EpisodePage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       <ReturnDisplay />
-      <CoinInfoDisplay
-        message="에피소드를 하나씩 수행함으로써 꾸준함을 길러보세요!<br>
-에피소드를 수행할 때마다 **20코인**이 지급됩니다."
-      />
+      <CoinInfoDisplay message="에피소드를 하나씩 수행함으로써 꾸준함을 길러보세요!<br>에피소드를 수행할 때마다 **20코인**이 지급됩니다." />
 
       {isPopupOpen && (
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />

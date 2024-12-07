@@ -30,7 +30,7 @@ function ChallengeStartPage() {
 
   const navigate = useNavigate();
   const { roomId } = useParams(); // roomId 가져오기
-  const { socket } = useContext(SocketContext);
+  const { socket, isInitialized } = useContext(SocketContext);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -53,10 +53,16 @@ function ChallengeStartPage() {
   }, [canCount]);
 
   useEffect(() => {
-    if (!socket) {
-      console.error("Socket is not initialized.");
+    if (!isInitialized) {
+      console.log("Socket is not initialized yet.");
       return;
     }
+
+    if (!socket) {
+      console.error("Socket is not available.");
+      return;
+    }
+
     const token = localStorage.getItem("token");
     if (!token) {
       navigate(routes.login);

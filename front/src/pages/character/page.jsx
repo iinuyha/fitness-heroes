@@ -5,6 +5,7 @@ import Popup from "../../components/Popup";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import { getCharacterInfo, changeCharacterSkin } from "./api"; // API 함수 가져오기
+import ChallengeHandler from "../../components/ChallengeHandler";
 
 function CharacterPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -58,6 +59,7 @@ function CharacterPage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       {/* 뒤로가기 버튼 */}
       <ReturnDisplay />
 

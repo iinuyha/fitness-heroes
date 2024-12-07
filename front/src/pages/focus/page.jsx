@@ -3,6 +3,7 @@ import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import Popup from "../../components/Popup";
 import ExerciseBox from "../../components/ExerciseBox"; // 분리된 컴포넌트 가져오기
+import ChallengeHandler from "../../components/ChallengeHandler";
 
 function FocusPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -19,6 +20,7 @@ function FocusPage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       {/* 뒤로가기 버튼 */}
       <ReturnDisplay />
 

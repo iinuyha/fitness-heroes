@@ -6,6 +6,7 @@ import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
 import { buySkin, getCharacterInfo } from "./api";
 import SocketContext from "../../contexts/SocketContext";
+import ChallengeHandler from "../../components/ChallengeHandler";
 
 function StorePage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -91,11 +92,9 @@ function StorePage() {
       className="relative w-full h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
+      <ChallengeHandler />
       <ReturnDisplay />
-      <CoinInfoDisplay
-        message="원하는 스킨을 구매하세요!
-"
-      />
+      <CoinInfoDisplay message="원하는 스킨을 구매하세요!" />
 
       {isPopupOpen && (
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />
