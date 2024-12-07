@@ -56,7 +56,10 @@ function StoryPage() {
       <ReturnDisplay />
 
       {/* 코인 및 정보 팝업 */}
-      <CoinInfoDisplay message="스토리모드 관련된 설명 적으면 됨" />
+      <CoinInfoDisplay
+        message="에피소드를 하나씩 수행함으로써 꾸준함을 길러보세요!<br>
+에피소드를 수행할 때마다 **20코인**이 지급됩니다."
+      />
 
       {/* 팝업창 */}
       {isPopupOpen && (

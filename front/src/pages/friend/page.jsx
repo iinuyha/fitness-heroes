@@ -31,7 +31,7 @@ function FriendPage() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/login");
+      navigate(routes.login);
       return;
     }
     loadFriends(); // 친구 목록 로드
@@ -46,7 +46,6 @@ function FriendPage() {
       cleanupSocketListeners(); // 소켓 이벤트 리스너 정리
     };
   }, [socket]);
-
 
   useEffect(() => {
     setFriendList((prevList) =>
@@ -66,12 +65,12 @@ function FriendPage() {
       setIsPopupOpen(true);
       setIsInvitationSent(false);
     });
-  
+
     socket.on("challengeReceived", handleChallengeReceived);
     socket.on("challengeDeclined", handleChallengeDeclined);
     socket.on("challengeCancelled", handleChallengeCancelled);
     socket.on("gameStart", handleGameStart);
-  
+
     // 친구 온라인 상태 업데이트 이벤트
     socket.on("friendOnline", ({ friendId }) => {
       onlineFriends[friendId] = true; // 친구 상태를 업데이트
@@ -81,7 +80,7 @@ function FriendPage() {
         )
       );
     });
-  
+
     // 친구 오프라인 상태 업데이트 이벤트
     socket.on("friendOffline", ({ friendId }) => {
       onlineFriends[friendId] = false; // 친구 상태를 업데이트
@@ -91,16 +90,27 @@ function FriendPage() {
         )
       );
     });
+
+    socket.on("friendStatusUpdate", ({ friendId, isInChallenge }) => {
+      setFriendList((prevList) =>
+        prevList.map((friend) =>
+          friend.id === friendId ? { ...friend, isInChallenge } : friend
+        )
+      );
+    });
   };
 
   const cleanupSocketListeners = () => {
     if (!socket) return;
-    
+
     socket.off("error");
     socket.off("challengeReceived");
     socket.off("challengeDeclined");
     socket.off("challengeCancelled");
     socket.off("gameStart");
+    socket.on("friendOnline");
+    socket.on("friendOffline");
+    socket.on("friendStatusUpdate");
   };
 
   // 친구 목록 로드
@@ -118,7 +128,6 @@ function FriendPage() {
       setIsPopupOpen(true);
     }
   };
-
 
   // 대결 신청하기 (초대하는 사람)
   const handleInvite = async (friend) => {
@@ -191,9 +200,6 @@ function FriendPage() {
   const handleChallengeAccept = async () => {
     try {
       await acceptInvitation(token, challengeInfo.from);
-      socket.emit("acceptChallenge", {
-        roomId: challengeInfo.roomId,
-      });
       setIsChallengePopupOpen(false);
     } catch (error) {
       console.error("대결 수락 실패:", error);
@@ -206,10 +212,6 @@ function FriendPage() {
   const handleChallengeDecline = async () => {
     try {
       await declineInvitation(token, challengeInfo.from);
-      socket.emit("declineChallenge", {
-        roomId: challengeInfo.roomId,
-      });
-
       setIsChallengePopupOpen(false);
       setPopupMessage("대결 신청을 거절하였습니다.");
       setIsPopupOpen(true);
@@ -247,14 +249,13 @@ function FriendPage() {
     );
   };
 
-  // 게임 시작 처리
+  // 게임 시작시 친구 목록 업데이트
   const handleGameStart = ({ roomId }) => {
     setFriendList((prevFriendList) =>
       prevFriendList.map((friend) =>
         friend.isInvited ? { ...friend, isInvited: false } : friend
       )
     );
-    navigate(`/friend/challenge/${roomId}`);
   };
 
   // 친구 추가 처리
@@ -283,7 +284,7 @@ function FriendPage() {
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
       <ReturnDisplay />
-      <CoinInfoDisplay message="<u>운동 경쟁 설명</u>" />
+      <CoinInfoDisplay message="친구와 코인을 걸고 운동 대결을 펼쳐보세요!" />
 
       {isPopupOpen && (
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />
@@ -339,17 +340,25 @@ function FriendPage() {
                   </span>
                 </span>
                 <button
-                  disabled={!friend.isOnline || friend.isInvited}
+                  disabled={
+                    !friend.isOnline ||
+                    friend.isInvited ||
+                    friend.isInChallenge === true
+                  }
                   onClick={() => handleInvite(friend)}
                   className={`px-4 py-1 rounded-full font-semibold ${
-                    friend.isInvited
+                    friend.isInChallenge
+                      ? "bg-gray-500" // 이미 대결 중인 경우
+                      : friend.isInvited
                       ? "bg-[#175874]" // 초대 중일 때 버튼 색상
                       : friend.isOnline
                       ? "bg-[#00B2FF]"
                       : "bg-gray-400"
                   } text-white`}
                 >
-                  {friend.isInvited
+                  {friend.isInChallenge
+                    ? "대결 중" // 이미 대결 중인 경우
+                    : friend.isInvited
                     ? "대결 신청 중..." // 초대 상태 표시
                     : friend.isOnline
                     ? "대결신청"

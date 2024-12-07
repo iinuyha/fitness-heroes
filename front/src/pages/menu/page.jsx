@@ -4,12 +4,10 @@ import { routes } from "../../constants/routes";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay"; // InfoPopup 컴포넌트 불러오기
 import SocketContext from "../../contexts/SocketContext";
 
-
 function MenuPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const navigate = useNavigate();
   const { socket, isConnected, isInitialized } = useContext(SocketContext); // 초기화 상태 가져오기
-
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -18,13 +16,12 @@ function MenuPage() {
     }
   }, [navigate]);
 
-   // 소켓 연결 관리
-   useEffect(() => {
+  // 소켓 연결 관리
+  useEffect(() => {
     if (isInitialized && socket && !isConnected) {
       socket.connect(); // 소켓 초기화가 완료된 후 연결
     }
   }, [socket, isConnected, isInitialized]);
-
 
   if (!isInitialized) {
     // 초기화 완료 전 로딩 화면 표시
@@ -34,7 +31,6 @@ function MenuPage() {
       </div>
     );
   }
-
 
   const handlePopupOpen = () => {
     setIsPopupOpen(!isPopupOpen);
@@ -46,7 +42,28 @@ function MenuPage() {
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
       {/* 코인 및 정보 팝업 */}
-      <CoinInfoDisplay message="# 이 게임에 대한 정보입니다.  <u>dd</u> **운동을 통해 에너지를 모아보세요!**" />
+      <CoinInfoDisplay
+        message="  
+      **스토리**<br>
+      “에피소드를 하나씩 클리어하며 운동하세요! 성공할 때마다 3코인이 지급됩니다. 목표를 향해 도전해보세요.”  
+      <hr>  
+      <br>
+      **집중 운동**
+      “특정 부위를 집중적으로 운동해보세요! (현재 준비 중인 기능입니다. 곧 만나보실 수 있습니다.)”  
+      <hr>  
+      <br>
+      **운동 대결**
+      “친구와 함께 운동하며 코인을 걸고 대결하세요! 최고의 운동 챔피언에 도전해보세요.”  
+      <hr>  
+      <br>
+      **캐릭터**  
+      “내 캐릭터를 꾸며보세요! 새로운 스킨을 구매하고 스타일을 변경해 나만의 캐릭터를 만들어보세요.”  
+      <hr>  
+      <br>
+      **마이페이지**  
+      “나의 활동을 확인하고, 계정을 관리하세요. 로그아웃도 여기서 할 수 있습니다.”  
+      "
+      />
 
       {/* 가운데 5개 아이콘 메뉴 */}
       <div className="flex flex-col items-center justify-center h-full space-y-8 font-sans">
@@ -81,7 +98,7 @@ function MenuPage() {
               alt="Group"
               className="w-28 h-28"
             />
-            <p className="text-white mt-3">같이 운동</p>
+            <p className="text-white mt-3">운동 대결</p>
           </Link>
           <Link to={routes.character} className="flex flex-col items-center">
             <img

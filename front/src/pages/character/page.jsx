@@ -62,7 +62,11 @@ function CharacterPage() {
       <ReturnDisplay />
 
       {/* 코인 및 정보 팝업 */}
-      <CoinInfoDisplay message="캐릭터 페이지 관련된 설명 적으면 됨" />
+      <CoinInfoDisplay
+        message="보유하고 있는 스킨을 장착해보세요!<br>
+원하는 스킨이 없다면 상점에서 구매할 수 있습니다 :)
+"
+      />
 
       {/* 팝업창 */}
       {isPopupOpen && (

@@ -92,7 +92,10 @@ function StorePage() {
       style={{ backgroundImage: "url('/image/background.png')" }}
     >
       <ReturnDisplay />
-      <CoinInfoDisplay message="상점 페이지 관련된 설명 적으면 됨" />
+      <CoinInfoDisplay
+        message="원하는 스킨을 구매하세요!
+"
+      />
 
       {isPopupOpen && (
         <Popup message={popupMessage} onClose={() => setIsPopupOpen(false)} />

@@ -53,6 +53,10 @@ function ChallengeStartPage() {
   }, [canCount]);
 
   useEffect(() => {
+    if (!socket) {
+      console.error("Socket is not initialized.");
+      return;
+    }
     const token = localStorage.getItem("token");
     if (!token) {
       navigate(routes.login);
@@ -178,13 +182,13 @@ function ChallengeStartPage() {
     socket.on("challengeEnded", ({ message, scores, resultMessage }) => {
       // 최종 스코어와 결과 메시지를 Popup에 표시
       setPopupContent(`
-        ${message}
+${message}
         
-        ${Object.entries(scores)
-          .map(([userId, score]) => `${parseInt(score)}점`)
-          .join(":")}
+${Object.entries(scores)
+  .map(([userId, score]) => `${parseInt(score)}점`)
+  .join(":")}
         
-        ${resultMessage}
+<b>${resultMessage}</b>
       `);
     });
 
@@ -347,12 +351,6 @@ function ChallengeStartPage() {
                 muted
                 className="w-full h-full object-cover"
               />
-              <button
-                onClick={handleCountIncrease}
-                className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-base font-semibold absolute bottom-4 right-4 z-20"
-              >
-                테스트: Count 증가
-              </button>
               {!isReady && (
                 <button
                   onClick={handleReady}

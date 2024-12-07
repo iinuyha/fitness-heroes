@@ -1,4 +1,12 @@
-import React, { createContext, useState, useEffect, useRef, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+} from "react";
+import { acceptInvitation, declineInvitation } from "../pages/friend/api/api";
+// import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { PopupContext } from "./PopupContext";
 
@@ -11,7 +19,8 @@ export const SocketProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token")); // 토큰 상태 추가
   const socketRef = useRef(null);
   const { showPopup } = useContext(PopupContext);
-  
+  // const navigate = useNavigate();
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -46,7 +55,6 @@ export const SocketProvider = ({ children }) => {
         });
 
         socket.on("userStatusUpdate", (updatedStatus) => {
-          console.log("User status updated:", updatedStatus);
           setOnlineFriends(updatedStatus);
         });
 
@@ -55,10 +63,26 @@ export const SocketProvider = ({ children }) => {
           showPopup(
             `${from}님이 대결을 신청했습니다. 수락하시겠습니까?`,
             // 확인 버튼 동작
-            () => socket.emit("acceptChallenge", { roomId }),
+            async () => {
+              await acceptInvitation(token, roomId.split("-")[0]);
+              socket.emit("acceptChallenge", {
+                roomId,
+              });
+              socket.emit("joinRoom", { roomId });
+            },
             // 거절 버튼 동작
-            () => socket.emit("declineChallenge", { roomId })
+            async () => {
+              await declineInvitation(token, roomId.split("-")[0]);
+              socket.emit("declineChallenge", {
+                roomId,
+              });
+            }
           );
+        });
+
+        socket.on("gameStart", ({ roomId }) => {
+          console.log(roomId);
+          window.location.href = `/friend/challenge/${roomId}`;
         });
 
         socket.on("connect_error", (err) => {
@@ -75,6 +99,12 @@ export const SocketProvider = ({ children }) => {
 
     return () => {
       if (socketRef.current) {
+        socketRef.current.off("connect");
+        socketRef.current.off("disconnect");
+        socketRef.current.off("challengeReceived");
+        // socketRef.current.off("redirect");
+        socketRef.current.off("gameStart");
+        socketRef.current.off("connect_error");
         socketRef.current.disconnect();
         socketRef.current = null;
         setIsConnected(false);
