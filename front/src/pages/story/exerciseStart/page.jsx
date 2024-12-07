@@ -175,7 +175,28 @@ function ExerciseStartPage() {
           {isWorkoutComplete && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-10">
               <div className="text-white px-6 py-3 rounded-lg text-2xl font-bold text-center">
-                <p>운동이 종료되었습니다! 수고하셨습니다!</p>
+                <p className="mb-4">
+                  운동이 종료되었습니다. 20코인이 적립되었어요!
+                </p>
+                <div className="flex items-center">
+                  <img
+                    src="/image/friend/competition.png"
+                    alt="경쟁 아이콘"
+                    className="h-20"
+                  />
+                  <span className="ml-4 text-white font-semibold text-2xl">
+                    +
+                  </span>
+                  <div className="flex items-center px-3 py-1 bg-white bg-opacity-20 rounded-full font-semibold text-lg ml-2">
+                    <img
+                      src="/image/friend/coin.png"
+                      alt="코인"
+                      className="h-7 mr-3"
+                    />
+                    <span className="text-xl text-white">20</span>
+                  </div>
+                </div>
+
                 <button
                   onClick={handleExerciseComplete}
                   className="block mt-4 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-base font-semibold"

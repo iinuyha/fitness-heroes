@@ -31,7 +31,7 @@ function FriendPage() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/login");
+      navigate(routes.login);
       return;
     }
     loadFriends(); // 친구 목록 로드
