@@ -3,6 +3,7 @@ import Step1 from "./_components/Step1";
 import Step2 from "./_components/Step2";
 import Step3 from "./_components/Step3";
 import Step4 from "./_components/Step4";
+import Step5 from "./_components/Step5";
 import { routes } from "../../constants/routes";
 
 
@@ -25,7 +26,8 @@ export const TutorialPage = () => {
                 <Step1 />, 
                 <Step2 />, 
                 <Step3 />, 
-                <Step4/>
+                <Step4/>,
+                <Step5/>
                 ];
 
   // 새로고침 후 메뉴로 이동하는 함수
