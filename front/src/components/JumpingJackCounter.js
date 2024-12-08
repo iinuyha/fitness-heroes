@@ -4,7 +4,6 @@ import * as posedetection from "@tensorflow-models/pose-detection"; // MoveNet �
 import "@tensorflow/tfjs-backend-webgl"; // WebGL 백엔드
 
 function JumpingJackCounter({ videoRef, onCountIncrease }) {
-  const canvasRef = useRef(null);
   const detectorRef = useRef(null);
   let isJumping = false;
 
@@ -55,7 +54,6 @@ function JumpingJackCounter({ videoRef, onCountIncrease }) {
       if (poses && poses.length > 0) {
         const pose = poses[0];
         processPose(pose);
-        drawPose(pose, video.videoWidth, video.videoHeight);
       }
     }
   };
@@ -132,35 +130,7 @@ function JumpingJackCounter({ videoRef, onCountIncrease }) {
     }
   };
 
-  const drawPose = (pose, videoWidth, videoHeight) => {
-    const ctx = canvasRef.current.getContext("2d");
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-
-    const xScale = canvasRef.current.width / videoWidth;
-    const yScale = canvasRef.current.height / videoHeight;
-
-    // 필요한 관절만 필터링
-    const keypoints = pose.keypoints.filter((kp) => kp.score > 0.5);
-
-    keypoints.forEach((keypoint) => {
-      const x = keypoint.x * xScale;
-      const y = keypoint.y * yScale;
-
-      ctx.beginPath();
-      ctx.arc(x, y, 5, 0, 2 * Math.PI);
-      ctx.fillStyle = "red";
-      ctx.fill();
-    });
-  };
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute top-0 left-0 w-full h-full object-cover"
-      width={window.innerWidth}
-      height={window.innerHeight}
-    />
-  );
+  return null; // 캔버스를 렌더링하지 않음
 }
 
 export default JumpingJackCounter;
