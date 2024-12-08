@@ -55,14 +55,14 @@ function ChallengeStartPage() {
 
   useEffect(() => {
     if (!isInitialized || !socket) return;
-  
+
     const handleStartCountdown = () => {
       console.log("Countdown started");
       // 처리 로직
     };
-  
+
     socket.on("startCountdown", handleStartCountdown);
-  
+
     return () => {
       socket.off("startCountdown", handleStartCountdown); // 정리
     };
@@ -202,19 +202,20 @@ function ChallengeStartPage() {
     });
 
     // 대결 종료시
-    socket.on("challengeEnded", ({ message, resultMessage }) => {
-      console.log("게임 종료. 최종 카운트:", {
-        myCount,
-        opponentCount,
-      });
-    
+    socket.on("challengeEnded", ({ message, scores, resultMessage }) => {
       // 최종 스코어와 결과 메시지를 Popup에 표시
+      const myScore = scores[userId] === true ? 0 : scores[userId];
+
+      // 나머지 한 명의 점수를 찾기
+      const otherUserId = Object.keys(scores).find((key) => key !== userId);
+      const otherScore = scores[otherUserId] === true ? 0 : scores[otherUserId];
+
       setPopupContent(`
   ${message}
 
-  내 점수: ${myCount}점
+  내 점수: ${myScore}점
   
-  상대 점수: ${opponentCount}점
+  상대 점수: ${otherScore}점
 
   ${resultMessage}
       `);
@@ -335,7 +336,7 @@ function ChallengeStartPage() {
     <div className="exercise-start-page">
       {isPopupOpen && (
         <Popup
-          message="<b><u>준비 버튼</u></b>을 눌러주세요!<br>모두 준비가 완료되면 3초 카운트다운 후 대결이 시작됩니다."
+          message="<b><u>준비 버튼</u></b>을 눌러주세요!<br>모두 준비가 완료되면 3초 카운트다운 후 대결이 시작됩니다.<br><span style='background-color:#fff5b1'><b>⛔️ 화면에 머리 끝부터 발 끝까지 보이도록 카메라 위치를 조정해주세요!! </b></span>"
           onClose={() => setIsPopupOpen(false)}
         />
       )}

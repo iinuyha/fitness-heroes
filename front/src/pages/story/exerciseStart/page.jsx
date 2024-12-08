@@ -149,7 +149,7 @@ function ExerciseStartPage() {
       <ChallengeHandler />
       {isPopupOpen ? (
         <Popup
-          message="<img alt='점핑잭 튜토리얼' src='/image/jumping_jack.png'/>"
+          message="<img alt='점핑잭 튜토리얼' src='/image/jumping_jack.png'/><br><span style='background-color:#fff5b1'><b>⛔️ 화면에 머리 끝부터 발 끝까지 보이도록 카메라 위치를 조정해주세요!! </b></span>"
           onClose={handlePopupClose}
         />
       ) : (

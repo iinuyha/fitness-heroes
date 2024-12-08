@@ -167,7 +167,7 @@ function startChallenge(io, socket) {
       const matchData = await Challenge.findOne(
         { challengerId, challengedId, status: "accepted" } // challengerId와 challengedId 기준
       ).sort({ createdAt: -1 }); // 최신 데이터 정렬
-      
+
       if (!matchData) {
         console.error(`해당 데이터를 찾을 수 없습니다. (방: ${roomId})`);
       } else {
@@ -184,7 +184,7 @@ function startChallenge(io, socket) {
             sort: { createdAt: -1 }, // 최신 데이터 기준으로 정렬
           }
         );
-        
+
         console.log("Challenge 업데이트 완료:", updatedChallenge);
       }
 
@@ -205,7 +205,7 @@ function startChallenge(io, socket) {
       };
 
       // ✅ 3. 승/무/패에 따른 Friend 컬렉션 업데이트
-      console.log('winnerId', winnerId);
+      console.log("winnerId", winnerId);
 
       if (isDraw) {
         await updateFriendStats(challengerId, "draw");
@@ -220,22 +220,24 @@ function startChallenge(io, socket) {
 
       // 4. 승자는 3코인 플러스, 패자는 3코인 마이너스
 
-      const winnerCharacter = await Character.findOne({ id: winnerId });
-      const loserCharacter = await Character.findOne({ id: loserId });
+      if (!isDraw) {
+        const winnerCharacter = await Character.findOne({ id: winnerId });
+        const loserCharacter = await Character.findOne({ id: loserId });
 
-      if (winnerCharacter && loserCharacter) {
-        // 코인 업데이트
-        winnerCharacter.coin += 3;
-        loserCharacter.coin -= 3;
+        if (winnerCharacter && loserCharacter) {
+          // 코인 업데이트
+          winnerCharacter.coin += 3;
+          loserCharacter.coin -= 3;
 
-        // 데이터베이스에 저장
-        await winnerCharacter.save();
-        await loserCharacter.save();
-      } else {
-        console.error("캐릭터를 찾을 수 없습니다.");
+          // 데이터베이스에 저장
+          await winnerCharacter.save();
+          await loserCharacter.save();
+        } else {
+          console.error("캐릭터를 찾을 수 없습니다.");
+        }
+
+        console.log(`대결 결과가 Friend 컬렉션에 성공적으로 저장되었습니다.`);
       }
-
-      console.log(`대결 결과가 Friend 컬렉션에 성공적으로 저장되었습니다.`);
     } catch (error) {
       console.error(`대결 결과 저장 중 에러 발생: ${error.message}`);
     }
