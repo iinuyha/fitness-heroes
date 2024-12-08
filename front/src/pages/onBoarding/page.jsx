@@ -35,10 +35,6 @@ function OnBoardingPage() {
     }
   }, [step]);
 
-  // 새로고침 후 메뉴로 이동하는 함수
-  const moveToMenuWithRefresh = () => {
-    window.location.replace(routes.menu);
-  };
 
   const components = [
     <Component1 moveToNext={() => setIsComplete(true)} setName={setName} />,

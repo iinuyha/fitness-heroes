@@ -14,4 +14,5 @@ export const routes = {
   character: "/character",
   store: "/character/store",
   mypage: "/mypage",
+  tutorial: "/tutorial"
 };
