@@ -20,11 +20,14 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (token && !socketRef.current) {
-      socketRef.current = io(process.env.REACT_APP_SERVER_URL, {
+      const socketUrl = process.env.REACT_APP_SERVER_URL.replace(/^https?/, "wss");
+
+      socketRef.current = io(socketUrl, {
         auth: { token },
         reconnection: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 2000,
+        transports: ["websocket"],
       });
 
       const socket = socketRef.current;
