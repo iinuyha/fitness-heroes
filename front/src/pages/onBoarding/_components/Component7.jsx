@@ -65,7 +65,7 @@ function Component7({
         onClick={handleStart}
         className="text-lg font-semibold px-6 py-1 bg-white border-2 border-[#0675C5] text-[#0675C5] rounded-full hover:bg-[#0675C5] hover:text-white"
       >
-        피트니스 히어로즈 시작하기 &gt;
+        튜토리얼 보러가기 &gt;
       </button>
     </div>
   );

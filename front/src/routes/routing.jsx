@@ -15,6 +15,7 @@ import ChallengeStartPage from "../pages/friend/challengeStart/page";
 import CharacterPage from "../pages/character/page";
 import StorePage from "../pages/store/page";
 import MypagePage from "../pages/mypage/page";
+import TutorialPage from "../pages/tutorial/page";
 
 const router = createBrowserRouter([
   {
@@ -72,6 +73,10 @@ const router = createBrowserRouter([
   {
     path: routes.mypage,
     element: <MypagePage />,
+  },
+  {
+    path: routes.tutorial,
+    element: <TutorialPage />,
   },
 ]);
 

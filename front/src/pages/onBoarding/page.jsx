@@ -17,6 +17,7 @@ function OnBoardingPage() {
   const [gender, setGender] = useState(null);
   const [concern, setConcern] = useState("");
   const [character, setCharacter] = useState("");
+  const navigate = useNavigate();
 
   const handleNext = () => {
     if (isComplete) {
@@ -35,10 +36,7 @@ function OnBoardingPage() {
     }
   }, [step]);
 
-  // 새로고침 후 메뉴로 이동하는 함수
-  const moveToMenuWithRefresh = () => {
-    window.location.replace(routes.menu);
-  };
+
 
   const components = [
     <Component1 moveToNext={() => setIsComplete(true)} setName={setName} />,
@@ -62,7 +60,7 @@ function OnBoardingPage() {
       birthdate={birthdate}
       gender={gender}
       concern={concern}
-      moveToMenu={moveToMenuWithRefresh}
+      moveToMenu={() => navigate("/tutorial")}
     />,
   ];
 
