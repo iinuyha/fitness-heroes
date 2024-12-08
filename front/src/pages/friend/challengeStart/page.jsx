@@ -54,6 +54,21 @@ function ChallengeStartPage() {
   }, [canCount]);
 
   useEffect(() => {
+    if (!isInitialized || !socket) return;
+  
+    const handleStartCountdown = () => {
+      console.log("Countdown started");
+      // 처리 로직
+    };
+  
+    socket.on("startCountdown", handleStartCountdown);
+  
+    return () => {
+      socket.off("startCountdown", handleStartCountdown); // 정리
+    };
+  }, [isInitialized, socket]);
+
+  useEffect(() => {
     if (!isInitialized) {
       console.log("Socket is not initialized yet.");
       return;
@@ -195,12 +210,13 @@ function ChallengeStartPage() {
     
       // 최종 스코어와 결과 메시지를 Popup에 표시
       setPopupContent(`
-${message}
+  ${message}
 
-내 점수: ${myCount}점
-상대 점수: ${opponentCount}점
+  내 점수: ${myCount}점
+  
+  상대 점수: ${opponentCount}점
 
-${resultMessage}
+  ${resultMessage}
       `);
     });
 
@@ -473,7 +489,7 @@ ${resultMessage}
               {!isReady && (
                 <button
                   onClick={handleReady}
-                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-5 rounded-xl text-2xl font-semibold absolute bottom-4 left-1/2 -translate-x-1/2 z-20 hover:scale-105 transition-all duration-200"
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-5 rounded-3xl text-2xl font-semibold absolute bottom-4 left-1/2 -translate-x-1/2 z-20 hover:scale-105 transition-all duration-200"
                 >
                   준비
                 </button>

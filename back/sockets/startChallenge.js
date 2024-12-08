@@ -164,21 +164,29 @@ function startChallenge(io, socket) {
 
     try {
       // ✅ 1. Challenge 컬렉션에 대결 결과 저장
-      const challenge = await Challenge.findOneAndUpdate(
-        { challengerId, challengedId, status: "accepted" }, // challengerId와 challengedId 기준
-        {
-          scores: { challengerScore, challengedScore }, // 점수 저장
-          winnerId: isDraw ? null : winnerId, // 무승부라면 winnerId는 null
-          status: "completed", // 상태를 'completed'로 설정
-        },
-        {
-          new: true, // 업데이트된 문서를 반환
-          upsert: false, // 없으면 생성하지 않음
-          sort: { createdAt: -1 }, // 최신 데이터 기준으로 정렬
-        }
-      );
-
-      console.log(`Challenge 컬렉션 업데이트 완료:`, challenge);
+      const matchData = await Challenge.findOne(
+        { challengerId, challengedId, status: "accepted" } // challengerId와 challengedId 기준
+      ).sort({ createdAt: -1 }); // 최신 데이터 정렬
+      
+      if (!matchData) {
+        console.error(`해당 데이터를 찾을 수 없습니다. (방: ${roomId})`);
+      } else {
+        const updatedChallenge = await Challenge.updateOne(
+          { _id: matchData._id }, // 특정 ID로 업데이트
+          {
+            scores: { challengerScore, challengedScore }, // 점수 저장
+            winnerId: isDraw ? null : winnerId, // 무승부라면 winnerId는 null
+            status: "completed", // 상태를 'completed'로 설정
+          },
+          {
+            new: true, // 업데이트된 문서를 반환
+            upsert: false, // 없으면 생성하지 않음
+            sort: { createdAt: -1 }, // 최신 데이터 기준으로 정렬
+          }
+        );
+        
+        console.log("Challenge 업데이트 완료:", updatedChallenge);
+      }
 
       // ✅ 2. Friend 컬렉션 업데이트 함수 정의
       const updateFriendStats = async (userId, resultType) => {
@@ -197,16 +205,17 @@ function startChallenge(io, socket) {
       };
 
       // ✅ 3. 승/무/패에 따른 Friend 컬렉션 업데이트
-      if (winnerId === challengerId) {
+      console.log('winnerId', winnerId);
+
+      if (isDraw) {
+        await updateFriendStats(challengerId, "draw");
+        await updateFriendStats(challengedId, "draw");
+      } else if (winnerId === challengerId) {
         await updateFriendStats(challengerId, "win");
         await updateFriendStats(challengedId, "lose");
       } else if (winnerId === challengedId) {
         await updateFriendStats(challengedId, "win");
         await updateFriendStats(challengerId, "lose");
-      } else {
-        // 무승부
-        await updateFriendStats(challengerId, "draw");
-        await updateFriendStats(challengedId, "draw");
       }
 
       // 4. 승자는 3코인 플러스, 패자는 3코인 마이너스
