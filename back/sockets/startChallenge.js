@@ -121,48 +121,57 @@ function startChallenge(io, socket) {
     }, 5000);
   });
 
+  const processedRooms = new Set(); // 처리된 방(roomId)을 저장하는 Set 객체
+
   socket.on("endChallenge", async ({ roomId }) => {
     console.log(`방 ${roomId}에서 대결이 종료되었습니다.`);
 
-    // roomCounts에서 해당 방의 점수 데이터 가져오기
-    const results = roomCounts[roomId];
-    if (!results) {
-      console.error(`방 ${roomId}의 대결 결과를 찾을 수 없습니다.`);
-      return;
+    if (processedRooms.has(roomId)) {
+      console.log(`방 ${roomId}의 대결은 이미 처리되었습니다.`);
+      return; // 이미 처리된 방이면 실행하지 않음
     }
 
-    // 결과 계산
-    const scores = Object.entries(results); // results: { userId1: score1, userId2: score2 }
-    scores.sort((a, b) => b[1] - a[1]); // 점수 내림차순 정렬
-
-    let winnerMessage = "";
-    if (scores[0][1] === scores[1][1]) {
-      // 무승부
-      winnerMessage = "무승부";
-    } else {
-      // 승자 결정
-      winnerMessage = `${scores[0][0]}님이 승리하셨습니다!`; // 최고 점수의 사용자
-    }
-
-    // 결과 로그
-    console.log(`최종 스코어:`, results);
-    console.log(`결과 메시지: ${winnerMessage}`);
-
-    // 클라이언트로 결과 전송
-    io.to(roomId).emit("challengeEnded", {
-      message: "대결이 종료되었습니다.",
-      scores: results, // 최종 점수
-      resultMessage: winnerMessage,
-    });
-
-    const [challengerId, challengedId] = roomId.split("-"); // roomId에서 challenger와 challenged 추출
-    const winnerId = scores[0][0]; // 승자 ID
-    const loserId = scores[1][0]; // 패자 ID
-    const isDraw = scores[0][1] === scores[1][1]; // 무승부 여부 확인
-    const challengerScore = roomCounts[roomId][challengerId]; // challenger 점수
-    const challengedScore = roomCounts[roomId][challengedId]; // challenged 점수
+    processedRooms.add(roomId); // 방을 처리된 상태로 표시
+    console.log(`방 ${roomId}에서 대결 종료 이벤트 처리 시작.`);
 
     try {
+      // roomCounts에서 해당 방의 점수 데이터 가져오기
+      const results = roomCounts[roomId];
+      if (!results) {
+        console.error(`방 ${roomId}의 대결 결과를 찾을 수 없습니다.`);
+        return;
+      }
+
+      // 결과 계산
+      const scores = Object.entries(results); // results: { userId1: score1, userId2: score2 }
+      scores.sort((a, b) => b[1] - a[1]); // 점수 내림차순 정렬
+
+      let winnerMessage = "";
+      if (scores[0][1] === scores[1][1]) {
+        // 무승부
+        winnerMessage = "무승부";
+      } else {
+        // 승자 결정
+        winnerMessage = `${scores[0][0]}님이 승리하셨습니다!`; // 최고 점수의 사용자
+      }
+
+      // 결과 로그
+      console.log(`최종 스코어:`, results);
+      console.log(`결과 메시지: ${winnerMessage}`);
+
+      // 클라이언트로 결과 전송
+      io.to(roomId).emit("challengeEnded", {
+        message: "대결이 종료되었습니다.",
+        scores: results, // 최종 점수
+        resultMessage: winnerMessage,
+      });
+
+      const [challengerId, challengedId] = roomId.split("-"); // roomId에서 challenger와 challenged 추출
+      const winnerId = scores[0][0]; // 승자 ID
+      const loserId = scores[1][0]; // 패자 ID
+      const isDraw = scores[0][1] === scores[1][1]; // 무승부 여부 확인
+      const challengerScore = roomCounts[roomId][challengerId]; // challenger 점수
+      const challengedScore = roomCounts[roomId][challengedId]; // challenged 점수
       // ✅ 1. Challenge 컬렉션에 대결 결과 저장
       const matchData = await Challenge.findOne(
         { challengerId, challengedId, status: "accepted" } // challengerId와 challengedId 기준
@@ -225,9 +234,15 @@ function startChallenge(io, socket) {
         const loserCharacter = await Character.findOne({ id: loserId });
 
         if (winnerCharacter && loserCharacter) {
-          // 코인 업데이트
-          winnerCharacter.coin += 3;
-          loserCharacter.coin -= 3;
+          if (!winnerCharacter.coin) winnerCharacter.coin = 0; // 초기값 설정
+          if (!loserCharacter.coin) loserCharacter.coin = 0; // 초기값 설정
+
+          // 코인 업데이트 (중복 실행 방지)
+          const updatedWinnerCoin = winnerCharacter.coin + 3;
+          const updatedLoserCoin = loserCharacter.coin - 3;
+
+          winnerCharacter.coin = updatedWinnerCoin;
+          loserCharacter.coin = updatedLoserCoin;
 
           // 데이터베이스에 저장
           await winnerCharacter.save();
@@ -243,6 +258,7 @@ function startChallenge(io, socket) {
     }
     // 방 상태 정리
     setTimeout(() => {
+      processedRooms.delete(roomId); // 일정 시간이 지난 후 방 처리 상태 초기화
       io.socketsLeave(roomId);
       delete roomCounts[roomId];
       delete roomReadyStates[roomId];
