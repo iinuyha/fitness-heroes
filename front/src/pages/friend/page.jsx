@@ -8,7 +8,6 @@ import {
 } from "./api/api";
 import CoinInfoDisplay from "../../components/CoinInfoDisplay";
 import ReturnDisplay from "../../components/ReturnDisplay";
-import YesNoPopup from "../../components/YesNoPopup";
 import Popup from "../../components/Popup";
 import SocketContext from "../../contexts/SocketContext";
 import { routes } from "../../constants/routes";
@@ -21,7 +20,6 @@ function FriendPage() {
   const [popupMessage, setPopupMessage] = useState("");
   const [newFriendId, setNewFriendId] = useState("");
   const [isChallengePopupOpen, setIsChallengePopupOpen] = useState(false);
-  const [challengeInfo, setChallengeInfo] = useState(null);
 
   const token = localStorage.getItem("token");
   const { socket, onlineFriends } = useContext(SocketContext);

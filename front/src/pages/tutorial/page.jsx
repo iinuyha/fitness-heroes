@@ -6,7 +6,6 @@ import Step4 from "./_components/Step4";
 import Step5 from "./_components/Step5";
 import { routes } from "../../constants/routes";
 
-
 export const TutorialPage = () => {
   const [step, setStep] = useState(0);
 
@@ -22,13 +21,7 @@ export const TutorialPage = () => {
     }
   };
 
-  const steps = [
-                <Step1 />, 
-                <Step2 />, 
-                <Step3 />, 
-                <Step4/>,
-                <Step5/>
-                ];
+  const steps = [<Step1 />, <Step2 />, <Step3 />, <Step4 />, <Step5 />];
 
   // 새로고침 후 메뉴로 이동하는 함수
   const moveToMenuWithRefresh = () => {
@@ -38,7 +31,11 @@ export const TutorialPage = () => {
   return (
     <div
       className="relative w-full h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/image/background.png')" }}
+      style={{
+        backgroundImage: "url('/image/background.png')",
+        backgroundColor: "rgba(0, 0, 0, 0.5)", // 배경색과 투명도 설정
+        backgroundBlendMode: "overlay", // 배경색과 이미지 섞기
+      }}
     >
       <div className="relative flex items-center justify-center h-full">
         <div className="relative">
@@ -67,10 +64,10 @@ export const TutorialPage = () => {
       {step === steps.length - 1 && (
         <button
           onClick={moveToMenuWithRefresh}
-          className="absolute bottom-10 right-8 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-         피트니스 히어로즈 시작하기
-        </button>   
+          피트니스 히어로즈 시작하기
+        </button>
       )}
     </div>
   );

@@ -4,7 +4,6 @@ import { login } from "./api";
 import { routes } from "../../constants/routes";
 import Popup from "../../components/Popup"; // Popup 컴포넌트 추가
 
-
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
@@ -24,12 +23,11 @@ function LoginPage() {
     try {
       const response = await login(id, password);
       console.log("로그인 응답:", response);
-  
+
       if (response?.success) {
         console.log("로그인 성공");
         localStorage.setItem("token", response.token);
-        
-        
+
         if (response.isFirstTime) {
           navigate(routes.onboarding);
         } else {
@@ -106,13 +104,6 @@ function LoginPage() {
               className="hover:text-[#0675C5] hover:font-semibold block text-center"
             >
               회원가입
-            </Link>
-            <p className="mx-4">|</p>
-            <Link
-              to="/signup"
-              className="font-sans hover:text-[#0675C5] hover:font-semibold block text-center"
-            >
-              비밀번호 찾기
             </Link>
           </div>
         </div>
