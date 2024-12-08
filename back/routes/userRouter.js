@@ -84,7 +84,7 @@ router.post("/onboarding", authenticateToken, async (req, res) => {
     const newCharacter = new Character({
       id: userId,
       character,
-      coin: 0,
+      coin: 10,
       skin: {
         헬린이: 1,
         초급자: 0,

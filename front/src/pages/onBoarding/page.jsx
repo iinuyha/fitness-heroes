@@ -17,6 +17,7 @@ function OnBoardingPage() {
   const [gender, setGender] = useState(null);
   const [concern, setConcern] = useState("");
   const [character, setCharacter] = useState("");
+  const navigate = useNavigate();
 
   const handleNext = () => {
     if (isComplete) {
@@ -34,6 +35,7 @@ function OnBoardingPage() {
       return () => clearTimeout(timer);
     }
   }, [step]);
+
 
 
   const components = [
@@ -58,7 +60,7 @@ function OnBoardingPage() {
       birthdate={birthdate}
       gender={gender}
       concern={concern}
-      moveToMenu={moveToMenuWithRefresh}
+      moveToMenu={() => navigate("/tutorial")}
     />,
   ];
 

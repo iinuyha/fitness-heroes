@@ -3,6 +3,8 @@ import Step1 from "./_components/Step1";
 import Step2 from "./_components/Step2";
 import Step3 from "./_components/Step3";
 import Step4 from "./_components/Step4";
+import { routes } from "../../constants/routes";
+
 
 export const TutorialPage = () => {
   const [step, setStep] = useState(0);
@@ -63,10 +65,10 @@ export const TutorialPage = () => {
       {step === steps.length - 1 && (
         <button
           onClick={moveToMenuWithRefresh}
-          className="absolute bottom-8 right-8 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          className="absolute bottom-10 right-8 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          완료
-        </button>
+         피트니스 히어로즈 시작하기
+        </button>   
       )}
     </div>
   );
