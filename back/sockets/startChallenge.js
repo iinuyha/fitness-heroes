@@ -184,6 +184,7 @@ function startChallenge(io, socket) {
             sort: { createdAt: -1 }, // 최신 데이터 기준으로 정렬
           }
         );
+        
         console.log("Challenge 업데이트 완료:", updatedChallenge);
       }
 
@@ -204,16 +205,17 @@ function startChallenge(io, socket) {
       };
 
       // ✅ 3. 승/무/패에 따른 Friend 컬렉션 업데이트
-      if (winnerId === challengerId) {
+      console.log('winnerId', winnerId);
+
+      if (isDraw) {
+        await updateFriendStats(challengerId, "draw");
+        await updateFriendStats(challengedId, "draw");
+      } else if (winnerId === challengerId) {
         await updateFriendStats(challengerId, "win");
         await updateFriendStats(challengedId, "lose");
       } else if (winnerId === challengedId) {
         await updateFriendStats(challengedId, "win");
         await updateFriendStats(challengerId, "lose");
-      } else {
-        // 무승부
-        await updateFriendStats(challengerId, "draw");
-        await updateFriendStats(challengedId, "draw");
       }
 
       // 4. 승자는 3코인 플러스, 패자는 3코인 마이너스

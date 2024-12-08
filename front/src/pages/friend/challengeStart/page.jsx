@@ -213,6 +213,7 @@ function ChallengeStartPage() {
   ${message}
 
   내 점수: ${myCount}점
+  
   상대 점수: ${opponentCount}점
 
   ${resultMessage}
