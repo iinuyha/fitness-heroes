@@ -187,19 +187,20 @@ function ChallengeStartPage() {
     });
 
     // 대결 종료시
-    socket.on("challengeEnded", ({ message, scores, resultMessage }) => {
+    socket.on("challengeEnded", ({ message, resultMessage }) => {
+      console.log("게임 종료. 최종 카운트:", {
+        myCount,
+        opponentCount,
+      });
+    
       // 최종 스코어와 결과 메시지를 Popup에 표시
       setPopupContent(`
 ${message}
-        
-${Object.entries(scores)
-  .map(([userId, score]) => {
-    const validScore = Number(score) || 0; // 숫자로 변환 불가 시 기본값 0
-    return `${validScore}점`;
-  })
-  .join(":")}
-        
-<b>${resultMessage}</b>
+
+내 점수: ${myCount}점
+상대 점수: ${opponentCount}점
+
+${resultMessage}
       `);
     });
 
