@@ -330,7 +330,20 @@ function ChallengeStartPage() {
           if (canCountRef.current) {
             setCanCount(false); // 점핑잭 카운트 비활성화
           }
-          socket.emit("endChallenge", { roomId });
+          const token = localStorage.getItem("token");
+          if (token) {
+            try {
+              // 토큰 디코딩
+              const decoded = jwtDecode(token);
+              const userId = decoded.id; // JWT에서 'id' 키에 해당하는 값 가져오기
+              console.log("EndChallenge emit:", { roomId, userId });
+              socket.emit("endChallenge", { roomId, userId });
+            } catch (error) {
+              console.error("JWT 디코딩 오류:", error.message);
+            }
+          } else {
+            console.warn("로컬 스토리지에 토큰이 없습니다.");
+          }
           return 0;
         }
         return prevTime - 1; // 1초씩 감소
@@ -514,6 +527,15 @@ function ChallengeStartPage() {
         videoRef={localVideoRef}
         onCountIncrease={handleCountIncrease}
       />
+      {/* 테스트용 버튼 추가 */}
+    <div className="absolute bottom-10 right-10 z-50">
+      <button
+        onClick={handleCountIncrease}
+        className="bg-green-500 hover:bg-green-700 text-white py-2 px-5 rounded-3xl text-2xl font-semibold hover:scale-105 transition-all duration-200"
+      >
+        카운트 증가 테스트
+      </button>
+    </div>
     </div>
   );
 }
