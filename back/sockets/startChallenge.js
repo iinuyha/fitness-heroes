@@ -123,7 +123,7 @@ function startChallenge(io, socket) {
 
   const processedRooms = new Set(); // 처리된 방(roomId)을 저장하는 Set 객체
 
-  socket.on("endChallenge", async ({ roomId }) => {
+  socket.on("endChallenge", async ({ roomId, userId }) => {
     console.log(`방 ${roomId}에서 대결이 종료되었습니다.`);
 
     if (processedRooms.has(roomId)) {
@@ -172,6 +172,7 @@ function startChallenge(io, socket) {
       const isDraw = scores[0][1] === scores[1][1]; // 무승부 여부 확인
       const challengerScore = roomCounts[roomId][challengerId]; // challenger 점수
       const challengedScore = roomCounts[roomId][challengedId]; // challenged 점수
+
       // ✅ 1. Challenge 컬렉션에 대결 결과 저장
       const matchData = await Challenge.findOne(
         { challengerId, challengedId, status: "accepted" } // challengerId와 challengedId 기준
@@ -197,62 +198,70 @@ function startChallenge(io, socket) {
         console.log("Challenge 업데이트 완료:", updatedChallenge);
       }
 
-      // ✅ 2. Friend 컬렉션 업데이트 함수 정의
-      const updateFriendStats = async (userId, resultType) => {
-        const friend = await Friend.findOne({ id: userId });
-        if (!friend) {
-          throw new Error(`Friend with id ${userId} not found.`);
-        }
-
-        // 승무패에 따른 값 증가
-        if (resultType === "win") friend.win = (friend.win || 0) + 1;
-        if (resultType === "lose") friend.lose = (friend.lose || 0) + 1;
-        if (resultType === "draw") friend.draw = (friend.draw || 0) + 1;
-
-        await friend.save();
-        console.log(`Friend 컬렉션 업데이트 완료: ${userId}, ${resultType}`);
-      };
-
-      // ✅ 3. 승/무/패에 따른 Friend 컬렉션 업데이트
-      console.log("winnerId", winnerId);
-
       if (isDraw) {
-        await updateFriendStats(challengerId, "draw");
-        await updateFriendStats(challengedId, "draw");
-      } else if (winnerId === challengerId) {
-        await updateFriendStats(challengerId, "win");
-        await updateFriendStats(challengedId, "lose");
-      } else if (winnerId === challengedId) {
-        await updateFriendStats(challengedId, "win");
-        await updateFriendStats(challengerId, "lose");
-      }
-
-      // 4. 승자는 3코인 플러스, 패자는 3코인 마이너스
-
-      if (!isDraw) {
-        const winnerCharacter = await Character.findOne({ id: winnerId });
-        const loserCharacter = await Character.findOne({ id: loserId });
-
-        if (winnerCharacter && loserCharacter) {
-          if (!winnerCharacter.coin) winnerCharacter.coin = 0; // 초기값 설정
-          if (!loserCharacter.coin) loserCharacter.coin = 0; // 초기값 설정
-
-          // 코인 업데이트 (중복 실행 방지)
-          const updatedWinnerCoin = winnerCharacter.coin + 3;
-          const updatedLoserCoin = loserCharacter.coin - 3;
-
-          winnerCharacter.coin = updatedWinnerCoin;
-          loserCharacter.coin = updatedLoserCoin;
-
-          // 데이터베이스에 저장
-          await winnerCharacter.save();
-          await loserCharacter.save();
-        } else {
-          console.error("캐릭터를 찾을 수 없습니다.");
+        const challengerFriend = await Friend.findOne({ id: challengerId });
+        const challengedFriend = await Friend.findOne({ id: challengedId });
+      
+        if (!challengerFriend || !challengedFriend) {
+          throw new Error("One or both friends not found for draw update.");
         }
-
-        console.log(`대결 결과가 Friend 컬렉션에 성공적으로 저장되었습니다.`);
+      
+        challengerFriend.draw = (challengerFriend.draw || 0) + 1;
+        challengedFriend.draw = (challengedFriend.draw || 0) + 1;
+      
+        await challengerFriend.save();
+        await challengedFriend.save();
+        console.log(`Draw stats updated for ${challengerId} and ${challengedId}`);
+      } else {
+        console.log("승패가 결정되었습니다.");
+        console.log("승자 ID:", winnerId);
+        console.log("패자 ID:", loserId);
+        console.log("사용자 ID:", userId);
+      
+        if (String(winnerId) === String(userId)) {
+          console.log("승자 업데이트 시작");
+          const winnerFriend = await Friend.findOne({ id: winnerId });
+          if (!winnerFriend) {
+            throw new Error(`Friend with id ${winnerId} not found.`);
+          }
+      
+          winnerFriend.win = (winnerFriend.win || 0) + 1;
+      
+          const winnerCharacter = await Character.findOne({ id: winnerId });
+          if (winnerCharacter) {
+            winnerCharacter.coin = (winnerCharacter.coin || 0) + 3;
+            await winnerCharacter.save();
+          } else {
+            console.error("Winner character not found.");
+          }
+      
+          await winnerFriend.save();
+          console.log(`Winner stats updated: ${winnerId}`);
+        } else if (String(loserId) === String(userId)) {
+          console.log("패자 업데이트 시작");
+          const loserFriend = await Friend.findOne({ id: loserId });
+          if (!loserFriend) {
+            throw new Error(`Friend with id ${loserId} not found.`);
+          }
+      
+          loserFriend.lose = (loserFriend.lose || 0) + 1;
+      
+          const loserCharacter = await Character.findOne({ id: loserId });
+          if (loserCharacter) {
+            loserCharacter.coin = (loserCharacter.coin || 0) - 3;
+            await loserCharacter.save();
+          } else {
+            console.error("Loser character not found.");
+          }
+      
+          await loserFriend.save();
+          console.log(`Loser stats updated: ${loserId}`);
+        } else {
+          console.error("사용자가 승자도 패자도 아닙니다.");
+        }
       }
+
+
     } catch (error) {
       console.error(`대결 결과 저장 중 에러 발생: ${error.message}`);
     }
