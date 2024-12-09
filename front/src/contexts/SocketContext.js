@@ -16,11 +16,24 @@ export const SocketProvider = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false); // 소켓 초기화 상태 추가
   const token = localStorage.getItem("token");
   const socketRef = useRef(null);
-  const { showPopup } = useContext(PopupContext);
+  const socketInitialized = useRef(false);
 
   useEffect(() => {
-    if (token && !socketRef.current) {
-      const socketUrl = process.env.REACT_APP_SERVER_URL.replace(/^https?/, "wss");
+    if (socketInitialized.current) {
+      return; // 이미 초기화된 경우 실행하지 않음
+    }
+    socketInitialized.current = true;
+
+    if (!token) {
+      console.error("No token found, socket cannot initialize.");
+      return;
+    }
+
+    if (!socketRef.current) {
+      const socketUrl = process.env.REACT_APP_SERVER_URL.replace(
+        /^https?/,
+        "wss"
+      );
 
       socketRef.current = io(socketUrl, {
         auth: { token },
@@ -93,7 +106,7 @@ export const SocketProvider = ({ children }) => {
         // setIsConnected(false);
       }
     };
-  }, [token, showPopup]);
+  }, [token]);
 
   return (
     <SocketContext.Provider
