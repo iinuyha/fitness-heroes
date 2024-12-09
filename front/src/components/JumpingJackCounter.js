@@ -41,10 +41,16 @@ function JumpingJackCounter({ videoRef, onCountIncrease }) {
   const detectPose = async () => {
     if (
       videoRef.current &&
-      videoRef.current.readyState === 4 &&
+      // videoRef.current.readyState === 4 // 원래거
+      (videoRef.current.video
+        ? videoRef.current.video.readyState
+        : videoRef.current.readyState) === 4 &&
       detectorRef.current
     ) {
-      const video = videoRef.current;
+      // const video = videoRef.current; // 원래거
+      const video = videoRef.current.video // react-webcam 사용 시
+        ? videoRef.current.video // react-webcam 내부의 video
+        : videoRef.current; // 일반 video 태그 직접 참조
 
       const poses = await detectorRef.current.estimatePoses(video, {
         maxPoses: 1,
