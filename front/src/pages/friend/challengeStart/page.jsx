@@ -114,16 +114,15 @@ function ChallengeStartPage() {
       if (peerConnection.current && receivedRoomId === roomId) {
         try {
           console.log(`Offer 수신: ${offer}`);
-          await peerConnection.current.setRemoteDescription(
-            new RTCSessionDescription(offer)
-          );
+          const remoteDescription = new RTCSessionDescription(offer);
+          await peerConnection.current.setRemoteDescription(remoteDescription);
           console.log("Offer를 Remote Description으로 설정 완료");
-
+    
           const answer = await peerConnection.current.createAnswer();
           await peerConnection.current.setLocalDescription(answer);
           console.log("Answer 생성 및 Local Description 설정 완료");
-
-          socket.emit("answer", { answer, roomId });
+    
+          socket.emit("answer", { answer: peerConnection.current.localDescription, roomId });
         } catch (error) {
           console.error("Offer 처리 중 오류:", error);
         }
@@ -134,9 +133,8 @@ function ChallengeStartPage() {
       if (peerConnection.current && receivedRoomId === roomId) {
         try {
           console.log(`Answer 수신: ${answer}`);
-          await peerConnection.current.setRemoteDescription(
-            new RTCSessionDescription(answer)
-          );
+          const remoteDescription = new RTCSessionDescription(answer);
+          await peerConnection.current.setRemoteDescription(remoteDescription);
           console.log("Answer를 Remote Description으로 설정 완료");
         } catch (error) {
           console.error("Answer 처리 중 오류:", error);
