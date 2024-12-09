@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import Webcam from "react-webcam";
 import Popup from "../../../components/Popup";
 import { useNavigate, useLocation } from "react-router-dom";
 import JumpingJackCounter from "../../../components/JumpingJackCounter";
@@ -10,15 +11,13 @@ import ChallengeHandler from "../../../components/ChallengeHandler";
 function ExerciseStartPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
   const [count, setCount] = useState(0); // 현재 카운트
-  const localVideoRef = useRef(null); // 비디오
-  const localStreamRef = useRef(null); // 로컬 스트림
-
   const [currentSet, setCurrentSet] = useState(1); // 현재 세트
   const [isResting, setIsResting] = useState(false); // 휴식 여부
   const [restTime, setRestTime] = useState(20); // 휴식 카운트다운
   const [isWorkoutComplete, setIsWorkoutComplete] = useState(false); // 운동 종료 여부
 
   const restIntervalRef = useRef(null);
+  const webcamRef = useRef(null);
 
   const location = useLocation();
   const { currentEpi } = location.state || {};
@@ -29,33 +28,6 @@ function ExerciseStartPage() {
   const exe_name = currentEpi.exe_name; // 현재 운동 이름 (story db 저장용 변수)
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const initializeWebRTC = async () => {
-      try {
-        const localStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
-        });
-        localStreamRef.current = localStream; // 로컬 스트림 저장
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = localStream;
-        }
-      } catch (error) {
-        console.error("비디오 초기화 실패:", error);
-      }
-    };
-
-    initializeWebRTC();
-
-    // Cleanup 함수: 페이지 나갈 때 로컬 스트림 해제
-    return () => {
-      if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach((track) => track.stop());
-        console.log("로컬 스트림 해제됨");
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -168,15 +140,13 @@ function ExerciseStartPage() {
                   : `${count}/${countPerSet}`}
               </div>
               <JumpingJackCounter
-                videoRef={localVideoRef}
+                videoRef={webcamRef}
                 onCountIncrease={handleCountIncrease}
               />
-
-              <video
-                ref={localVideoRef}
-                autoPlay
-                playsInline
-                muted
+              <Webcam
+                ref={webcamRef}
+                audio={false}
+                mirrored={true}
                 className="w-full h-full object-cover"
               />
             </>
