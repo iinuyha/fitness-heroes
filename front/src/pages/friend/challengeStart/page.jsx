@@ -528,14 +528,14 @@ function ChallengeStartPage() {
         onCountIncrease={handleCountIncrease}
       />
       {/* 테스트용 버튼 추가 */}
-    <div className="absolute bottom-10 right-10 z-50">
+    {/* <div className="absolute bottom-10 right-10 z-50">
       <button
         onClick={handleCountIncrease}
         className="bg-green-500 hover:bg-green-700 text-white py-2 px-5 rounded-3xl text-2xl font-semibold hover:scale-105 transition-all duration-200"
       >
         카운트 증가 테스트
       </button>
-    </div>
+    </div> */}
     </div>
   );
 }
