@@ -30,12 +30,15 @@ export const SocketProvider = ({ children }) => {
     }
 
     if (!socketRef.current) {
-      const socketUrl = process.env.REACT_APP_SERVER_URL.replace(
-        /^https?/,
-        "wss"
-      );
+      // AWS에서는 이 아래거로 하기
 
-      socketRef.current = io(socketUrl, {
+      // const socketUrl = process.env.REACT_APP_SERVER_URL.replace(
+      //   /^https?/,
+      //   "wss"
+      // );
+      // socketRef.current = io(socketUrl, {
+
+      socketRef.current = io(process.env.REACT_APP_SERVER_URL, {
         auth: { token },
         reconnection: true,
         reconnectionAttempts: 10,
