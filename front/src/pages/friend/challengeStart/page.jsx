@@ -40,13 +40,18 @@ function ChallengeStartPage() {
 
   const iceServers = {
     iceServers: [
+      { urls: ["stun:hk-turn1.xirsys.com"] },
       {
+        username:
+          "LYu5J9TTzrX5ZQkgNDYTwQLdDU00ghGXzm5vLdaQVJgi88v_4XvEtKEGnNJOz3sBAAAAAGdW7HZka2d1czczMQ==",
+        credential: "13d167f0-b62f-11ef-a116-0242ac120004",
         urls: [
-          "stun:stun.l.google.com:19302",
-          "stun:stun1.l.google.com:19302",
-          "stun:stun2.l.google.com:19302",
-          "stun:stun3.l.google.com:19302",
-          "stun:stun4.l.google.com:19302",
+          "turn:hk-turn1.xirsys.com:80?transport=udp",
+          "turn:hk-turn1.xirsys.com:3478?transport=udp",
+          "turn:hk-turn1.xirsys.com:80?transport=tcp",
+          "turn:hk-turn1.xirsys.com:3478?transport=tcp",
+          "turns:hk-turn1.xirsys.com:443?transport=tcp",
+          "turns:hk-turn1.xirsys.com:5349?transport=tcp",
         ],
       },
     ],
@@ -117,12 +122,15 @@ function ChallengeStartPage() {
           const remoteDescription = new RTCSessionDescription(offer);
           await peerConnection.current.setRemoteDescription(remoteDescription);
           console.log("Offer를 Remote Description으로 설정 완료");
-    
+
           const answer = await peerConnection.current.createAnswer();
           await peerConnection.current.setLocalDescription(answer);
           console.log("Answer 생성 및 Local Description 설정 완료");
-    
-          socket.emit("answer", { answer: peerConnection.current.localDescription, roomId });
+
+          socket.emit("answer", {
+            answer: peerConnection.current.localDescription,
+            roomId,
+          });
         } catch (error) {
           console.error("Offer 처리 중 오류:", error);
         }
@@ -526,7 +534,7 @@ function ChallengeStartPage() {
         onCountIncrease={handleCountIncrease}
       />
       {/* 테스트용 버튼 추가 */}
-    {/* <div className="absolute bottom-10 right-10 z-50">
+      {/* <div className="absolute bottom-10 right-10 z-50">
       <button
         onClick={handleCountIncrease}
         className="bg-green-500 hover:bg-green-700 text-white py-2 px-5 rounded-3xl text-2xl font-semibold hover:scale-105 transition-all duration-200"
